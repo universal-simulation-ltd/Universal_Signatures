@@ -1,0 +1,28 @@
+# Cloudflare Pages rewrites — Universal Signatures is served under /signatures/
+# but the built files in dist/ are flat (Vite's `base` only rewrites URLs INSIDE
+# the HTML; it does not place files in dist/signatures/).
+#
+# 200 status = transparent rewrite (URL bar unchanged). Specific rules first,
+# broad SPA fallback last.
+
+# Service-worker + PWA artefacts.
+/signatures/sw.js                /sw.js                200
+/signatures/registerSW.js        /registerSW.js        200
+/signatures/manifest.webmanifest /manifest.webmanifest 200
+/signatures/workbox-*            /workbox-:splat       200
+
+# Hashed asset bundles.
+/signatures/assets/*             /assets/:splat        200
+
+# Static files referenced from index.html / app code (BASE_URL-prefixed).
+/signatures/favicon.svg          /favicon.svg          200
+/signatures/unisim-icon.png      /unisim-icon.png      200
+/signatures/og-image.png         /og-image.png         200
+
+# SEO crawler files.
+/signatures/robots.txt           /robots.txt           200
+/signatures/sitemap.xml          /sitemap.xml          200
+
+# SPA fallback — everything else under /signatures/ serves the shell (incl.
+# /signatures/verify/<cert>).
+/signatures/*                    /index.html           200
