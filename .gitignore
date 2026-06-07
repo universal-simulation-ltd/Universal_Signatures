@@ -11,3 +11,6 @@ dist-ssr
 
 # Per-user Claude Code settings
 .claude/settings.local.json
+
+# Internal project notes — not published (matches the other Universal Apps repos)
+CLAUDE.md
