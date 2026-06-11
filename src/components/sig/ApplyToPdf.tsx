@@ -1,6 +1,10 @@
 import { useState } from 'react'
+import { useUniversal, useUser } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import { signPdf, pageCount, type Anchor } from '../../lib/pdf'
+import { sha256Bytes } from '../../lib/signature'
+import { makeQrPng } from '../../lib/qr'
+import { recordSigningEvent } from '../../lib/cloud'
 
 const ANCHORS: Anchor[] = [
   'top-left', 'top-center', 'top-right',
@@ -8,18 +12,27 @@ const ANCHORS: Anchor[] = [
   'bottom-left', 'bottom-center', 'bottom-right',
 ]
 
+const SIGNUP_URL = 'https://app.unisim.co.uk/login'
+
 export default function ApplyToPdf() {
   const currentImage = useSigStore((s) => s.currentImage())
+  const { supabase, session, activeOrgId } = useUniversal()
+  const { user } = useUser()
+  const signedIn = !!session?.user && session.user.is_anonymous !== true
+
   const [file, setFile] = useState<File | null>(null)
   const [pages, setPages] = useState(0)
   const [pageIndex, setPageIndex] = useState(0)
   const [anchor, setAnchor] = useState<Anchor>('bottom-right')
   const [widthPct, setWidthPct] = useState(25)
+  const [makeRecord, setMakeRecord] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [verifyUrl, setVerifyUrl] = useState<string | null>(null)
 
   async function onFile(f: File) {
     setError(null)
+    setVerifyUrl(null)
     setFile(f)
     try {
       const n = await pageCount(await f.arrayBuffer())
@@ -36,8 +49,36 @@ export default function ApplyToPdf() {
     if (!file || !currentImage) return
     setBusy(true)
     setError(null)
+    setVerifyUrl(null)
     try {
-      const bytes = await signPdf(await file.arrayBuffer(), currentImage, { pageIndex, anchor, widthPct })
+      const buf = await file.arrayBuffer()
+
+      // Opt-in verifiable record (free for any signed-in Universal ID): hash the
+      // ORIGINAL bytes, store the metadata-only record, then stamp its QR on.
+      let qrPng: string | undefined
+      if (makeRecord && signedIn) {
+        if (!user?.email) {
+          setError('Your Universal ID has no email on file, so a verifiable record can\'t be created.')
+          setBusy(false)
+          return
+        }
+        const documentHash = await sha256Bytes(buf)
+        const res = await recordSigningEvent(supabase, activeOrgId, user.id, {
+          signerEmail: user.email,
+          originalFilename: file.name,
+          documentHash,
+        })
+        if (!res.ok || !res.certId) {
+          setError(res.error ?? 'Could not create the verifiable record.')
+          setBusy(false)
+          return
+        }
+        const url = `${location.origin}${import.meta.env.BASE_URL}verify/${res.certId}`
+        qrPng = await makeQrPng(url)
+        setVerifyUrl(url)
+      }
+
+      const bytes = await signPdf(buf, currentImage, { pageIndex, anchor, widthPct, qrPng })
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -97,6 +138,29 @@ export default function ApplyToPdf() {
         </div>
       )}
 
+      {file && (
+        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+          <label className={`flex items-start gap-2.5 ${signedIn ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}`}>
+            <input
+              type="checkbox"
+              checked={makeRecord && signedIn}
+              disabled={!signedIn}
+              onChange={(e) => setMakeRecord(e.target.checked)}
+              className="mt-0.5 h-4 w-4 accent-orange-600"
+            />
+            <span className="text-xs text-slate-600">
+              <span className="font-semibold text-slate-800">Add a verification QR code</span> — stamps a QR on the PDF and saves a
+              free, verifiable record (your email, the file name, a document hash and the time). The document itself is never uploaded.
+            </span>
+          </label>
+          {!signedIn && (
+            <p className="mt-2 pl-6 text-[11px] text-slate-500">
+              <a href={SIGNUP_URL} className="font-medium text-orange-600 hover:underline">Sign in with a free Universal ID</a> to enable verifiable records.
+            </p>
+          )}
+        </div>
+      )}
+
       {error && <p className="mt-3 text-sm text-rose-600">{error}</p>}
 
       <button
@@ -106,6 +170,22 @@ export default function ApplyToPdf() {
       >
         {busy ? 'Signing…' : !currentImage ? 'Create a signature first' : 'Sign & download PDF'}
       </button>
+
+      {verifyUrl && (
+        <div className="mt-3 rounded-lg bg-emerald-50 p-3">
+          <p className="text-xs font-semibold text-emerald-800">✓ Verifiable record created</p>
+          <p className="mt-1 text-[11px] text-emerald-700">The signed PDF carries a QR linking here:</p>
+          <div className="mt-2 flex items-center gap-2">
+            <input readOnly value={verifyUrl} className="flex-1 rounded-md border border-emerald-200 bg-white px-2 py-1.5 text-[11px] text-slate-700" />
+            <button
+              onClick={() => navigator.clipboard?.writeText(verifyUrl)}
+              className="shrink-0 rounded-md bg-emerald-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-700"
+            >
+              Copy
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

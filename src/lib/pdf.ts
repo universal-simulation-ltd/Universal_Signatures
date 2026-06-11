@@ -1,4 +1,4 @@
-import { PDFDocument } from 'pdf-lib'
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import { dataUrlToBytes } from './signature'
 
 export type Anchor =
@@ -10,6 +10,9 @@ export interface PlaceOpts {
   pageIndex: number   // 0-based; -1 = last page
   anchor: Anchor
   widthPct: number    // signature width as % of page width (5–60)
+  // Optional QR PNG (data URL) stamped beside the signature, linking to the
+  // public verify page. Present only when the user opts into a verifiable record.
+  qrPng?: string
 }
 
 export async function pageCount(pdfBytes: ArrayBuffer): Promise<number> {
@@ -40,6 +43,33 @@ export async function signPdf(pdfBytes: ArrayBuffer, sigPng: string, opts: Place
   else if (vert === 'top') y = ph - h - margin
 
   page.drawImage(png, { x, y, width: w, height: h })
+
+  // Optional verification QR, stamped just below the signature (or above, if
+  // there isn't room) and right-aligned to the signature's edge, with a small
+  // "scan to verify" caption beneath it.
+  if (opts.qrPng) {
+    const qr = await doc.embedPng(dataUrlToBytes(opts.qrPng))
+    const qrSize = Math.max(48, Math.min(96, w * 0.5))
+    const caption = 'Scan to verify · Universal Signatures'
+    const font = await doc.embedFont(StandardFonts.Helvetica)
+    const fontSize = 6
+    const capH = fontSize + 2
+    const gap = 6
+    const qrX = Math.min(x + w - qrSize, pw - margin - qrSize)
+    // Prefer below the signature; flip above if it would clip the bottom margin.
+    let qrY = y - gap - qrSize - capH
+    if (qrY < margin) qrY = y + h + gap + capH
+    page.drawImage(qr, { x: qrX, y: qrY + capH, width: qrSize, height: qrSize })
+    const capW = font.widthOfTextAtSize(caption, fontSize)
+    page.drawText(caption, {
+      x: qrX + (qrSize - capW) / 2,
+      y: qrY,
+      size: fontSize,
+      font,
+      color: rgb(0.39, 0.45, 0.55),
+    })
+  }
+
   return doc.save()
 }
 

@@ -10,7 +10,7 @@ export interface SavedSignature {
   created_at: string
 }
 
-// Public fields returned by the verify RPC (no org/user internals).
+// Public fields returned by the saved-signature verify RPC (no org/user internals).
 export interface VerifyResult {
   cert_id: string
   signer_name: string | null
@@ -19,6 +19,23 @@ export interface VerifyResult {
   created_at: string
   verified: boolean
 }
+
+// Public fields returned by the signing-event verify RPC — what a QR scan
+// resolves to: who signed which document, and when.
+export interface SigningEventResult {
+  cert_id: string
+  signer_email: string
+  org_name: string | null
+  original_filename: string
+  document_hash: string
+  created_at: string
+  verified: boolean
+}
+
+// The verify page resolves a cert id to either kind of record.
+export type AnyVerifyResult =
+  | { kind: 'signing'; data: SigningEventResult }
+  | { kind: 'signature'; data: VerifyResult }
 
 // Why the cloud-save action is or isn't available for the current visitor.
 export type CloudGate =

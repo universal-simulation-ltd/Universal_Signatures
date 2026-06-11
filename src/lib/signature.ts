@@ -3,6 +3,16 @@
 
 export async function sha256Hex(input: string): Promise<string> {
   const bytes = new TextEncoder().encode(input)
+  return digestHex(bytes)
+}
+
+// SHA-256 over raw bytes — used to fingerprint the ORIGINAL PDF (before the
+// signature/QR are stamped on) so the document can be matched at verify time.
+export async function sha256Bytes(bytes: ArrayBuffer): Promise<string> {
+  return digestHex(bytes)
+}
+
+async function digestHex(bytes: BufferSource): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', bytes)
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('')
 }

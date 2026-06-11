@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useUniversal } from '@unisim/sdk'
-import { verifyCert } from '../../lib/cloud'
-import type { VerifyResult } from '../../lib/types'
+import { verifyAny } from '../../lib/cloud'
+import type { AnyVerifyResult } from '../../lib/types'
 
-// Public certificate verification: anyone with a cert link can confirm a saved
-// signature is genuine (via the SECURITY DEFINER RPC — no auth needed).
+// Public certificate verification: anyone with a cert link (typically by
+// scanning the QR on a signed PDF) can confirm the record is genuine, via a
+// SECURITY DEFINER RPC — no auth needed.
 export default function VerifyPage({ certId }: { certId: string }) {
   const { supabase } = useUniversal()
-  const [result, setResult] = useState<VerifyResult | null>(null)
+  const [result, setResult] = useState<AnyVerifyResult | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let cancelled = false
-    verifyCert(supabase, certId)
+    verifyAny(supabase, certId)
       .then((r) => { if (!cancelled) setResult(r) })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
@@ -32,22 +33,40 @@ export default function VerifyPage({ certId }: { certId: string }) {
           <div className="mt-6 flex items-center gap-2 text-sm text-slate-500">
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-orange-500" /> Verifying…
           </div>
-        ) : result ? (
+        ) : result?.kind === 'signing' ? (
+          <div className="mt-6">
+            <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-3">
+              <span className="text-lg" aria-hidden="true">✓</span>
+              <span className="text-sm font-semibold text-emerald-800">Verified — this document was signed via Universal Signatures</span>
+            </div>
+            <dl className="mt-4 divide-y divide-slate-100 text-sm">
+              <Row k="Signed by" v={result.data.signer_email} />
+              <Row k="Organisation" v={result.data.org_name ?? '—'} />
+              <Row k="Document" v={result.data.original_filename} />
+              <Row k="Signed" v={fmt(result.data.created_at)} />
+              <Row k="Document hash (SHA-256)" v={result.data.document_hash} mono />
+            </dl>
+            <p className="mt-4 text-xs text-slate-500">
+              The hash above fingerprints the <strong>original</strong> document. To confirm a copy is the one
+              that was signed, hash the original PDF (before the signature was added) and compare.
+            </p>
+          </div>
+        ) : result?.kind === 'signature' ? (
           <div className="mt-6">
             <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-3">
               <span className="text-lg" aria-hidden="true">✓</span>
               <span className="text-sm font-semibold text-emerald-800">Verified — this is a genuine saved signature</span>
             </div>
             <dl className="mt-4 divide-y divide-slate-100 text-sm">
-              <Row k="Signer" v={result.signer_name ?? '—'} />
-              <Row k="Organisation" v={result.org_name ?? '—'} />
-              <Row k="Saved" v={fmt(result.created_at)} />
-              <Row k="Document hash (SHA-256)" v={result.signature_hash} mono />
+              <Row k="Signer" v={result.data.signer_name ?? '—'} />
+              <Row k="Organisation" v={result.data.org_name ?? '—'} />
+              <Row k="Saved" v={fmt(result.data.created_at)} />
+              <Row k="Signature hash (SHA-256)" v={result.data.signature_hash} mono />
             </dl>
           </div>
         ) : (
           <div className="mt-6 rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            ✗ No signature found for this certificate. The link may be wrong, or the signature was removed.
+            ✗ No record found for this certificate. The link may be wrong, or the record was removed.
           </div>
         )}
 

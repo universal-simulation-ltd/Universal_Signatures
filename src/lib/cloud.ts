@@ -3,7 +3,7 @@
 import { useUniversal, useSubscription, useCredits, useProjects } from '@unisim/sdk'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { sha256Hex } from './signature'
-import type { CloudGate, SignatureMode, VerifyResult } from './types'
+import type { AnyVerifyResult, CloudGate, SignatureMode, VerifyResult } from './types'
 
 // ── The gate ────────────────────────────────────────────────────────────────
 // Saving a verified signature to the cloud costs us hosting, so it's gated on
@@ -63,8 +63,42 @@ export async function saveSignature(
   return { ok: true, certId: (data as { cert_id: string }).cert_id }
 }
 
+// ── Signing-event record (free for any signed-in Universal ID) ────────────────
+// A verifiable "this PDF was signed via Universal Signatures" record. We store
+// only the metadata (signer email, filename, document hash, time) — never the
+// PDF — so this is free for signed-in users and isn't behind the cloud gate.
+export interface SigningRecordInput {
+  signerEmail: string
+  originalFilename: string
+  documentHash: string   // SHA-256 of the ORIGINAL PDF bytes (pre-stamp)
+  signatureId?: string | null
+}
+
+export async function recordSigningEvent(
+  supabase: SupabaseClient,
+  orgId: string | null,
+  userId: string | null,
+  input: SigningRecordInput,
+): Promise<{ ok: boolean; certId?: string; error?: string }> {
+  if (!orgId || !userId) return { ok: false, error: 'Sign in with your Universal ID to create a verifiable record.' }
+  const { data, error } = await supabase
+    .from('signing_events')
+    .insert({
+      org_id: orgId,
+      user_id: userId,
+      signer_email: input.signerEmail,
+      original_filename: input.originalFilename,
+      document_hash: input.documentHash,
+      signature_id: input.signatureId ?? null,
+    })
+    .select('cert_id')
+    .single()
+  if (error) return { ok: false, error: error.message }
+  return { ok: true, certId: (data as { cert_id: string }).cert_id }
+}
+
 // ── Verify (public) ──────────────────────────────────────────────────────────
-// Reads minimal public fields via a SECURITY DEFINER RPC so a cert can be
+// Reads minimal public fields via SECURITY DEFINER RPCs so a cert can be
 // verified by anyone holding the (unguessable) cert id, without opening RLS.
 export async function verifyCert(supabase: SupabaseClient, certId: string): Promise<VerifyResult | null> {
   const { data, error } = await supabase.rpc('verify_signature_cert', { p_cert: certId })
@@ -79,4 +113,27 @@ export async function verifyCert(supabase: SupabaseClient, certId: string): Prom
     created_at: row.created_at ?? '',
     verified: true,
   }
+}
+
+// A cert link (e.g. from a scanned QR) can point at either a signing event or a
+// saved signature. Resolve signing events first (the QR case), then fall back.
+export async function verifyAny(supabase: SupabaseClient, certId: string): Promise<AnyVerifyResult | null> {
+  const { data } = await supabase.rpc('verify_signing_event_cert', { p_cert: certId })
+  const row = Array.isArray(data) ? data[0] : data
+  if (row) {
+    return {
+      kind: 'signing',
+      data: {
+        cert_id: certId,
+        signer_email: row.signer_email ?? '',
+        org_name: row.org_name ?? null,
+        original_filename: row.original_filename ?? '',
+        document_hash: row.document_hash ?? '',
+        created_at: row.created_at ?? '',
+        verified: true,
+      },
+    }
+  }
+  const sig = await verifyCert(supabase, certId)
+  return sig ? { kind: 'signature', data: sig } : null
 }
