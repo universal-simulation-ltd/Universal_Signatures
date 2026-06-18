@@ -2,6 +2,7 @@ import { useSigStore } from '../../stores/sigStore'
 import SignaturePad from './SignaturePad'
 import TypeSignature from './TypeSignature'
 import ApplyToPdf from './ApplyToPdf'
+import LocalSavePanel from './LocalSavePanel'
 import CloudSavePanel from './CloudSavePanel'
 
 export default function SignatureStudio() {
@@ -39,6 +40,7 @@ export default function SignatureStudio() {
         {/* Use + save */}
         <div className="space-y-6">
           <ApplyToPdf />
+          <LocalSavePanel />
           <CloudSavePanel />
         </div>
       </div>

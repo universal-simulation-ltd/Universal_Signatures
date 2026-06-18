@@ -7,7 +7,12 @@ export default function SignaturePad() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const drawing = useRef(false)
   const last = useRef<{ x: number; y: number } | null>(null)
+  // The last data URL this pad itself emitted — lets us tell our own strokes
+  // apart from an externally restored signature (a reused "Save on this device"
+  // entry), which we paint onto the canvas so it's visible here too.
+  const emitted = useRef<string | null>(null)
   const setDrawn = useSigStore((s) => s.setDrawn)
+  const drawnDataUrl = useSigStore((s) => s.drawnDataUrl)
 
   // Size the canvas backing store to its CSS box (crisp on HiDPI).
   useEffect(() => {
@@ -24,6 +29,22 @@ export default function SignaturePad() {
     ctx.lineJoin = 'round'
     ctx.strokeStyle = '#0f172a'
   }, [])
+
+  // Paint a signature set from outside this pad (e.g. reusing a saved one) so
+  // it shows in the box. Our own stroke output is skipped via `emitted`.
+  useEffect(() => {
+    if (!drawnDataUrl || drawnDataUrl === emitted.current) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')!
+    const rect = canvas.getBoundingClientRect()
+    const img = new Image()
+    img.onload = () => {
+      ctx.clearRect(0, 0, rect.width, rect.height)
+      ctx.drawImage(img, 0, 0, rect.width, rect.height)
+    }
+    img.src = drawnDataUrl
+  }, [drawnDataUrl])
 
   function pos(e: React.PointerEvent): { x: number; y: number } {
     const rect = canvasRef.current!.getBoundingClientRect()
@@ -53,6 +74,7 @@ export default function SignaturePad() {
     drawing.current = false
     last.current = null
     const url = canvasRef.current?.toDataURL('image/png') ?? null
+    emitted.current = url
     setDrawn(url)
   }
 
@@ -61,6 +83,7 @@ export default function SignaturePad() {
     if (!canvas) return
     const ctx = canvas.getContext('2d')!
     ctx.clearRect(0, 0, canvas.width, canvas.height)
+    emitted.current = null
     setDrawn(null)
   }
 

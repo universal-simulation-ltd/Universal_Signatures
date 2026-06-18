@@ -1,5 +1,4 @@
 import { UniversalAppsNavBar } from '@unisim/sdk'
-import AppMenu from './components/Header/AppMenu'
 import ProductLogo from './components/Header/ProductLogo'
 import SignatureStudio from './components/sig/SignatureStudio'
 import VerifyPage from './components/sig/VerifyPage'
@@ -26,7 +25,6 @@ export default function App() {
         product="signatures"
         productLogo={<ProductLogo />}
         productHomeHref={import.meta.env.BASE_URL}
-        fileMenu={<AppMenu />}
         suiteSwitcherIconSrc={`${import.meta.env.BASE_URL}unisim-icon.png`}
       />
 
