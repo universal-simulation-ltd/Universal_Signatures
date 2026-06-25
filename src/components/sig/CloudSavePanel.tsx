@@ -113,7 +113,7 @@ export default function CloudSavePanel() {
                 Self-host for free
               </a>
               <a href={BILLING_URL} className="inline-flex items-center rounded-lg bg-white px-3.5 py-2 text-sm font-semibold text-amber-900 ring-1 ring-amber-300 hover:bg-amber-100">
-                Get a token or subscription →
+                Sign up here →
               </a>
             </div>
             <p className="mt-2 text-[11px] text-amber-700">Source: <a href={REPO_URL} target="_blank" rel="noreferrer" className="underline">{REPO_URL.replace('https://', '')}</a></p>
