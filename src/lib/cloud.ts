@@ -63,6 +63,47 @@ export async function saveSignature(
   return { ok: true, certId: (data as { cert_id: string }).cert_id }
 }
 
+// ── Free token hold ──────────────────────────────────────────────────────────
+// Storing a signature on a FREE account uses the account's one complimentary
+// token while it's kept. acquire_token_hold spends the token and records a
+// cross-app hold (so e.g. Date Polling can tell the user their token is busy);
+// removing the signature releases + refunds it. Paid/project-entitled accounts
+// don't touch the token, so the caller only holds when entitled `via: 'token'`.
+export function friendlyTokenError(msg: string): string {
+  if (msg.includes('token_in_use:')) {
+    const what = msg.split('token_in_use:')[1]?.trim() || 'another app'
+    return `Your free token is currently in use (${what}). Free it up or add another token to store a signature.`
+  }
+  if (msg.includes('no_credits')) return 'No tokens available — add a token to store a signature on the cloud.'
+  return msg
+}
+
+export async function holdSignatureToken(
+  supabase: SupabaseClient,
+  certId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase.rpc('acquire_token_hold', {
+    p_app: 'signatures',
+    p_resource_id: certId,
+    p_label: 'Universal Signature',
+    p_refundable: true,
+  })
+  if (error) return { ok: false, error: friendlyTokenError(error.message) }
+  return { ok: true }
+}
+
+// Delete a stored signature and return the token it was holding (if any). We
+// delete the row first; the release/refund is best-effort after.
+export async function removeStoredSignature(
+  supabase: SupabaseClient,
+  certId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase.from('signatures').delete().eq('cert_id', certId)
+  if (error) return { ok: false, error: error.message }
+  await supabase.rpc('release_token_hold', { p_app: 'signatures', p_resource_id: certId })
+  return { ok: true }
+}
+
 // ── Signing-event record (free for any signed-in Universal ID) ────────────────
 // A verifiable "this PDF was signed via Universal Signatures" record. We store
 // only the metadata (signer email, filename, document hash, time) — never the

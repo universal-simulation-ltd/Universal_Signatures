@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useUniversal, useUser } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
-import { useCloudGate, saveSignature } from '../../lib/cloud'
+import { useCloudGate, saveSignature, holdSignatureToken, removeStoredSignature } from '../../lib/cloud'
 import { fontById } from '../../lib/fonts'
 
 const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatures'
@@ -20,7 +20,10 @@ export default function CloudSavePanel() {
 
   const [busy, setBusy] = useState(false)
   const [certId, setCertId] = useState<string | null>(null)
+  const [heldByToken, setHeldByToken] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const via = gate.state === 'entitled' ? gate.via : null
 
   const verifyUrl = certId
     ? `${location.origin}${import.meta.env.BASE_URL}verify/${certId}`
@@ -35,9 +38,34 @@ export default function CloudSavePanel() {
       font: mode === 'type' ? fontById(fontId).id : null,
       imageDataUrl: currentImage,
     })
+    if (!res.ok || !res.certId) { setBusy(false); setError(res.error ?? 'Could not save.'); return }
+
+    // On a free account, storing the signature uses the one complimentary token
+    // (cross-app: Date Polling etc. will see it as in use). Paid / project
+    // accounts store it without touching the token.
+    if (via === 'token') {
+      const held = await holdSignatureToken(supabase, res.certId)
+      if (!held.ok) {
+        // Couldn't reserve the token — roll the just-saved signature back.
+        await removeStoredSignature(supabase, res.certId)
+        setBusy(false)
+        setError(held.error ?? 'Could not reserve your token.')
+        return
+      }
+      setHeldByToken(true)
+    }
     setBusy(false)
-    if (!res.ok) { setError(res.error ?? 'Could not save.'); return }
-    setCertId(res.certId ?? null)
+    setCertId(res.certId)
+  }
+
+  async function onRemove() {
+    if (!certId) return
+    setBusy(true); setError(null)
+    const res = await removeStoredSignature(supabase, certId)
+    setBusy(false)
+    if (!res.ok) { setError(res.error ?? 'Could not remove.'); return }
+    setCertId(null)
+    setHeldByToken(false)
   }
 
   return (
@@ -71,6 +99,7 @@ export default function CloudSavePanel() {
         {gate.state === 'entitled' && !certId && (
           <div>
             <button
+              type="button"
               onClick={onSave}
               disabled={busy || !currentImage}
               className="w-full rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50"
@@ -78,7 +107,9 @@ export default function CloudSavePanel() {
               {busy ? 'Saving…' : !currentImage ? 'Create a signature first' : 'Save verified signature ☁'}
             </button>
             <p className="mt-2 text-[11px] text-slate-400">
-              Cloud hosting included via your {gate.via === 'subscription' ? 'subscription' : gate.via === 'token' ? 'token balance' : 'active project'}.
+              {gate.via === 'token'
+                ? 'Uses your one free token while stored — remove the signature anytime to get it back.'
+                : `Cloud hosting included via your ${gate.via === 'subscription' ? 'subscription' : 'active project'}.`}
             </p>
             {error && <p className="mt-2 text-sm text-rose-600">{error}</p>}
           </div>
@@ -91,12 +122,28 @@ export default function CloudSavePanel() {
             <div className="mt-2 flex items-center gap-2">
               <input readOnly value={verifyUrl} className="flex-1 rounded-md border border-emerald-200 bg-white px-2 py-1.5 text-xs text-slate-700" />
               <button
+                type="button"
                 onClick={() => navigator.clipboard?.writeText(verifyUrl)}
                 className="shrink-0 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
               >
                 Copy
               </button>
             </div>
+            {heldByToken && (
+              <div className="mt-3 border-t border-emerald-200 pt-3">
+                <p className="text-[11px] text-emerald-700">
+                  This signature is using your one free token. Remove it to free the token for another app (e.g. a date poll).
+                </p>
+                <button
+                  type="button"
+                  onClick={onRemove}
+                  disabled={busy}
+                  className="mt-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-200 hover:bg-rose-50 disabled:opacity-50"
+                >
+                  {busy ? 'Removing…' : 'Remove stored signature & free token'}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
