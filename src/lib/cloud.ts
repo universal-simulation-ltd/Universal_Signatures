@@ -64,15 +64,15 @@ export async function saveSignature(
 }
 
 // ── Free token hold ──────────────────────────────────────────────────────────
-// Storing a signature on a FREE account uses the account's one complimentary
-// token while it's kept. acquire_token_hold spends the token and records a
-// cross-app hold (so e.g. Date Polling can tell the user their token is busy);
-// removing the signature releases + refunds it. Paid/project-entitled accounts
+// Storing a signature on a FREE account uses the app's own free token while
+// it's kept (one free returnable token PER Universal App — universal-platform
+// migration 0045; the RPC spends it before any purchased wallet credits).
+// Removing the signature releases + refunds it. Paid/project-entitled accounts
 // don't touch the token, so the caller only holds when entitled `via: 'token'`.
 export function friendlyTokenError(msg: string): string {
   if (msg.includes('token_in_use:')) {
-    const what = msg.split('token_in_use:')[1]?.trim() || 'another app'
-    return `Your free token is currently in use (${what}). Free it up or add another token to store a signature.`
+    const what = msg.split('token_in_use:')[1]?.trim() || 'a stored signature'
+    return `Your free Signatures token is already in use (${what}). Remove it or add a token to store another signature.`
   }
   if (msg.includes('no_credits')) return 'No tokens available — add a token to store a signature on the cloud.'
   return msg

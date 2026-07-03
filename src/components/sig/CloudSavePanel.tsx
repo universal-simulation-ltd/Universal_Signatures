@@ -108,7 +108,7 @@ export default function CloudSavePanel() {
             </button>
             <p className="mt-2 text-[11px] text-slate-400">
               {gate.via === 'token'
-                ? 'Uses your one free token while stored — remove the signature anytime to get it back.'
+                ? 'Uses your free Signatures token while stored — remove the signature anytime to get it back.'
                 : `Cloud hosting included via your ${gate.via === 'subscription' ? 'subscription' : 'active project'}.`}
             </p>
             {error && <p className="mt-2 text-sm text-rose-600">{error}</p>}
@@ -132,7 +132,7 @@ export default function CloudSavePanel() {
             {heldByToken && (
               <div className="mt-3 border-t border-emerald-200 pt-3">
                 <p className="text-[11px] text-emerald-700">
-                  This signature is using your one free token. Remove it to free the token for another app (e.g. a date poll).
+                  This signature is using your free Signatures token. Remove it to get the token straight back.
                 </p>
                 <button
                   type="button"
