@@ -19,7 +19,7 @@ const universalConfig = {
   supabaseAnonKey: import.meta.env.VITE_PLATFORM_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5Z2Z4Z2Fsb2pvanBweG1oZGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NTY4MjUsImV4cCI6MjA5NDMzMjgyNX0.hLy_vt9vY_rdPKF3nL32yAuMCD604E3CH5VM7D7CaNE',
   // 'signatures' is added to the SDK ProductCode union in this same change but
   // isn't in the published package yet — cast until the SDK is republished
-  // (mirrors how QR/Charts shipped).
+  // (mirrors how QR shipped).
   product: 'signatures' as unknown as ProductCode,
   cookieDomain: import.meta.env.PROD ? '.unisim.co.uk' : undefined,
 }
