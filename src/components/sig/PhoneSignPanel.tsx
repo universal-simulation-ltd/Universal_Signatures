@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useUniversal } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
-import { makeQrPng } from '../../lib/qr'
+import { brandedQrPngDataUrl } from '../../lib/brandedQr'
 import {
   mobileSignChannel,
   mobileSignUrl,
@@ -32,7 +32,7 @@ export default function PhoneSignPanel() {
   const canRealtime = typeof (supabase as { channel?: unknown }).channel === 'function'
 
   useEffect(() => {
-    makeQrPng(mobileSignUrl(token)).then(setQrUrl).catch(() => setQrUrl(null))
+    brandedQrPngDataUrl(mobileSignUrl(token), 240).then(setQrUrl).catch(() => setQrUrl(null))
   }, [token])
 
   useEffect(() => {
