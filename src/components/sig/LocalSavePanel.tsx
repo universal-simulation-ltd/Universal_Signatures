@@ -10,7 +10,7 @@ import {
 // Free, no-account "Save on this device" — the local-first counterpart to the
 // cloud save. Guests can keep a few signatures in this browser and reuse them
 // without a Universal ID. Sits above the cloud panel so the free option leads.
-export default function LocalSavePanel() {
+export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
   const mode = useSigStore((s) => s.mode)
   const fontId = useSigStore((s) => s.fontId)
   const signerName = useSigStore((s) => s.signerName)
@@ -73,13 +73,15 @@ export default function LocalSavePanel() {
     setSaved(removeLocalSignature(id))
   }
 
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
-      <div className="flex items-center gap-2">
-        <h2 className="text-sm font-bold text-slate-900">Save on this device</h2>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600">No account</span>
-      </div>
-      <p className="mt-1 text-xs text-slate-500">
+  const content = (
+    <>
+      {!bare && (
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-bold text-slate-900">Save on this device</h2>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600">No account</span>
+        </div>
+      )}
+      <p className={`text-xs text-slate-500 ${bare ? '' : 'mt-1'}`}>
         Keep your signature in this browser and reuse it later — free, no sign-in. It stays on this device and never leaves it.
       </p>
 
@@ -132,6 +134,9 @@ export default function LocalSavePanel() {
           ))}
         </ul>
       )}
-    </div>
+    </>
   )
+
+  if (bare) return content
+  return <div className="rounded-xl border border-slate-200 bg-white p-5">{content}</div>
 }
