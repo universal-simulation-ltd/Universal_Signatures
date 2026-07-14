@@ -15,6 +15,9 @@ const MAX = 6
 export interface LocalSignature {
   id: string
   signerName: string | null
+  /** User-given label for this saved signature (as in Universal PDF). Falls
+   *  back to signerName / a style default when absent. */
+  label: string | null
   style: SignatureMode
   font: string | null
   imageDataUrl: string
@@ -54,6 +57,7 @@ function makeId(): string {
 
 export interface SaveLocalInput {
   signerName: string
+  label?: string
   style: SignatureMode
   font: string | null
   imageDataUrl: string
@@ -64,12 +68,18 @@ export interface SaveLocalInput {
 export function saveLocalSignature(input: SaveLocalInput): LocalSignature[] {
   const existing = loadLocalSignatures()
   const dupeIdx = existing.findIndex((s) => s.imageDataUrl === input.imageDataUrl)
+  const label = input.label?.trim() || null
   const entry: LocalSignature =
     dupeIdx >= 0
-      ? { ...existing[dupeIdx], signerName: input.signerName.trim() || existing[dupeIdx].signerName }
+      ? {
+          ...existing[dupeIdx],
+          signerName: input.signerName.trim() || existing[dupeIdx].signerName,
+          label: label ?? existing[dupeIdx].label ?? null,
+        }
       : {
           id: makeId(),
           signerName: input.signerName.trim() || null,
+          label,
           style: input.style,
           font: input.font,
           imageDataUrl: input.imageDataUrl,
@@ -77,6 +87,13 @@ export function saveLocalSignature(input: SaveLocalInput): LocalSignature[] {
         }
   const rest = existing.filter((_, i) => i !== dupeIdx)
   return persist([entry, ...rest])
+}
+
+export function renameLocalSignature(id: string, label: string): LocalSignature[] {
+  const next = loadLocalSignatures().map((s) =>
+    s.id === id ? { ...s, label: label.trim() || null } : s,
+  )
+  return persist(next)
 }
 
 export function removeLocalSignature(id: string): LocalSignature[] {
