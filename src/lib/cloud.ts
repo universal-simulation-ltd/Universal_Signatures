@@ -1,6 +1,7 @@
 'use client'
 
-import { useUniversal, useSubscription, useCredits, useProjects } from '@unisim/sdk'
+import { useRef } from 'react'
+import { useUniversal, useOrg, useSubscription, useCredits, useProjects } from '@unisim/sdk'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { sha256Hex } from './signature'
 import type { AnyVerifyResult, CloudGate, SignatureMode, VerifyResult } from './types'
@@ -13,15 +14,32 @@ import type { AnyVerifyResult, CloudGate, SignatureMode, VerifyResult } from './
 // sign in with a Universal ID first.
 export function useCloudGate(): CloudGate {
   const { session, loading: provLoading } = useUniversal()
+  const { org, loading: orgLoading } = useOrg()
   const { subscription, loading: subLoading } = useSubscription()
   const { credits, loading: creditsLoading } = useCredits()
   const { projects, loading: projLoading } = useProjects()
 
   const signedIn = !!session?.user && session.user.is_anonymous !== true
+  const orgId = org?.id ?? null
+  const anyDataLoading = subLoading || creditsLoading || projLoading
+
+  // Know when the subscription/credits/projects data has actually been fetched
+  // for the CURRENT org. Those hooks short-circuit to `loading:false` with empty
+  // data while `org` is still null, and lag one render after `org` resolves — so
+  // a bare `!loading` check can't tell "stale/not-yet-fetched" from "checked and
+  // genuinely empty". We only trust the data once we've seen its loading flip
+  // true→false for this org; otherwise the gate would momentarily read `blocked`
+  // and flash the "self-host / sign up" placeholder before the check completes.
+  const fetchStartedForOrg = useRef<string | null>(null)
+  if (anyDataLoading && orgId) fetchStartedForOrg.current = orgId
+  const dataReady = !!orgId && !anyDataLoading && fetchStartedForOrg.current === orgId
 
   if (provLoading) return { state: 'loading' }
   if (!signedIn) return { state: 'signed_out' }
-  if (subLoading || creditsLoading || projLoading) return { state: 'loading' }
+  // Signed in but the account isn't checked yet: keep showing "Checking your
+  // account…" until the org resolves and its entitlement data is in.
+  if (orgLoading) return { state: 'loading' }
+  if (orgId && !dataReady) return { state: 'loading' }
 
   const hasSub = !!subscription && subscription.status === 'active' && subscription.tier !== 'free'
   if (hasSub) return { state: 'entitled', via: 'subscription' }
