@@ -6,7 +6,6 @@ import {
   removeLocalSignature,
   type LocalSignature,
 } from '../../lib/localSignatures'
-import { fontById } from '../../lib/fonts'
 
 // Free, no-account "Save on this device" — the local-first counterpart to the
 // cloud save. Guests can keep a few signatures in this browser and reuse them
@@ -50,7 +49,7 @@ export default function LocalSavePanel() {
       saveLocalSignature({
         signerName,
         style: mode === 'type' ? 'type' : 'draw',
-        font: mode === 'type' ? fontById(fontId).id : null,
+        font: mode === 'type' ? fontId : null,
         imageDataUrl: currentImage,
       }),
     )

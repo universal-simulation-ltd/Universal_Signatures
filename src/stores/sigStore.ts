@@ -1,11 +1,12 @@
 import { create } from 'zustand'
 import type { StudioMode } from '../lib/types'
-import { DEFAULT_FONT } from '../lib/fonts'
+import { DEFAULT_FONT, type SigFont } from '../lib/fonts'
 
 interface SigState {
   mode: StudioMode
   signerName: string
   fontId: string
+  importedFonts: SigFont[]   // user-supplied faces loaded this session
   drawnDataUrl: string | null   // from the canvas pad (or a phone handoff)
   typedDataUrl: string | null   // rasterised typed text
 
@@ -19,6 +20,7 @@ interface SigState {
   setMode: (m: StudioMode) => void
   setSignerName: (n: string) => void
   setFontId: (id: string) => void
+  addImportedFont: (f: SigFont) => void
   setDrawn: (url: string | null) => void
   setTyped: (url: string | null) => void
   setIncludeName: (v: boolean) => void
@@ -37,6 +39,7 @@ export const useSigStore = create<SigState>((set, get) => ({
   mode: 'draw',
   signerName: '',
   fontId: DEFAULT_FONT.id,
+  importedFonts: [],
   drawnDataUrl: null,
   typedDataUrl: null,
   includeName: false,
@@ -46,6 +49,7 @@ export const useSigStore = create<SigState>((set, get) => ({
   setMode: (mode) => set({ mode }),
   setSignerName: (signerName) => set({ signerName }),
   setFontId: (fontId) => set({ fontId }),
+  addImportedFont: (f) => set((s) => ({ importedFonts: [...s.importedFonts, f] })),
   setDrawn: (drawnDataUrl) => set({ drawnDataUrl }),
   setTyped: (typedDataUrl) => set({ typedDataUrl }),
   setIncludeName: (includeName) => set({ includeName }),
