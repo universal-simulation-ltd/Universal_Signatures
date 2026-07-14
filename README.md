@@ -40,6 +40,22 @@ npm run dev -- --port 5186
 `npm run build` runs `tsc -b && vite build` (strict TypeScript). Output is a
 static `dist/` served by Cloudflare Pages under `/signatures/`.
 
+### Offline "dummy account"
+
+In local dev the app runs against an **offline mock** of the Universal ID by
+default — no network, no real Supabase. Open the profile menu → **Sign in** and
+use the demo credentials:
+
+```
+james@unisim.co.uk / KyJam91
+```
+
+You'll get a seeded signed-in world (owner of a demo org with one free token) so
+the navbar profile, cloud save and verify pages all work offline. To test
+against the **real** Supabase project instead, set `VITE_REAL_AUTH=1` in
+`.env.local`. The mock lives in `@unisim/sdk` (`mockAuth`) and is hard-guarded
+off in production.
+
 ## Self-hosting
 
 Universal Signatures is MIT-licensed and self-contained. To run your own copy —
