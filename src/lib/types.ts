@@ -1,5 +1,10 @@
 export type SignatureMode = 'draw' | 'type'
 
+// The create-signature tab. 'phone' is a capture method (draw on your phone via
+// a QR handoff) that yields a drawn image — once received the studio drops back
+// to 'draw', so a saved signature's `style` is only ever 'draw' | 'type'.
+export type StudioMode = SignatureMode | 'phone'
+
 export interface SavedSignature {
   id: string
   signer_name: string | null

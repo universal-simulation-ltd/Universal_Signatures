@@ -1,14 +1,22 @@
 import { UniversalAppsNavBar } from '@unisim/sdk'
 import ProductLogo from './components/Header/ProductLogo'
 import SignatureStudio from './components/sig/SignatureStudio'
+import SignMobilePage from './components/sig/SignMobilePage'
 import VerifyPage from './components/sig/VerifyPage'
 
 const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatures'
 
-// Tiny path router: /signatures/verify/<cert> → verify page; everything else →
-// the studio. Verify links are opened fresh, so a load-time check is enough
-// (no client-router dependency).
-function route(): { name: 'verify'; certId: string } | { name: 'studio' } {
+// Tiny path router: /signatures/verify/<cert> → verify page; `?sign=<token>` →
+// the phone signing page (opened from the desktop QR); everything else → the
+// studio. These links are opened fresh, so a load-time check is enough (no
+// client-router dependency).
+function route():
+  | { name: 'verify'; certId: string }
+  | { name: 'signMobile'; token: string }
+  | { name: 'studio' } {
+  const token = new URLSearchParams(window.location.search).get('sign')
+  if (token) return { name: 'signMobile', token }
+
   const base = import.meta.env.BASE_URL
   const path = window.location.pathname
   const rel = (path.startsWith(base) ? path.slice(base.length) : path.replace(/^\//, ''))
@@ -19,6 +27,9 @@ function route(): { name: 'verify'; certId: string } | { name: 'studio' } {
 
 export default function App() {
   const r = route()
+
+  // The phone signing page is a standalone full-screen view — no navbar/footer.
+  if (r.name === 'signMobile') return <SignMobilePage token={r.token} />
   return (
     <div className="flex flex-col min-h-screen bg-slate-100">
       <UniversalAppsNavBar
