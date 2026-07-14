@@ -1,9 +1,17 @@
 import { useSigStore } from '../../stores/sigStore'
+import type { StudioMode } from '../../lib/types'
 import SignaturePad from './SignaturePad'
 import TypeSignature from './TypeSignature'
+import PhoneSignPanel from './PhoneSignPanel'
 import ApplyToPdf from './ApplyToPdf'
 import LocalSavePanel from './LocalSavePanel'
 import CloudSavePanel from './CloudSavePanel'
+
+const MODES: { id: StudioMode; label: string }[] = [
+  { id: 'draw', label: 'Draw' },
+  { id: 'type', label: 'Type' },
+  { id: 'phone', label: 'Sign on phone' },
+]
 
 export default function SignatureStudio() {
   const mode = useSigStore((s) => s.mode)
@@ -17,19 +25,19 @@ export default function SignatureStudio() {
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-900">Create your signature</h2>
             <div className="inline-flex rounded-md bg-slate-100 p-0.5">
-              {(['draw', 'type'] as const).map((m) => (
+              {MODES.map((m) => (
                 <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className={`rounded px-3 py-1 text-xs font-semibold capitalize ${mode === m ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                  key={m.id}
+                  onClick={() => setMode(m.id)}
+                  className={`rounded px-3 py-1 text-xs font-semibold ${mode === m.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
                 >
-                  {m}
+                  {m.label}
                 </button>
               ))}
             </div>
           </div>
           <div className="mt-4">
-            {mode === 'draw' ? <SignaturePad /> : <TypeSignature />}
+            {mode === 'type' ? <TypeSignature /> : mode === 'phone' ? <PhoneSignPanel /> : <SignaturePad />}
           </div>
           <p className="mt-3 text-xs text-slate-500">
             Everything here runs in your browser. Use your signature to sign a PDF on the right — for free, no account

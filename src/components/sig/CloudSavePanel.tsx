@@ -34,7 +34,7 @@ export default function CloudSavePanel() {
     setBusy(true); setError(null)
     const res = await saveSignature(supabase, activeOrgId, user?.id ?? null, {
       signerName,
-      style: mode,
+      style: mode === 'type' ? 'type' : 'draw',
       font: mode === 'type' ? fontById(fontId).id : null,
       imageDataUrl: currentImage,
     })

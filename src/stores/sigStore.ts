@@ -1,15 +1,15 @@
 import { create } from 'zustand'
-import type { SignatureMode } from '../lib/types'
+import type { StudioMode } from '../lib/types'
 import { DEFAULT_FONT } from '../lib/fonts'
 
 interface SigState {
-  mode: SignatureMode
+  mode: StudioMode
   signerName: string
   fontId: string
-  drawnDataUrl: string | null   // from the canvas pad
+  drawnDataUrl: string | null   // from the canvas pad (or a phone handoff)
   typedDataUrl: string | null   // rasterised typed text
 
-  setMode: (m: SignatureMode) => void
+  setMode: (m: StudioMode) => void
   setSignerName: (n: string) => void
   setFontId: (id: string) => void
   setDrawn: (url: string | null) => void
@@ -35,6 +35,7 @@ export const useSigStore = create<SigState>((set, get) => ({
 
   currentImage: () => {
     const s = get()
-    return s.mode === 'draw' ? s.drawnDataUrl : s.typedDataUrl
+    // 'phone' produces a drawn image; only 'type' uses the rasterised text.
+    return s.mode === 'type' ? s.typedDataUrl : s.drawnDataUrl
   },
 }))

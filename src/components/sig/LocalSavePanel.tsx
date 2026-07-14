@@ -34,7 +34,7 @@ export default function LocalSavePanel() {
     setSaved(
       saveLocalSignature({
         signerName,
-        style: mode,
+        style: mode === 'type' ? 'type' : 'draw',
         font: mode === 'type' ? fontById(fontId).id : null,
         imageDataUrl: currentImage,
       }),
