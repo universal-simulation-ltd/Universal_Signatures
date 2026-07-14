@@ -16,7 +16,13 @@ const ANCHORS: Anchor[] = [
 const SIGNUP_URL = 'https://app.unisim.co.uk/login'
 
 export default function ApplyToPdf() {
-  const currentImage = useSigStore((s) => s.currentImage())
+  const composedImage = useSigStore((s) => s.currentImage())
+  const baseImage = useSigStore((s) => s.baseImage())
+  const hasExtras = useSigStore((s) => s.hasExtras())
+  const [applyExtras, setApplyExtras] = useState(true)
+  // What actually gets stamped: with name/date when the user keeps them applied
+  // for this document, otherwise the raw signature.
+  const currentImage = hasExtras && applyExtras ? composedImage : baseImage
   const { supabase, session, activeOrgId } = useUniversal()
   const { user } = useUser()
   const signedIn = !!session?.user && session.user.is_anonymous !== true
@@ -173,6 +179,21 @@ export default function ApplyToPdf() {
           onConfirm={(p) => { setPos(p); setPickerOpen(false) }}
           onClose={() => setPickerOpen(false)}
         />
+      )}
+
+      {file && hasExtras && (
+        <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+          <input
+            type="checkbox"
+            checked={applyExtras}
+            onChange={(e) => setApplyExtras(e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-orange-600"
+          />
+          <span className="text-xs text-slate-600">
+            <span className="font-semibold text-slate-800">Add name &amp; date</span> — stamp the name/date you added in
+            "Create your signature" beneath the signature on this document.
+          </span>
+        </label>
       )}
 
       {file && (
