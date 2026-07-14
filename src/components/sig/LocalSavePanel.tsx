@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSigStore } from '../../stores/sigStore'
 import {
   loadLocalSignatures,
@@ -16,6 +16,7 @@ export default function LocalSavePanel() {
   const fontId = useSigStore((s) => s.fontId)
   const signerName = useSigStore((s) => s.signerName)
   const currentImage = useSigStore((s) => s.currentImage())
+  const baseImage = useSigStore((s) => s.baseImage())
   const setMode = useSigStore((s) => s.setMode)
   const setDrawn = useSigStore((s) => s.setDrawn)
   const setTyped = useSigStore((s) => s.setTyped)
@@ -24,10 +25,24 @@ export default function LocalSavePanel() {
 
   const [saved, setSaved] = useState<LocalSignature[]>([])
   const [justSaved, setJustSaved] = useState(false)
+  const didInit = useRef(false)
 
   useEffect(() => {
-    setSaved(loadLocalSignatures())
+    const list = loadLocalSignatures()
+    setSaved(list)
+    // Default the most recently saved signature to "in use" — but only once,
+    // and only if the user hasn't already started a signature this session.
+    if (!didInit.current) {
+      didInit.current = true
+      if (list.length > 0 && !useSigStore.getState().baseImage()) {
+        onUse(list[0])
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Which saved entry (if any) is currently loaded as the active signature.
+  const inUseId = baseImage ? saved.find((s) => s.imageDataUrl === baseImage)?.id ?? null : null
 
   function onSave() {
     if (!currentImage) return
@@ -84,7 +99,7 @@ export default function LocalSavePanel() {
           {saved.map((sig) => (
             <li
               key={sig.id}
-              className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2"
+              className={`flex items-center gap-3 rounded-lg border p-2 ${sig.id === inUseId ? 'border-orange-300 bg-orange-50/60 ring-1 ring-orange-200' : 'border-slate-200 bg-slate-50'}`}
             >
               <span className="flex h-12 w-24 shrink-0 items-center justify-center overflow-hidden rounded bg-white ring-1 ring-slate-200">
                 <img src={sig.imageDataUrl} alt="Saved signature" className="max-h-11 max-w-[5.5rem] object-contain" />
@@ -95,12 +110,18 @@ export default function LocalSavePanel() {
                 </span>
                 <span className="text-[10px] uppercase tracking-wide text-slate-400">{sig.style}</span>
               </span>
-              <button
-                onClick={() => onUse(sig)}
-                className="shrink-0 rounded-md bg-orange-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-700"
-              >
-                Use
-              </button>
+              {sig.id === inUseId ? (
+                <span className="shrink-0 rounded-md bg-orange-100 px-3 py-1.5 text-xs font-semibold text-orange-700">
+                  In use ✓
+                </span>
+              ) : (
+                <button
+                  onClick={() => onUse(sig)}
+                  className="shrink-0 rounded-md bg-orange-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-700"
+                >
+                  Use
+                </button>
+              )}
               <button
                 onClick={() => onRemove(sig.id)}
                 aria-label="Remove saved signature"
