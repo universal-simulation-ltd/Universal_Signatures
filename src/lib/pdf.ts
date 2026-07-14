@@ -6,10 +6,21 @@ export type Anchor =
   | 'mid-left' | 'mid-center' | 'mid-right'
   | 'bottom-left' | 'bottom-center' | 'bottom-right'
 
+// A custom placement point chosen on the visual picker. Fractions of the page
+// (0–1) with a top-left origin (y grows downward, like the screen); the point
+// is the CENTRE of the signature. Overrides `anchor` when present.
+export interface PlacePoint {
+  xPct: number
+  yPct: number
+}
+
 export interface PlaceOpts {
   pageIndex: number   // 0-based; -1 = last page
   anchor: Anchor
   widthPct: number    // signature width as % of page width (5–60)
+  // When set (from the "Choose position" picker), the signature is centred on
+  // this point instead of snapping to the 9-grid anchor.
+  pos?: PlacePoint
   // Optional QR PNG (data URL) stamped beside the signature, linking to the
   // public verify page. Present only when the user opts into a verifiable record.
   qrPng?: string
@@ -33,14 +44,25 @@ export async function signPdf(pdfBytes: ArrayBuffer, sigPng: string, opts: Place
   const h = (png.height / png.width) * w
 
   const margin = 24
-  const [vert, horiz] = anchorParts(opts.anchor)
-  let x = margin
-  if (horiz === 'center') x = (pw - w) / 2
-  else if (horiz === 'right') x = pw - w - margin
-  // pdf-lib origin is bottom-left.
-  let y = margin
-  if (vert === 'mid') y = (ph - h) / 2
-  else if (vert === 'top') y = ph - h - margin
+  let x: number
+  let y: number
+  if (opts.pos) {
+    // Click point is the signature centre, in top-left-origin page fractions.
+    // pdf-lib's origin is bottom-left, so flip Y. Clamp so it can't clip off.
+    const cx = opts.pos.xPct * pw
+    const cyTop = opts.pos.yPct * ph
+    x = Math.max(0, Math.min(pw - w, cx - w / 2))
+    y = Math.max(0, Math.min(ph - h, ph - cyTop - h / 2))
+  } else {
+    const [vert, horiz] = anchorParts(opts.anchor)
+    x = margin
+    if (horiz === 'center') x = (pw - w) / 2
+    else if (horiz === 'right') x = pw - w - margin
+    // pdf-lib origin is bottom-left.
+    y = margin
+    if (vert === 'mid') y = (ph - h) / 2
+    else if (vert === 'top') y = ph - h - margin
+  }
 
   page.drawImage(png, { x, y, width: w, height: h })
 
