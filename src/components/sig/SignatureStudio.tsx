@@ -6,8 +6,7 @@ import SignaturePad from './SignaturePad'
 import TypeSignature from './TypeSignature'
 import PhoneSignPanel from './PhoneSignPanel'
 import ApplyToPdf from './ApplyToPdf'
-import LocalSavePanel from './LocalSavePanel'
-import CloudSavePanel from './CloudSavePanel'
+import SaveTabs from './SaveTabs'
 
 const MODES: { id: StudioMode; label: string }[] = [
   { id: 'draw', label: 'Draw' },
@@ -47,7 +46,8 @@ export default function SignatureStudio() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-6">
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Create signature */}
+        {/* Left column: create your signature, then save it */}
+        <div className="space-y-6">
         <section className="rounded-xl border border-slate-200 bg-white p-5">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-900">Create your signature</h2>
@@ -99,11 +99,12 @@ export default function SignatureStudio() {
           </p>
         </section>
 
-        {/* Use + save */}
+          <SaveTabs />
+        </div>
+
+        {/* Right column: sign a PDF */}
         <div className="space-y-6">
           <ApplyToPdf />
-          <LocalSavePanel />
-          <CloudSavePanel />
         </div>
       </div>
     </div>

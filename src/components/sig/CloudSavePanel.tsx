@@ -8,7 +8,7 @@ const SELFHOST_DOCS = 'https://github.com/universal-simulation-ltd/Universal_Sig
 const SIGNUP_URL = 'https://app.unisim.co.uk/login'
 const BILLING_URL = 'https://app.unisim.co.uk/billing'
 
-export default function CloudSavePanel() {
+export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
   const { supabase, activeOrgId } = useUniversal()
   const { user } = useUser()
   const gate = useCloudGate()
@@ -67,13 +67,15 @@ export default function CloudSavePanel() {
     setHeldByToken(false)
   }
 
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
-      <div className="flex items-center gap-2">
-        <h2 className="text-sm font-bold text-slate-900">Save a verified signature to the cloud</h2>
-        <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-700">Universal ID</span>
-      </div>
-      <p className="mt-1 text-xs text-slate-500">
+  const content = (
+    <>
+      {!bare && (
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-bold text-slate-900">Save a verified signature to the cloud</h2>
+          <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-700">Universal ID</span>
+        </div>
+      )}
+      <p className={`text-xs text-slate-500 ${bare ? '' : 'mt-1'}`}>
         Store your signature against your Universal ID with a tamper-evident certificate, so you can reuse and verify it anywhere.
       </p>
 
@@ -166,6 +168,9 @@ export default function CloudSavePanel() {
           </div>
         )}
       </div>
-    </div>
+    </>
   )
+
+  if (bare) return content
+  return <div className="rounded-xl border border-slate-200 bg-white p-5">{content}</div>
 }
