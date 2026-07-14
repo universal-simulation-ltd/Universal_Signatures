@@ -20,6 +20,11 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: {
       exclude: ['@unisim/sdk']
     },
+    // pdf.js worker is loaded via `?worker`; IIFE format so iOS Safari gets a
+    // classic blob-URL worker instead of an ES-module worker it can't import.
+    worker: {
+      format: 'iife'
+    },
     plugins: [
       react(),
       tailwindcss(),

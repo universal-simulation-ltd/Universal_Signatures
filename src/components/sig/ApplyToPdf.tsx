@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useUniversal, useUser } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
-import { signPdf, pageCount, type Anchor } from '../../lib/pdf'
+import { signPdf, pageCount, type Anchor, type PlacePoint } from '../../lib/pdf'
 import { sha256Bytes } from '../../lib/signature'
 import { makeQrPng } from '../../lib/qr'
 import { recordSigningEvent } from '../../lib/cloud'
+import PositionPicker from './PositionPicker'
 
 const ANCHORS: Anchor[] = [
   'top-left', 'top-center', 'top-right',
@@ -24,6 +25,8 @@ export default function ApplyToPdf() {
   const [pages, setPages] = useState(0)
   const [pageIndex, setPageIndex] = useState(0)
   const [anchor, setAnchor] = useState<Anchor>('bottom-right')
+  const [pos, setPos] = useState<PlacePoint | null>(null)
+  const [pickerOpen, setPickerOpen] = useState(false)
   const [widthPct, setWidthPct] = useState(25)
   const [makeRecord, setMakeRecord] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -38,6 +41,7 @@ export default function ApplyToPdf() {
       const n = await pageCount(await f.arrayBuffer())
       setPages(n)
       setPageIndex(0)
+      setPos(null)
     } catch {
       setError('Could not read that PDF.')
       setFile(null)
@@ -78,7 +82,7 @@ export default function ApplyToPdf() {
         setVerifyUrl(url)
       }
 
-      const bytes = await signPdf(buf, currentImage, { pageIndex, anchor, widthPct, qrPng })
+      const bytes = await signPdf(buf, currentImage, { pageIndex, anchor, widthPct, pos: pos ?? undefined, qrPng })
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -122,20 +126,53 @@ export default function ApplyToPdf() {
           </div>
           <div>
             <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Position</div>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className={`grid grid-cols-3 gap-1.5 transition ${pos ? 'opacity-40' : ''}`}>
               {ANCHORS.map((a) => (
                 <button
                   key={a}
-                  onClick={() => setAnchor(a)}
+                  onClick={() => { setPos(null); setAnchor(a) }}
                   aria-label={a}
-                  className={`h-9 rounded-md ring-1 transition ${anchor === a ? 'bg-orange-600 ring-orange-600' : 'bg-white ring-slate-200 hover:bg-slate-50'}`}
+                  className={`h-9 rounded-md ring-1 transition ${!pos && anchor === a ? 'bg-orange-600 ring-orange-600' : 'bg-white ring-slate-200 hover:bg-slate-50'}`}
                 >
-                  <span className={`mx-auto block h-2 w-2 rounded-full ${anchor === a ? 'bg-white' : 'bg-slate-300'}`} />
+                  <span className={`mx-auto block h-2 w-2 rounded-full ${!pos && anchor === a ? 'bg-white' : 'bg-slate-300'}`} />
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={() => setPickerOpen(true)}
+              disabled={!currentImage}
+              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-orange-400 hover:bg-orange-50/40 disabled:opacity-50"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" />
+              </svg>
+              {pos ? 'Change position' : 'Choose position…'}
+            </button>
+            {pos && (
+              <div className="mt-1.5 flex items-center justify-between text-[11px] text-emerald-700">
+                <span>✓ Custom position set</span>
+                <button type="button" onClick={() => setPos(null)} className="font-medium text-slate-500 hover:text-rose-600">Use grid</button>
+              </div>
+            )}
+            {!currentImage && (
+              <p className="mt-1 text-[11px] text-slate-400">Create a signature to preview placement.</p>
+            )}
           </div>
         </div>
+      )}
+
+      {pickerOpen && file && currentImage && (
+        <PositionPicker
+          file={file}
+          pageIndex={pageIndex}
+          sigPng={currentImage}
+          widthPct={widthPct}
+          onWidthChange={setWidthPct}
+          initialPos={pos}
+          onConfirm={(p) => { setPos(p); setPickerOpen(false) }}
+          onClose={() => setPickerOpen(false)}
+        />
       )}
 
       {file && (
