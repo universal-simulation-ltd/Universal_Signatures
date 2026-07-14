@@ -4,6 +4,7 @@ import {
   loadLocalSignatures,
   saveLocalSignature,
   removeLocalSignature,
+  renameLocalSignature,
   type LocalSignature,
 } from '../../lib/localSignatures'
 
@@ -24,6 +25,9 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
 
   const [saved, setSaved] = useState<LocalSignature[]>([])
   const [justSaved, setJustSaved] = useState(false)
+  const [saveName, setSaveName] = useState('')
+  const [renamingId, setRenamingId] = useState<string | null>(null)
+  const [renameDraft, setRenameDraft] = useState('')
   const didInit = useRef(false)
 
   useEffect(() => {
@@ -48,13 +52,34 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
     setSaved(
       saveLocalSignature({
         signerName,
+        label: saveName,
         style: mode === 'type' ? 'type' : 'draw',
         font: mode === 'type' ? fontId : null,
         imageDataUrl: currentImage,
       }),
     )
+    setSaveName('')
     setJustSaved(true)
     window.setTimeout(() => setJustSaved(false), 1800)
+  }
+
+  function startRename(sig: LocalSignature) {
+    setRenamingId(sig.id)
+    setRenameDraft(sig.label ?? sig.signerName ?? '')
+  }
+  function cancelRename() { setRenamingId(null); setRenameDraft('') }
+  function saveRename(id: string) {
+    // Guard against Enter + the ensuing blur both firing (the second would run
+    // after renamingId is cleared, with an empty draft, wiping the name).
+    if (renamingId !== id) return
+    setSaved(renameLocalSignature(id, renameDraft))
+    cancelRename()
+  }
+
+  // Display name for a saved entry: its label, else the signer name, else a
+  // style default.
+  function displayName(sig: LocalSignature): string {
+    return sig.label || sig.signerName || (sig.style === 'type' ? 'Typed signature' : 'Drawn signature')
   }
 
   function onUse(sig: LocalSignature) {
@@ -85,7 +110,13 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
         Keep your signature in this browser and reuse it later — free, no sign-in. It stays on this device and never leaves it.
       </p>
 
-      <div className="mt-4">
+      <div className="mt-4 space-y-2">
+        <input
+          value={saveName}
+          onChange={(e) => setSaveName(e.target.value)}
+          placeholder="Name this signature (optional)"
+          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+        />
         <button
           onClick={onSave}
           disabled={!currentImage}
@@ -106,9 +137,28 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
                 <img src={sig.imageDataUrl} alt="Saved signature" className="max-h-11 max-w-[5.5rem] object-contain" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-xs font-medium text-slate-700">
-                  {sig.signerName || (sig.style === 'type' ? 'Typed signature' : 'Drawn signature')}
-                </span>
+                {renamingId === sig.id ? (
+                  <input
+                    autoFocus
+                    value={renameDraft}
+                    onChange={(e) => setRenameDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveRename(sig.id)
+                      else if (e.key === 'Escape') cancelRename()
+                    }}
+                    onBlur={() => saveRename(sig.id)}
+                    placeholder="Signature name"
+                    className="w-full rounded-md border border-slate-300 px-2 py-1 text-xs focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  />
+                ) : (
+                  <button
+                    onClick={() => startRename(sig)}
+                    className="block max-w-full truncate text-left text-xs font-medium text-slate-700 hover:text-orange-600"
+                    title="Rename"
+                  >
+                    {displayName(sig)}
+                  </button>
+                )}
                 <span className="text-[10px] uppercase tracking-wide text-slate-400">{sig.style}</span>
               </span>
               {sig.id === inUseId ? (
