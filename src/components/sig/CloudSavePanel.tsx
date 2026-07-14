@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useUniversal, useUser } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import { useCloudGate, saveSignature, holdSignatureToken, removeStoredSignature } from '../../lib/cloud'
-import { fontById } from '../../lib/fonts'
 
 const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatures'
 const SELFHOST_DOCS = 'https://github.com/universal-simulation-ltd/Universal_Signatures#self-hosting'
@@ -35,7 +34,7 @@ export default function CloudSavePanel() {
     const res = await saveSignature(supabase, activeOrgId, user?.id ?? null, {
       signerName,
       style: mode === 'type' ? 'type' : 'draw',
-      font: mode === 'type' ? fontById(fontId).id : null,
+      font: mode === 'type' ? fontId : null,
       imageDataUrl: currentImage,
     })
     if (!res.ok || !res.certId) { setBusy(false); setError(res.error ?? 'Could not save.'); return }

@@ -11,7 +11,37 @@ body {
 /* The drawing canvas should never scroll the page while signing. */
 .sig-pad { touch-action: none; }
 
-/* Cursive faces for typed-signature previews (loaded in index.html). */
+/* Cursive faces for typed signatures — self-hosted (bundled) so they render
+   offline and on local preview, not just when Google Fonts is reachable. */
+@font-face {
+  font-family: 'Dancing Script';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./assets/fonts/dancing.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Great Vibes';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/greatvibes.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Sacramento';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/sacramento.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Pacifico';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/pacifico.woff2') format('woff2');
+}
+
 .font-dancing { font-family: 'Dancing Script', cursive; }
 .font-greatvibes { font-family: 'Great Vibes', cursive; }
 .font-sacramento { font-family: 'Sacramento', cursive; }
