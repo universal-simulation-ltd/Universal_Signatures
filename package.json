@@ -16,6 +16,7 @@
     "@unisim/sdk": "^0.65.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.10.38",
+    "qr-code-styling": "^1.9.2",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
