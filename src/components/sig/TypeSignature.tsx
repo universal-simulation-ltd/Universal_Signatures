@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useSigStore } from '../../stores/sigStore'
 import { SIG_FONTS, fontById, fontFamilyCss, type SigFont } from '../../lib/fonts'
 import { rasterizeTyped } from '../../lib/signature'
@@ -23,8 +23,27 @@ export default function TypeSignature() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [importError, setImportError] = useState<string | null>(null)
 
+  const previewBoxRef = useRef<HTMLDivElement>(null)
+  const previewTextRef = useRef<HTMLSpanElement>(null)
+
   const fonts = [...SIG_FONTS, ...importedFonts]
   const font = fontById(fontId, importedFonts)
+
+  // Keep the live preview inside the pad: shrink the font until the name fits
+  // the box width so a long name never spills out of bounds (mirrors how the
+  // rasterised PNG is fit to width).
+  useLayoutEffect(() => {
+    const box = previewBoxRef.current
+    const el = previewTextRef.current
+    if (!box || !el) return
+    const BASE = 48 // text-5xl
+    const avail = box.clientWidth - 24 // horizontal padding breathing room
+    el.style.fontSize = `${BASE}px`
+    const natural = el.scrollWidth
+    if (natural > avail) {
+      el.style.fontSize = `${Math.max(14, BASE * (avail / natural))}px`
+    }
+  }, [signerName, font.family])
 
   // Rasterise the typed signature whenever the name or font changes (once the
   // web font is ready), so the cloud save / PDF embed always have a PNG.
@@ -98,9 +117,9 @@ export default function TypeSignature() {
         />
       </div>
       {importError && <p className="text-xs text-rose-600">{importError}</p>}
-      <div className="flex h-44 items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-white">
+      <div ref={previewBoxRef} className="flex h-44 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-slate-300 bg-white px-3">
         {signerName.trim() ? (
-          <span style={{ fontFamily: fontFamilyCss(font) }} className="text-5xl text-slate-900">{signerName}</span>
+          <span ref={previewTextRef} style={{ fontFamily: fontFamilyCss(font) }} className="whitespace-nowrap leading-tight text-slate-900">{signerName}</span>
         ) : (
           <span className="text-sm text-slate-300">Your typed signature previews here</span>
         )}
