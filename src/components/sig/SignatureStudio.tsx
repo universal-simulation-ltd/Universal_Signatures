@@ -7,6 +7,7 @@ import TypeSignature from './TypeSignature'
 import PhoneSignPanel from './PhoneSignPanel'
 import ApplyToPdf from './ApplyToPdf'
 import SaveTabs from './SaveTabs'
+import { CONTAINER } from '../../lib/layout'
 
 const MODES: { id: StudioMode; label: string }[] = [
   { id: 'draw', label: 'Draw' },
@@ -44,7 +45,7 @@ export default function SignatureStudio() {
   }, [base, includeName, includeDate, signerName, setComposed])
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-6">
+    <div className={`${CONTAINER} py-6`}>
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Left column: create your signature, then save it */}
         <div className="space-y-6">
