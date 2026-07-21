@@ -6,6 +6,8 @@ import App from './App'
 import UsageTracker from './UsageTracker'
 import './index.css'
 
+console.log(`build: ${import.meta.env.VITE_BUILD_SHA}`)
+
 // Universal Signatures: the signature studio + sign-a-PDF flow run entirely
 // client-side (documents never leave the browser). Saving a *verified*
 // signature to the cloud uses the Universal ID session (cookie SSO on
