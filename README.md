@@ -40,6 +40,11 @@ npm run dev -- --port 5186
 `npm run build` runs `tsc -b && vite build` (strict TypeScript). Output is a
 static `dist/` served by Cloudflare Pages under `/signatures/`.
 
+Each build bakes the commit SHA into a `<meta name="build-sha">` tag and logs
+`build: <sha>` to the console at startup, so you can tell which build is live
+in-browser. On Cloudflare Pages the SHA comes from `CF_PAGES_COMMIT_SHA`; locally
+it falls back to the git short SHA (or `dev`).
+
 ### Offline "dummy account"
 
 In local dev the app runs against an **offline mock** of the Universal ID by
