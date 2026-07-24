@@ -153,7 +153,7 @@ export default function ApplyToPdf() {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" />
               </svg>
-              {pos ? 'Change position' : 'Choose position…'}
+              {pos ? 'Custom position' : 'Choose position…'}
             </button>
             {pos && (
               <div className="mt-1.5 flex items-center justify-between text-[11px] text-emerald-700">
@@ -190,7 +190,7 @@ export default function ApplyToPdf() {
             className="mt-0.5 h-4 w-4 accent-orange-600"
           />
           <span className="text-xs text-slate-600">
-            <span className="font-semibold text-slate-800">Add name &amp; date</span> — stamp the name/date you added in
+            <span className="font-semibold text-slate-800">Add name, date &amp; time</span> — stamp the name/date/time you added in
             "Create your signature" beneath the signature on this document.
           </span>
         </label>

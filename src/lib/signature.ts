@@ -52,6 +52,13 @@ export function formatSigningDate(d = new Date()): string {
   return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+// Local time formatted for stamping beneath a signature (e.g. "14:32"). This is
+// the machine's local time at the moment of signing — see the signing-provenance
+// scope-out for why local time is one of the few purely client-side signals.
+export function formatSigningTime(d = new Date()): string {
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+}
+
 // Load an image data URL to an <img> element.
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -62,14 +69,18 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   })
 }
 
-// Stack one or more text lines (name, then date) centred beneath a signature
-// PNG, returning a new transparent PNG data URL. Rendered at 2× for crispness.
-// Mirrors Universal PDF's composeSignatureWithLabels.
+export type LabelAlign = 'left' | 'center' | 'right'
+
+// Stack one or more text lines (name, then date/time) beneath a signature PNG,
+// returning a new transparent PNG data URL. Rendered at 2× for crispness.
+// `align` places the labels against the left edge, centre, or right edge of the
+// signature box. Mirrors Universal PDF's composeSignatureWithLabels.
 export async function composeSignatureWithLabels(
   sigDataUrl: string,
   labels: { text: string; scale: number }[],
-  color = '#0f172a',
+  opts: { color?: string; align?: LabelAlign } = {},
 ): Promise<string> {
+  const { color = '#0f172a', align = 'center' } = opts
   const img = await loadImage(sigDataUrl)
   if (labels.length === 0) return sigDataUrl
 
@@ -95,14 +106,20 @@ export async function composeSignatureWithLabels(
   canvas.width = Math.ceil(outW * RS)
   canvas.height = Math.ceil(outH * RS)
 
-  ctx.drawImage(img, ((outW - sigW) / 2) * RS, 0, sigW * RS, sigH * RS)
+  // Keep the signature centred in the output; align only the text labels to the
+  // signature box's left/centre/right edge.
+  const sigLeft = (outW - sigW) / 2
+  const sigRight = sigLeft + sigW
+  const textX = align === 'left' ? sigLeft : align === 'right' ? sigRight : outW / 2
+
+  ctx.drawImage(img, sigLeft * RS, 0, sigW * RS, sigH * RS)
   ctx.fillStyle = color
-  ctx.textAlign = 'center'
+  ctx.textAlign = align === 'left' ? 'left' : align === 'right' ? 'right' : 'center'
   ctx.textBaseline = 'top'
   let y = sigH + gap
   labels.forEach((l, i) => {
     ctx.font = `${baseFont * l.scale * RS}px ${FONT}`
-    ctx.fillText(l.text, (outW / 2) * RS, y * RS)
+    ctx.fillText(l.text, textX * RS, y * RS)
     y += lineHeights[i]
   })
 
