@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { useSigStore } from '../../stores/sigStore'
 import type { StudioMode } from '../../lib/types'
-import { composeSignatureWithLabels, formatSigningDate } from '../../lib/signature'
+import { composeSignatureWithLabels, formatSigningDate, formatSigningTime } from '../../lib/signature'
+import type { LabelAlign } from '../../stores/sigStore'
 import SignaturePad from './SignaturePad'
 import TypeSignature from './TypeSignature'
 import PhoneSignPanel from './PhoneSignPanel'
@@ -25,24 +26,31 @@ export default function SignatureStudio() {
   const signerName = useSigStore((s) => s.signerName)
   const includeName = useSigStore((s) => s.includeName)
   const includeDate = useSigStore((s) => s.includeDate)
+  const includeTime = useSigStore((s) => s.includeTime)
+  const labelAlign = useSigStore((s) => s.labelAlign)
   const setSignerName = useSigStore((s) => s.setSignerName)
   const setIncludeName = useSigStore((s) => s.setIncludeName)
   const setIncludeDate = useSigStore((s) => s.setIncludeDate)
+  const setIncludeTime = useSigStore((s) => s.setIncludeTime)
+  const setLabelAlign = useSigStore((s) => s.setLabelAlign)
   const setComposed = useSigStore((s) => s.setComposed)
 
   const base = mode === 'type' ? typedDataUrl : drawnDataUrl
+  const hasLabels = (includeName && signerName.trim().length > 0) || includeDate || includeTime
 
-  // Recompose the base signature with the name/date labels whenever any input
-  // changes, so currentImage() (used by save + sign) reflects the choice.
+  // Recompose the base signature with the name/date/time labels whenever any
+  // input changes, so currentImage() (used by save + sign) reflects the choice.
   useEffect(() => {
     let cancelled = false
     const labels: { text: string; scale: number }[] = []
     if (includeName && signerName.trim()) labels.push({ text: signerName.trim(), scale: 1 })
-    if (includeDate) labels.push({ text: formatSigningDate(), scale: 0.8 })
+    if (includeDate && includeTime) labels.push({ text: `${formatSigningDate()} · ${formatSigningTime()}`, scale: 0.8 })
+    else if (includeDate) labels.push({ text: formatSigningDate(), scale: 0.8 })
+    else if (includeTime) labels.push({ text: formatSigningTime(), scale: 0.8 })
     if (!base || labels.length === 0) { setComposed(null); return }
-    composeSignatureWithLabels(base, labels).then((url) => { if (!cancelled) setComposed(url) })
+    composeSignatureWithLabels(base, labels, { align: labelAlign }).then((url) => { if (!cancelled) setComposed(url) })
     return () => { cancelled = true }
-  }, [base, includeName, includeDate, signerName, setComposed])
+  }, [base, includeName, includeDate, includeTime, labelAlign, signerName, setComposed])
 
   return (
     <div className={`${CONTAINER} py-6`}>
@@ -68,9 +76,9 @@ export default function SignatureStudio() {
             {mode === 'type' ? <TypeSignature /> : mode === 'phone' ? <PhoneSignPanel /> : <SignaturePad />}
           </div>
 
-          {/* Optional name / date stamped beneath the signature. */}
+          {/* Optional name / date / time stamped beneath the signature. */}
           <div className="mt-4 space-y-2 border-t border-slate-100 pt-3">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Add name &amp; date</div>
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Add name, date &amp; time</div>
             <label className="flex items-center gap-2 text-sm text-slate-700">
               <input type="checkbox" checked={includeName} onChange={(e) => setIncludeName(e.target.checked)} className="h-4 w-4 accent-orange-600" />
               Add your name
@@ -87,7 +95,29 @@ export default function SignatureStudio() {
               <input type="checkbox" checked={includeDate} onChange={(e) => setIncludeDate(e.target.checked)} className="h-4 w-4 accent-orange-600" />
               Add today's date <span className="text-slate-400">({formatSigningDate()})</span>
             </label>
-            {(includeName || includeDate) && (
+            <label className="flex items-center gap-2 text-sm text-slate-700">
+              <input type="checkbox" checked={includeTime} onChange={(e) => setIncludeTime(e.target.checked)} className="h-4 w-4 accent-orange-600" />
+              Add the time <span className="text-slate-400">({formatSigningTime()})</span>
+            </label>
+            {hasLabels && (
+              <div className="flex items-center gap-2 pt-0.5">
+                <span className="text-[11px] font-medium text-slate-500">Align</span>
+                <div className="inline-flex rounded-md bg-slate-100 p-0.5">
+                  {(['left', 'center', 'right'] as LabelAlign[]).map((a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setLabelAlign(a)}
+                      aria-pressed={labelAlign === a}
+                      className={`rounded px-2.5 py-1 text-xs font-semibold capitalize ${labelAlign === a ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                    >
+                      {a}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {hasLabels && (
               <p className="text-[11px] text-slate-400">
                 Appears beneath your signature. When signing a PDF you can choose whether to include it.
               </p>

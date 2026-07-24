@@ -2,6 +2,9 @@ import { create } from 'zustand'
 import type { StudioMode } from '../lib/types'
 import { DEFAULT_FONT, type SigFont } from '../lib/fonts'
 
+/** Where the name/date/time labels sit relative to the signature box. */
+export type LabelAlign = 'left' | 'center' | 'right'
+
 interface SigState {
   mode: StudioMode
   signerName: string
@@ -15,6 +18,8 @@ interface SigState {
   // recomputed reactively by SignatureStudio.
   includeName: boolean
   includeDate: boolean
+  includeTime: boolean
+  labelAlign: LabelAlign
   composedDataUrl: string | null
 
   setMode: (m: StudioMode) => void
@@ -25,6 +30,8 @@ interface SigState {
   setTyped: (url: string | null) => void
   setIncludeName: (v: boolean) => void
   setIncludeDate: (v: boolean) => void
+  setIncludeTime: (v: boolean) => void
+  setLabelAlign: (a: LabelAlign) => void
   setComposed: (url: string | null) => void
   clear: () => void
   /** True when name/date labels should be applied (choice set + has content). */
@@ -44,6 +51,8 @@ export const useSigStore = create<SigState>((set, get) => ({
   typedDataUrl: null,
   includeName: false,
   includeDate: false,
+  includeTime: false,
+  labelAlign: 'center',
   composedDataUrl: null,
 
   setMode: (mode) => set({ mode }),
@@ -54,12 +63,14 @@ export const useSigStore = create<SigState>((set, get) => ({
   setTyped: (typedDataUrl) => set({ typedDataUrl }),
   setIncludeName: (includeName) => set({ includeName }),
   setIncludeDate: (includeDate) => set({ includeDate }),
+  setIncludeTime: (includeTime) => set({ includeTime }),
+  setLabelAlign: (labelAlign) => set({ labelAlign }),
   setComposed: (composedDataUrl) => set({ composedDataUrl }),
   clear: () => set({ drawnDataUrl: null, typedDataUrl: null, composedDataUrl: null }),
 
   hasExtras: () => {
     const s = get()
-    return (s.includeName && s.signerName.trim().length > 0) || s.includeDate
+    return (s.includeName && s.signerName.trim().length > 0) || s.includeDate || s.includeTime
   },
 
   baseImage: () => {
