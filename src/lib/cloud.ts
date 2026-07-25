@@ -138,7 +138,7 @@ export async function recordSigningEvent(
   orgId: string | null,
   userId: string | null,
   input: SigningRecordInput,
-): Promise<{ ok: boolean; certId?: string; error?: string }> {
+): Promise<{ ok: boolean; certId?: string; recordedAt?: string; error?: string }> {
   if (!orgId || !userId) return { ok: false, error: 'Sign in with your Universal ID to create a verifiable record.' }
   const { data, error } = await supabase
     .from('signing_events')
@@ -150,10 +150,14 @@ export async function recordSigningEvent(
       document_hash: input.documentHash,
       signature_id: input.signatureId ?? null,
     })
-    .select('cert_id')
+    // created_at comes back too: it is the SERVER's timestamp, the only
+    // trustworthy time in the record. The certificate page prints it as such,
+    // with the signer's own clock shown separately and labelled self-reported.
+    .select('cert_id, created_at')
     .single()
   if (error) return { ok: false, error: error.message }
-  return { ok: true, certId: (data as { cert_id: string }).cert_id }
+  const row = data as { cert_id: string; created_at: string }
+  return { ok: true, certId: row.cert_id, recordedAt: row.created_at }
 }
 
 // ── Verify (public) ──────────────────────────────────────────────────────────

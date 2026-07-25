@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+import { appendSigningAuditPage, type SigningAuditFields } from '@unisim/sdk'
 import { dataUrlToBytes } from './signature'
 
 export type Anchor =
@@ -24,6 +25,11 @@ export interface PlaceOpts {
   // Optional QR PNG (data URL) stamped beside the signature, linking to the
   // public verify page. Present only when the user opts into a verifiable record.
   qrPng?: string
+  // When set, a signing certificate page is appended to the document. Same
+  // opt-in as the QR — the page is what a recipient actually reads, the QR is
+  // just the shortcut to the online copy. Composed by the SDK so Universal PDF
+  // renders an identical page.
+  audit?: SigningAuditFields
 }
 
 export async function pageCount(pdfBytes: ArrayBuffer): Promise<number> {
@@ -90,6 +96,13 @@ export async function signPdf(pdfBytes: ArrayBuffer, sigPng: string, opts: Place
       font,
       color: rgb(0.39, 0.45, 0.55),
     })
+  }
+
+  // The certificate page goes last, after the signature is stamped, so it
+  // reads as an appendix rather than interrupting the document. `rgb` is
+  // passed in because the SDK holds no runtime dependency on pdf-lib.
+  if (opts.audit) {
+    await appendSigningAuditPage({ pdf: doc, fields: opts.audit, rgb, qrPng: opts.qrPng })
   }
 
   return doc.save()

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useUniversal, useUser } from '@unisim/sdk'
+import { useUniversal, useUser, type SigningAuditFields } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import { signPdf, pageCount, type Anchor, type PlacePoint } from '../../lib/pdf'
 import { sha256Bytes } from '../../lib/signature'
@@ -64,8 +64,10 @@ export default function ApplyToPdf() {
       const buf = await file.arrayBuffer()
 
       // Opt-in verifiable record (free for any signed-in Universal ID): hash the
-      // ORIGINAL bytes, store the metadata-only record, then stamp its QR on.
+      // ORIGINAL bytes, store the metadata-only record, then stamp its QR on and
+      // append the certificate page describing it.
       let qrPng: string | undefined
+      let audit: SigningAuditFields | undefined
       if (makeRecord && signedIn) {
         if (!user?.email) {
           setError('Your Universal ID has no email on file, so a verifiable record can\'t be created.')
@@ -86,9 +88,25 @@ export default function ApplyToPdf() {
         const url = `${location.origin}${import.meta.env.BASE_URL}verify/${res.certId}`
         qrPng = await makeQrPng(url)
         setVerifyUrl(url)
+
+        // Everything on the certificate page is either already in the record
+        // the user just consented to, or their own device's clock/zone — which
+        // the page prints under a heading saying it is self-reported. No
+        // geolocation: that needs its own prompt and its own opt-in.
+        audit = {
+          signerEmail: user.email,
+          originalFilename: file.name,
+          documentHash,
+          recordedAt: res.recordedAt,
+          certId: res.certId,
+          verifyUrl: url,
+          localSignedAt: new Date().toISOString(),
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          productName: 'Universal Signatures',
+        }
       }
 
-      const bytes = await signPdf(buf, currentImage, { pageIndex, anchor, widthPct, pos: pos ?? undefined, qrPng })
+      const bytes = await signPdf(buf, currentImage, { pageIndex, anchor, widthPct, pos: pos ?? undefined, qrPng, audit })
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -207,8 +225,9 @@ export default function ApplyToPdf() {
               className="mt-0.5 h-4 w-4 accent-orange-600"
             />
             <span className="text-xs text-slate-600">
-              <span className="font-semibold text-slate-800">Add a verification QR code</span> — stamps a QR on the PDF and saves a
-              free, verifiable record (your email, the file name, a document hash and the time). The document itself is never uploaded.
+              <span className="font-semibold text-slate-800">Add a signing certificate</span> — appends a certificate page and a
+              QR to the PDF, and saves a free, verifiable record (your email, the file name, a document hash and the time). The page also
+              shows your device's clock and timezone, marked as self-reported. The document itself is never uploaded.
             </span>
           </label>
           {!signedIn && (
