@@ -1,7 +1,31 @@
 # Signing provenance / evidence-of-signing — scope-out
 
-**Status:** recommendation only. No backend, schema, or capture code is built by
-this document. This exists to decide *whether* and *how* Universal Signatures
+**Status (updated 2026-07-25): PARTLY BUILT.**
+
+- **The audit page (§4 item 2) is BUILT** — as `appendSigningAuditPage` in
+  **`@unisim/sdk`** (universal-platform #98), *not* in this repo, so Universal
+  PDF's sign flow can call the same implementation (see §5). pdf-lib is a
+  type-only import and an optional peer, so apps that never touch a PDF pay
+  nothing. **Owner-gated:** the SDK must be published (`packages/sdk/publish.sh`,
+  needs an npm login) before this app can consume it — the wire-up here is a
+  follow-up.
+- **Server-signing the record (§4 item 3) is HELD, deliberately.** Its value
+  lands where there is a *counterparty* with reason to doubt us — the two-party
+  send-to-sign flow — and that already has it: platform migration **0058
+  `pdf_sign_provenance`** ships an append-only, service-role-only,
+  hash-chained event log **including IP / ip_country / user_agent** capture. For
+  single-party self-signing, Ed25519 would cost a service-role write path, key
+  management and a *published* public key (the licence key in
+  `sign-offline-license` is embedded in the desktop verifier — no good for a web
+  verify page) to make a self-signature marginally more provable. Revisit the
+  first time someone asks "can my client verify this without you?".
+- **IP / VPN / geolocation (§2, §3) remains NOT DONE for this app**, and the
+  recommendation to keep it hosted + consented stands. Note it is **already
+  live in Universal PDF's two-party flow** via 0058 — so the "departure from
+  no-upload" has been taken there, not here.
+
+Original status: recommendation only. No backend, schema, or capture code was
+built by this document. This exists to decide *whether* and *how* Universal Signatures
 should capture an audit trail of signing metadata (IP, VPN/proxy detection,
 coarse geolocation, machine timezone, local date/time), the way DocuSign and
 Adobe Sign attach a "Certificate of Completion" / audit page to a signed
