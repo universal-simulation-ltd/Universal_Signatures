@@ -28,6 +28,7 @@ export default function SignatureStudio() {
   const includeDate = useSigStore((s) => s.includeDate)
   const includeTime = useSigStore((s) => s.includeTime)
   const labelAlign = useSigStore((s) => s.labelAlign)
+  const composedDataUrl = useSigStore((s) => s.composedDataUrl)
   const setSignerName = useSigStore((s) => s.setSignerName)
   const setIncludeName = useSigStore((s) => s.setIncludeName)
   const setIncludeDate = useSigStore((s) => s.setIncludeDate)
@@ -114,6 +115,26 @@ export default function SignatureStudio() {
                       {a}
                     </button>
                   ))}
+                </div>
+              </div>
+            )}
+            {/* Live preview of exactly what gets stamped — the same composed
+                image used for saving and signing. */}
+            {hasLabels && (
+              <div className="pt-1">
+                <div className="mb-1 text-[11px] font-medium text-slate-500">Preview</div>
+                <div className="flex min-h-[76px] items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 p-3">
+                  {composedDataUrl ? (
+                    <img
+                      src={composedDataUrl}
+                      alt="Your signature with the name, date and time stamped beneath it"
+                      className="max-h-24 max-w-full object-contain"
+                    />
+                  ) : (
+                    <span className="text-center text-[11px] text-slate-400">
+                      {base ? 'Building preview…' : 'Add your signature above to see the preview.'}
+                    </span>
+                  )}
                 </div>
               </div>
             )}
