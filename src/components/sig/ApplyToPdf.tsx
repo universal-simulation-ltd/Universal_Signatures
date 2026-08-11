@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useUniversal, useUser, type SigningAuditFields } from '@unisim/sdk'
+import { useFileDrop, useUniversal, useUser, type SigningAuditFields } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import { signPdf, pageCount, type Anchor, type PlacePoint } from '../../lib/pdf'
 import { sha256Bytes } from '../../lib/signature'
@@ -38,6 +38,13 @@ export default function ApplyToPdf() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [verifyUrl, setVerifyUrl] = useState<string | null>(null)
+
+  const drop = useFileDrop({
+    onFiles: (files) => { if (files[0]) void onFile(files[0]) },
+    accept: 'application/pdf',
+    multiple: false,
+    label: 'Drop a PDF here, or click to choose one',
+  })
 
   async function onFile(f: File) {
     setError(null)
@@ -126,11 +133,19 @@ export default function ApplyToPdf() {
       <h2 className="text-sm font-bold text-slate-900">Sign a PDF</h2>
       <p className="mt-1 text-xs text-slate-500">Add your signature to a document — it's processed in your browser and never uploaded.</p>
 
-      <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 px-4 py-5 text-sm text-slate-600 hover:border-orange-400 hover:bg-orange-50/40">
+      {/* A real drop target now, not just a label wrapping an input: the box
+          takes a dragged PDF, and the SDK hook resets the input's value so
+          picking the SAME document a second time still fires. */}
+      <div
+        {...drop.dropzoneProps}
+        className={`mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-5 text-sm text-slate-600 transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-orange-600 ${
+          drop.over ? 'border-orange-500 bg-orange-50' : 'border-slate-300 hover:border-orange-400 hover:bg-orange-50/40'
+        }`}
+      >
         <span aria-hidden="true">📄</span>
-        {file ? `${file.name} · ${pages} page${pages === 1 ? '' : 's'}` : 'Choose a PDF…'}
-        <input type="file" accept="application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />
-      </label>
+        {file ? `${file.name} · ${pages} page${pages === 1 ? '' : 's'}` : 'Drop a PDF here, or click to choose'}
+      </div>
+      <input {...drop.inputProps} className="hidden" />
 
       {file && (
         <div className="mt-4 grid gap-4 sm:grid-cols-2">

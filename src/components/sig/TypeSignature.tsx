@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useFileDrop } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import { SIG_FONTS, fontById, fontFamilyCss, type SigFont } from '../../lib/fonts'
 import { rasterizeTyped } from '../../lib/signature'
@@ -20,8 +21,15 @@ export default function TypeSignature() {
   const setTyped = useSigStore((s) => s.setTyped)
   const addImportedFont = useSigStore((s) => s.addImportedFont)
 
-  const fileRef = useRef<HTMLInputElement>(null)
   const [importError, setImportError] = useState<string | null>(null)
+  // One button in a row of font buttons, so no drop target and no click-to-
+  // browse wrapper — just the SDK's input mechanics.
+  const fontPicker = useFileDrop({
+    onFiles: (files) => { if (files[0]) void onImportFont(files[0]) },
+    accept: '.woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf',
+    multiple: false,
+    clickToBrowse: false,
+  })
 
   const previewBoxRef = useRef<HTMLDivElement>(null)
   const previewTextRef = useRef<HTMLSpanElement>(null)
@@ -99,7 +107,7 @@ export default function TypeSignature() {
         ))}
         {/* Import a custom font from the user's device. */}
         <button
-          onClick={() => fileRef.current?.click()}
+          onClick={fontPicker.open}
           className="inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:border-orange-400 hover:text-orange-600"
           title="Import a font file"
         >
@@ -108,13 +116,7 @@ export default function TypeSignature() {
           </svg>
           Import font
         </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf"
-          className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) onImportFont(f); e.target.value = '' }}
-        />
+        <input {...fontPicker.inputProps} className="hidden" />
       </div>
       {importError && <p className="text-xs text-rose-600">{importError}</p>}
       <div ref={previewBoxRef} className="flex h-44 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-slate-300 bg-white px-3">
