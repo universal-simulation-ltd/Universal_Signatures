@@ -70,7 +70,7 @@ export default function VerifyPage({ certId }: { certId: string }) {
           </div>
         )}
 
-        <a href={import.meta.env.BASE_URL} className="mt-6 inline-block text-sm font-medium text-orange-600 hover:underline">
+        <a href={import.meta.env.BASE_URL} className="mt-6 inline-block text-sm font-medium text-orange-700 hover:underline">
           ← Universal Signatures
         </a>
       </div>

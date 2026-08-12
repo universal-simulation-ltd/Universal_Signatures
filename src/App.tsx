@@ -49,7 +49,7 @@ export default function App() {
         <div className={`${CONTAINER} py-4 flex flex-row items-center gap-3 text-xs text-slate-500`}>
           <span>
             100% free — sign locally, no paywalls. Documents never leave your browser. Hosted by{' '}
-            <a href="https://www.unisim.co.uk" target="_blank" rel="noreferrer" className="text-slate-700 hover:text-orange-600 underline-offset-2 hover:underline">
+            <a href="https://www.unisim.co.uk" target="_blank" rel="noreferrer" className="text-slate-700 hover:text-orange-700 underline-offset-2 hover:underline">
               UNI SIM
             </a>
           </span>

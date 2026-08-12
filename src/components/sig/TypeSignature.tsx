@@ -108,7 +108,7 @@ export default function TypeSignature() {
         {/* Import a custom font from the user's device. */}
         <button
           onClick={fontPicker.open}
-          className="inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:border-orange-400 hover:text-orange-600"
+          className="inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:border-orange-400 hover:text-orange-700"
           title="Import a font file"
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

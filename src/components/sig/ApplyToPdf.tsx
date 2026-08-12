@@ -322,7 +322,7 @@ export default function ApplyToPdf() {
           </label>
           {!signedIn && (
             <p className="mt-2 pl-6 text-[11px] text-slate-500">
-              <a href={SIGNUP_URL} className="font-medium text-orange-600 hover:underline">Sign in with a free Universal ID</a> to enable verifiable records.
+              <a href={SIGNUP_URL} className="font-medium text-orange-700 hover:underline">Sign in with a free Universal ID</a> to enable verifiable records.
             </p>
           )}
         </div>

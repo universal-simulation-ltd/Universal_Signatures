@@ -153,7 +153,7 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
                 ) : (
                   <button
                     onClick={() => startRename(sig)}
-                    className="block max-w-full truncate text-left text-xs font-medium text-slate-700 hover:text-orange-600"
+                    className="block max-w-full truncate text-left text-xs font-medium text-slate-700 hover:text-orange-700"
                     title="Rename"
                   >
                     {displayName(sig)}
