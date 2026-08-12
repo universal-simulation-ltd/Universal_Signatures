@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useFileDrop, useUniversal, useUser, type SigningAuditFields } from '@unisim/sdk'
+import { DropAnywhere, DropRing, useFileDrop, useUniversal, useUser, type SigningAuditFields } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import { signPdf, pageCount, type Anchor, type PlacePoint } from '../../lib/pdf'
 import { sha256Bytes } from '../../lib/signature'
@@ -39,16 +39,38 @@ export default function ApplyToPdf() {
   const [error, setError] = useState<string | null>(null)
   const [verifyUrl, setVerifyUrl] = useState<string | null>(null)
 
+  // Not while the position picker is up (it would swap the document behind a
+  // modal still showing the old one), and not mid-signing.
+  const accepting = !pickerOpen && !busy
+
+  // `pageWide`: the circle is where to aim, not where you have to land. It also
+  // closes a real trap in this app specifically — a PDF let go just outside the
+  // ring used to be handed to the browser, which navigates away from the tab and
+  // takes the signature drawn in the left-hand column with it, unsaved.
   const drop = useFileDrop({
     onFiles: (files) => { if (files[0]) void onFile(files[0]) },
     accept: 'application/pdf',
     multiple: false,
-    label: 'Drop a PDF here, or click to choose one',
+    pageWide: true,
+    disabled: !accepting,
+    label: file ? 'Drop another PDF here, or click to choose one' : 'Drop a PDF here, or click to choose one',
   })
+  // ⚠️ `over`/`pageOver` go true for a page drag whether or not this zone is
+  // disabled — the hook lights every page-wide zone and only checks `disabled`
+  // when deciding who TAKES the file. Highlighting a target that will not take
+  // anything is a lie, so gate the visuals here too.
+  const over = drop.over && accepting
 
   async function onFile(f: File) {
     setError(null)
     setVerifyUrl(null)
+    // A page-wide target takes whatever is dropped on the margin, including the
+    // font file the "Type" panel wants. Say which thing was wrong rather than
+    // letting it fail later as an unreadable PDF.
+    if (f.type !== 'application/pdf' && !/\.pdf$/i.test(f.name)) {
+      setError(`${f.name} isn't a PDF.`)
+      return
+    }
     setFile(f)
     try {
       const n = await pageCount(await f.arrayBuffer())
@@ -133,19 +155,72 @@ export default function ApplyToPdf() {
       <h2 className="text-sm font-bold text-slate-900">Sign a PDF</h2>
       <p className="mt-1 text-xs text-slate-500">Add your signature to a document — it's processed in your browser and never uploaded.</p>
 
-      {/* A real drop target now, not just a label wrapping an input: the box
-          takes a dragged PDF, and the SDK hook resets the input's value so
-          picking the SAME document a second time still fires. */}
-      <div
-        {...drop.dropzoneProps}
-        className={`mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-5 text-sm text-slate-600 transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-orange-600 ${
-          drop.over ? 'border-orange-500 bg-orange-50' : 'border-slate-300 hover:border-orange-400 hover:bg-orange-50/40'
-        }`}
-      >
-        <span aria-hidden="true">📄</span>
-        {file ? `${file.name} · ${pages} page${pages === 1 ? '' : 's'}` : 'Drop a PDF here, or click to choose'}
+      {/* The suite's shared drop circle (`DropRing` + `useFileDrop` from
+          @unisim/sdk), not a dashed rectangle of this app's own: Universal PDF,
+          Images, Compress and Video all take a document through this same ring,
+          and someone arriving from one of them shouldn't have to learn a second
+          front door.
+
+          Two things to know before editing the middle of it:
+           • The centre has `pointer-events: none` so nothing there can swallow a
+             drop — which means a button in there would be dead to the mouse. The
+             whole circle is the control ("or click to browse" is words, not a
+             link), and the accessible name lives on the ring.
+           • The interior is painted `#ffffff` by the SDK, so the text inside is
+             fixed dark and carries no `dark:` variant. */}
+      <div className="mt-4 flex flex-col items-center">
+        <div
+          {...drop.dropzoneProps}
+          className={`w-full max-w-[260px] cursor-pointer rounded-full transition-transform focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-600 ${
+            over ? 'scale-[1.02]' : ''
+          }`}
+        >
+          {/* `still` once a document is loaded: neither the idle twinkle ("alive
+              and waiting") nor the busy chase ("working") is true then. */}
+          <DropRing size="100%" over={over} motion={busy ? 'busy' : file ? 'still' : 'idle'}>
+            {file ? (
+              <>
+                <span className="w-full truncate text-[13px] font-bold text-slate-900" title={file.name}>
+                  {file.name}
+                </span>
+                <span className="text-[11.5px] tabular-nums text-slate-500">
+                  {pages} page{pages === 1 ? '' : 's'}
+                </span>
+                <span className="mt-1 text-[11px] text-slate-400">
+                  {busy ? 'Signing…' : 'drop another, or click to change'}
+                </span>
+              </>
+            ) : (
+              <>
+                <svg
+                  viewBox="0 0 24 24"
+                  className={`mb-1 h-9 w-9 ${over ? 'text-orange-500' : 'text-slate-400'}`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  {/* A page with its corner turned — the thing you drop, not an
+                      upload tray. Nothing is uploaded. */}
+                  <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                  <path d="M14 3v5h5" />
+                  <path d="M9 13h6" />
+                  <path d="M9 17h4" />
+                </svg>
+                <span className="text-[15px] font-bold text-slate-900">
+                  {over ? 'Drop to open' : 'Drop a PDF here'}
+                </span>
+                <span className="text-[11.5px] leading-relaxed text-slate-500">it stays on your device</span>
+                <span className="mt-1 text-[11px] text-slate-400">or click to browse</span>
+              </>
+            )}
+          </DropRing>
+        </div>
+        {/* Outside the ring, so the picker is never the thing a drop lands on. */}
+        <input {...drop.inputProps} className="hidden" />
       </div>
-      <input {...drop.inputProps} className="hidden" />
 
       {file && (
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -278,6 +353,13 @@ export default function ApplyToPdf() {
           </div>
         </div>
       )}
+
+      {/* From `pageOver`, not `over`: over the ring itself the ring answers. */}
+      <DropAnywhere
+        show={drop.pageOver && accepting}
+        title="Drop it anywhere"
+        hint="A PDF — it's signed in this browser and never uploaded"
+      />
     </div>
   )
 }
