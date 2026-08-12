@@ -98,7 +98,7 @@ export default function TypeSignature() {
             onClick={() => setFontId(f.id)}
             style={{ fontFamily: fontFamilyCss(f) }}
             className={`rounded-md px-3 py-1.5 text-base ring-1 transition ${
-              fontId === f.id ? 'bg-orange-600 text-white ring-orange-600' : 'bg-white text-slate-700 ring-slate-200 hover:bg-slate-50'
+              fontId === f.id ? 'bg-orange-700 text-white ring-orange-600' : 'bg-white text-slate-700 ring-slate-200 hover:bg-slate-50'
             }`}
             title={f.label}
           >

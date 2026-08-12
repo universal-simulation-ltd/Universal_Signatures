@@ -139,7 +139,7 @@ export default function PositionPicker({
           <button
             onClick={() => onConfirm(pos)}
             disabled={!pageUrl}
-            className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50"
+            className="rounded-lg bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800 disabled:opacity-50"
           >
             Use this position
           </button>

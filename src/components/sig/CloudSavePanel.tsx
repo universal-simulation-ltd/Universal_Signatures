@@ -91,7 +91,7 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
             <p className="text-sm text-slate-700">
               Create a free <strong>Universal ID</strong> (or sign in) to save a verified signature to the cloud.
             </p>
-            <a href={SIGNUP_URL} className="mt-3 inline-flex rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
+            <a href={SIGNUP_URL} className="mt-3 inline-flex rounded-lg bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800">
               Create / sign in with Universal ID →
             </a>
           </div>
@@ -103,7 +103,7 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
               type="button"
               onClick={onSave}
               disabled={busy || !currentImage}
-              className="w-full rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50"
+              className="w-full rounded-lg bg-orange-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-800 disabled:opacity-50"
             >
               {busy ? 'Saving…' : !currentImage ? 'Create a signature first' : 'Save verified signature ☁'}
             </button>
