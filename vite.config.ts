@@ -34,7 +34,15 @@ export default defineConfig(({ mode }) => {
       dedupe: ['react', 'react-dom']
     },
     optimizeDeps: {
-      exclude: ['@unisim/sdk']
+      exclude: ['@unisim/sdk'],
+      // ⚠️ Dev only, and REQUIRED. The SDK's <UnisimQr> reaches qr-code-styling
+      // through a dynamic import; that package ships UMD with no ESM build, and
+      // with @unisim/sdk excluded above Vite serves it raw, where the UMD
+      // wrapper dies on "Cannot set properties of undefined (setting
+      // 'QRCodeStyling')". The component catches that, so the only symptom is a
+      // code that never draws. Naming it here forces the CJS interop;
+      // `vite build` was never affected.
+      include: ['qr-code-styling']
     },
     // pdf.js worker is loaded via `?worker`; IIFE format so iOS Safari gets a
     // classic blob-URL worker instead of an ES-module worker it can't import.
