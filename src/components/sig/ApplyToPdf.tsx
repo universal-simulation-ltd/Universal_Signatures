@@ -178,16 +178,7 @@ export default function ApplyToPdf() {
         >
           {/* `still` once a document is loaded: neither the idle twinkle ("alive
               and waiting") nor the busy chase ("working") is true then. */}
-          <DropRing size="100%" over={over} motion={busy ? 'busy' : file ? 'still' : 'idle'}>
-            {/* Backdrop, empty state only — once a document is loaded the ring
-                carries its filename, page count and status, and a drawing
-                behind three lines of live detail is noise. A CHILD of the ring,
-                never behind it: DropRing paints an opaque white interior. */}
-            {!file && (
-              <div className="pointer-events-none absolute inset-[14%] opacity-[0.3]" aria-hidden="true">
-                <DropWatermark />
-              </div>
-            )}
+          <DropRing size="100%" over={over} motion={busy ? 'busy' : file ? 'still' : 'idle'} watermark={file ? false : <DropWatermark />}>
             {file ? (
               <>
                 <span className="w-full truncate text-[13px] font-bold text-slate-900" title={file.name}>
