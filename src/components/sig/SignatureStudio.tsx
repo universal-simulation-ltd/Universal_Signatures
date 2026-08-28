@@ -56,23 +56,6 @@ export default function SignatureStudio() {
 
   return (
     <div className={`${CONTAINER} py-6`}>
-      {/* Above everything, because of all the apps in the suite this is the one
-          where the question bites hardest — a signature is the single most
-          sensitive thing anybody draws into a web page.
-
-          ⚠️ `except` names BOTH network paths, not just the obvious one. Cloud
-          save is the one people expect; "Sign on your phone" relays the drawing
-          over a Supabase realtime channel, which is just as much a departure
-          from this device and far less obvious from the button. Leaving it out
-          would have made the sentence false for the feature most likely to be
-          used by someone who read the sentence and trusted it. */}
-      <PrivacyNote
-        className="mb-6"
-        repo="https://github.com/universal-simulation-ltd/Universal_Signatures"
-        subject="Your signature"
-        except="saving one to the cloud, or signing on your phone"
-        badge="on-device"
-      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Left column: create your signature, then save it */}
@@ -176,6 +159,21 @@ export default function SignatureStudio() {
         {/* Right column: sign a PDF */}
         <div className="space-y-6">
           <ApplyToPdf />
+
+          {/* Under the box in the right column — the suite's placement (James,
+              2026-08-28). It sat above both columns until then.
+
+              ⚠️ `except` names BOTH network paths. Cloud save is the one people
+              expect; "Sign on your phone" relays the drawing over a Supabase
+              realtime channel, which is just as much a departure from this
+              device and far less obvious from the button. Leaving it out would
+              have made the sentence false for the feature most likely to be
+              used by someone who read the sentence and trusted it. */}
+          <PrivacyNote
+            repo="https://github.com/universal-simulation-ltd/Universal_Signatures"
+            subject="Your signature"
+            except="saving one to the cloud, or signing on your phone"
+          />
         </div>
       </div>
     </div>
