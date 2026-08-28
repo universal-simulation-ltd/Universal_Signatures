@@ -171,6 +171,7 @@ export default function SignatureStudio() {
               used by someone who read the sentence and trusted it. */}
           <PrivacyNote
             repo="https://github.com/universal-simulation-ltd/Universal_Signatures"
+            proof="https://github.com/universal-simulation-ltd/Universal_Signatures/blob/main/PRIVACY.md"
             subject="Your signature"
             except="saving one to the cloud, or signing on your phone"
           />
