@@ -3,7 +3,13 @@
      Regenerate: node scripts/app-marks/build.mjs (from backoffice/universal-platform)
      Mark: Universal Signatures — A signature on a ruled line. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Universal Signatures">
-  <rect x="0" y="0" width="64" height="64" rx="14" fill="#0f172a"/>
-  <path d="M12 42c6-2 8-18 12-18s2 14 6 14 6-12 10-12 2 6 6 6" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="66" stroke="#fe8c01"/>
-  <path d="M12 50h40" stroke-width="3.2" stroke-linecap="round" stroke="#ff9a1f" fill="none"/>
+  <defs>
+    <linearGradient id="u-signatures-tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fe8c01"/>
+      <stop offset="1" stop-color="#e05504"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#u-signatures-tile)"/>
+  <path d="M12 42c6-2 8-18 12-18s2 14 6 14 6-12 10-12 2 6 6 6" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="66" stroke="#ffffff"/>
+  <path d="M12 50h40" stroke-width="3.2" stroke-linecap="round" stroke="#fed7aa" fill="none"/>
 </svg>
