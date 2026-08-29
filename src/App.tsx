@@ -1,4 +1,4 @@
-import { UniversalAppsNavBar, UpdateNotice } from '@unisim/sdk'
+import { AdvancedMenu, UniversalAppsNavBar, UpdateNotice } from '@unisim/sdk'
 import ProductLogo from './components/Header/ProductLogo'
 import SignatureStudio from './components/sig/SignatureStudio'
 import { CONTAINER } from './lib/layout'
@@ -36,6 +36,20 @@ export default function App() {
       <UniversalAppsNavBar
         product="signatures"
         productLogo={<ProductLogo />}
+        actions={
+          /* Advanced — the SDK's own category, so every app in the suite has
+             one in the same place, and whatever goes in it next is one change
+             rather than nineteen. "About this app" is always its last row. */
+          <AdvancedMenu
+            about={{
+              repo:    'https://github.com/universal-simulation-ltd/Universal_Signatures',
+              proof:   'https://github.com/universal-simulation-ltd/Universal_Signatures/blob/main/PRIVACY.md',
+              subject: 'Your signature',
+              except:  'saving one to the cloud, or signing on your phone',
+              version: __APP_VERSION__,
+            }}
+          />
+        }
         productHomeHref={import.meta.env.BASE_URL}
         suiteSwitcherIconSrc={`${import.meta.env.BASE_URL}unisim-icon.png`}
         contentClassName={CONTAINER}
