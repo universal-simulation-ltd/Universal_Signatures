@@ -46,3 +46,79 @@ body {
 .font-greatvibes { font-family: 'Great Vibes', cursive; }
 .font-sacramento { font-family: 'Sacramento', cursive; }
 .font-pacifico { font-family: 'Pacifico', cursive; }
+
+/* ── Dialogs ─────────────────────────────────────────────────────────────────
+   Every modal in this app is built from these three classes. Both faults they
+   fix were found on a 390×844 phone (2026-08-30):
+
+   • **Stacking.** The SDK's <UniversalAppsNavBar> wraps its header in
+     `position: relative; z-index: 1000` so the suite switcher beats host
+     content (see UniversalAppsNavBar.js → headerOuterStyle). A dialog on
+     Tailwind's `z-50` therefore paints UNDERNEATH the bar: in landscape the
+     dialog's own title and × close button disappeared behind it entirely —
+     `elementFromPoint` over the × returned the SDK <header> — so there was no
+     way to see what you were in or to shut it. 1100 clears the bar; anything
+     at or below 1000 does not. Dialogs also portal to <body>, so a future
+     `transform` on an ancestor can't turn `position: fixed` into a trap.
+   • **Height.** The panel is capped at the *visible* viewport rather than
+     `100vh` (which on mobile Safari is the tall, URL-bar-collapsed viewport),
+     and the overlay reserves the device safe area for the notch and home bar.
+     Only `.uni-modal-body` scrolls — the header and the action row stay pinned,
+     so a dialog taller than the screen can never push its own header off it. */
+.uni-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 0.5);
+  padding-top: max(1rem, env(safe-area-inset-top, 0px));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  padding-left: max(1rem, env(safe-area-inset-left, 0px));
+}
+
+.uni-modal-panel {
+  display: flex;
+  flex-direction: column;
+  /* `100%` is the overlay's content box — the visible viewport minus the safe
+     area — and `100dvh` is the belt to those braces on any engine that sizes a
+     fixed element to the large viewport instead. */
+  max-height: min(100%, 100dvh);
+  overflow: hidden;
+}
+
+.uni-modal-body {
+  flex: 1 1 auto;
+  /* Without this the body refuses to shrink below its content and pushes the
+     pinned header back off the top — the original bug, reintroduced. */
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ── iOS input zoom ──────────────────────────────────────────────────────────
+   iOS Safari and WKWebView zoom the page in whenever a focused input, textarea
+   or select computes to under 16px, and never zoom back out. Floor the size on
+   coarse pointers only, so the desktop type scale (this app's form fields are
+   `text-sm`) is unchanged. `1em` is the parent's size, so anything already
+   larger than 16px keeps its size.
+
+   ⚠️ Deliberately NOT fixed with `maximum-scale=1` / `user-scalable=no` on the
+   viewport meta: pinch-zoom is an accessibility feature and locking it out is
+   the wrong trade.
+
+   `!important` is load-bearing, not laziness: the SDK's language picker in the
+   nav bar menu is a <select> with an INLINE `font-size: 12px`, and an inline
+   declaration outranks every stylesheet rule that isn't important — so without
+   it that one control still zooms the page in and never lets go. This app's own
+   fields would be fine on specificity alone (unlayered rules already outrank
+   Tailwind v4's `@layer utilities`). */
+@media (pointer: coarse) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color']),
+  textarea,
+  select {
+    font-size: max(16px, 1em) !important;
+  }
+}
