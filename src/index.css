@@ -109,16 +109,24 @@ body {
    viewport meta: pinch-zoom is an accessibility feature and locking it out is
    the wrong trade.
 
-   `!important` is load-bearing, not laziness: the SDK's language picker in the
-   nav bar menu is a <select> with an INLINE `font-size: 12px`, and an inline
-   declaration outranks every stylesheet rule that isn't important — so without
-   it that one control still zooms the page in and never lets go. This app's own
-   fields would be fine on specificity alone (unlayered rules already outrank
-   Tailwind v4's `@layer utilities`). */
+   `!important` was load-bearing until @unisim/sdk 0.123.2: the SDK's language
+   picker in the nav bar menu is a <select> that carried an INLINE
+   `font-size: 12px`, and an inline declaration outranks every stylesheet rule
+   that isn't important — so without the flag that one control still zoomed the
+   page in and never let go. The same was true of <SignInDialog />'s email and
+   password inputs at an inline 14px.
+
+   0.123.2 sizes both itself (16px on touch), so the flag is gone and this rule
+   covers only the app's own fields — which were always fine on specificity
+   alone, since unlayered rules outrank Tailwind v4's `@layer utilities`.
+   ⚠️ Dropping it is safe because the SDK's condition is a SUPERSET of this
+   media query: `!((hover: hover) and (pointer: fine))` is true everywhere
+   `(pointer: coarse)` is. If the dependency ever goes back below 0.123.2, the
+   flag has to come back with it. */
 @media (pointer: coarse) {
   input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color']),
   textarea,
   select {
-    font-size: max(16px, 1em) !important;
+    font-size: max(16px, 1em);
   }
 }
