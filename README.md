@@ -63,7 +63,7 @@ off in production.
 
 ## Self-hosting
 
-Universal Signatures is MIT-licensed and self-contained. To run your own copy —
+Universal Signatures is AGPL-3.0-licensed and self-contained. To run your own copy —
 including cloud save against **your own** Supabase, with no entitlement gate:
 
 1. Clone this repo and `npm install`.

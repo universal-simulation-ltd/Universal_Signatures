@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "description": "Universal Signatures — draw or type a signature, sign PDFs in your browser, and optionally save a verified signature to the cloud with your Universal ID.",
   "scripts": {
     "dev": "vite",
