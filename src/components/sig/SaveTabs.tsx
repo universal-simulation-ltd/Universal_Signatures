@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useUniversal } from '@unisim/sdk'
 import LocalSavePanel from './LocalSavePanel'
 import CloudSavePanel from './CloudSavePanel'
@@ -14,6 +14,7 @@ export default function SaveTabs() {
   const signedIn = !!session?.user && session.user.is_anonymous !== true
 
   const [open, setOpen] = useState(false)
+  const panelId = useId()
   const [tab, setTab] = useState<Tab>('local')
   const touched = useRef(false)
 
@@ -38,6 +39,7 @@ export default function SaveTabs() {
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
+          aria-controls={panelId}
           className="-m-1 flex items-center gap-1.5 rounded p-1 text-sm font-bold text-slate-900"
         >
           Save your signature
@@ -71,7 +73,7 @@ export default function SaveTabs() {
         )}
       </div>
       {open && (
-        <div className="mt-4">
+        <div id={panelId} className="mt-4">
           {tab === 'local' ? <LocalSavePanel bare /> : <CloudSavePanel bare />}
         </div>
       )}
