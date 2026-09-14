@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useUniversal, useUser } from '@unisim/sdk'
+import { Chip, useUniversal, useUser } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import { useCloudGate, saveSignature, holdSignatureToken, removeStoredSignature } from '../../lib/cloud'
 
@@ -72,7 +72,7 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
       {!bare && (
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-bold text-slate-900">Save a verified signature to the cloud</h2>
-          <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-700">Universal ID</span>
+          <Chip size="sm">Universal ID</Chip>
         </div>
       )}
       <p className={`text-xs text-slate-500 ${bare ? '' : 'mt-1'}`}>

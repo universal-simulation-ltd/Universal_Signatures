@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Chip } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import {
   loadLocalSignatures,
@@ -103,7 +104,7 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
       {!bare && (
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-bold text-slate-900">Save on this device</h2>
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600">No account</span>
+          <Chip size="sm">No account</Chip>
         </div>
       )}
       <p className={`text-xs text-slate-500 ${bare ? '' : 'mt-1'}`}>
