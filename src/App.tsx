@@ -1,4 +1,4 @@
-import { AdvancedMenu, UniversalAppsNavBar, UpdateNotice } from '@unisim/sdk'
+import { UniversalAppsNavBar, UpdateNotice } from '@unisim/sdk'
 // Generated — `npm run credits` after any dependency change. Never edit it by
 // hand: it is read off the installed tree, so a hand-kept list drifts from the
 // lockfile the first time anyone upgrades anything, and a credits list naming a
@@ -41,22 +41,18 @@ export default function App() {
       <UniversalAppsNavBar
         product="signatures"
         productLogo={<ProductLogo />}
-        actions={
-          /* Advanced — the SDK's own category, so every app in the suite has
-             one in the same place, and whatever goes in it next is one change
-             rather than nineteen. "About this app" is always its last row. */
-          <AdvancedMenu
-            about={{
-              repo:    'https://github.com/universal-simulation-ltd/Universal_Signatures',
-              proof:   'https://github.com/universal-simulation-ltd/Universal_Signatures/blob/main/PRIVACY.md',
-              subject: 'Your signature',
-              except:  'saving one to the cloud, or signing on your phone',
-              version: __APP_VERSION__,
-              credits,
-              noticesHref: 'https://github.com/universal-simulation-ltd/Universal_Signatures/blob/main/THIRD-PARTY-NOTICES.md',
-            }}
-          />
-        }
+        // "About this app" — drawn by the SDK at the foot of "Tune this app"
+        // (SDK 0.161.0+). It was the only row of the Advanced actions menu, so
+        // that menu is gone.
+        about={{
+          repo:    REPO_URL,
+          proof:   `${REPO_URL}/blob/main/PRIVACY.md`,
+          subject: 'Your signature',
+          except:  'saving one to the cloud, or signing on your phone',
+          version: __APP_VERSION__,
+          credits,
+          noticesHref: `${REPO_URL}/blob/main/THIRD-PARTY-NOTICES.md`,
+        }}
         productHomeHref={import.meta.env.BASE_URL}
         suiteSwitcherIconSrc={`${import.meta.env.BASE_URL}unisim-icon.png`}
         contentClassName={CONTAINER}
