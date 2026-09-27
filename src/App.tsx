@@ -9,6 +9,7 @@ import SignatureStudio from './components/sig/SignatureStudio'
 import { CONTAINER } from './lib/layout'
 import SignMobilePage from './components/sig/SignMobilePage'
 import VerifyPage from './components/sig/VerifyPage'
+import { KNOWLEDGE_BASE } from './knowledge'
 
 const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatures'
 
@@ -42,8 +43,8 @@ export default function App() {
         product="signatures"
         productLogo={<ProductLogo />}
         // "About this app" — drawn by the SDK at the foot of "Tune this app"
-        // (SDK 0.161.0+). It was the only row of the Advanced actions menu, so
-        // that menu is gone.
+        // (SDK 0.161.0+). It was the only row of the Advanced actions menu, which
+        // now holds the knowledge base instead (below).
         about={{
           repo:    REPO_URL,
           proof:   `${REPO_URL}/blob/main/PRIVACY.md`,
@@ -53,6 +54,9 @@ export default function App() {
           credits,
           noticesHref: `${REPO_URL}/blob/main/THIRD-PARTY-NOTICES.md`,
         }}
+        // Actions ▸ Advanced ▸ Knowledge base (SDK 0.163.0): this app's own
+        // articles, bundled from ./knowledge so they read offline.
+        knowledgeBase={KNOWLEDGE_BASE}
         productHomeHref={import.meta.env.BASE_URL}
         suiteSwitcherIconSrc={`${import.meta.env.BASE_URL}unisim-icon.png`}
         contentClassName={CONTAINER}
