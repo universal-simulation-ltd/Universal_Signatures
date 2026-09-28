@@ -81,7 +81,7 @@ Adınızı yazdığınızda uygulama onu seçtiğiniz el yazısı yazı tipiyle 
 ## Neyi yapar, neyi yapmaz
 
 - İmzanızın görüntüsünü belgenin bir sayfasına yerleştirir. Form alanlarını doldurmaz ve birden fazla belgeyi birleştirmez.
-- PDF'i kilitlemez. Uygun yazılıma sahip herkes imzalı kopyayı yine de düzenleyebilir. Bir dosyanın değiştirilmediğini daha sonra göstermeniz gerekiyorsa imzalama sertifikası ekleyiniz.
+- PDF'i kilitlemez. Uygun yazılıma sahip herkes imzalı kopyayı yine de düzenleyebilir. İmzalama sertifikası, imzasız özgün dosyanın parmak izini kaydeder. Bu, daha sonra hangi belgeyi imzaladığınızı göstermeye yarar, ancak imzalı kopyada yapılan değişiklikleri tespit etmez.
 - Yazılan imzalar yerleşik el yazısı yazı tiplerinden birini ya da sizin içe aktardığınız bir yazı tipi dosyasını kullanır. İçe aktarılan yazı tipi yalnızca sizin cihazınızda ve o oturum boyunca kullanılır.
 
 ## İpuçları

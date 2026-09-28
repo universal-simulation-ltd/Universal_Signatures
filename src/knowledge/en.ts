@@ -81,7 +81,7 @@ Because nothing about signing needs a server, you can sign a PDF with your inter
 ## What it does and does not do
 
 - It places a picture of your signature on one page of the document. It does not fill in form fields or merge several documents.
-- It does not lock the PDF. Anyone with suitable software could still edit the signed copy. If you need to show later that a file has not been changed, add a signing certificate.
+- It does not lock the PDF. Anyone with suitable software could still edit the signed copy. A signing certificate records a fingerprint of the unsigned original, so it can show later which document you signed, but it cannot detect changes made to the signed copy.
 - Typed signatures use one of the built-in cursive fonts, or a font file you import yourself. An imported font is only used on your device for that session.
 
 ## Tips

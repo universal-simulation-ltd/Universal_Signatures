@@ -81,7 +81,7 @@ Comme la signature n’a besoin d’aucun serveur, vous pouvez signer un PDF ave
 ## Ce que l’application fait et ne fait pas
 
 - Elle place une image de votre signature sur une page du document. Elle ne remplit pas de champs de formulaire et ne fusionne pas plusieurs documents.
-- Elle ne verrouille pas le PDF. Toute personne disposant du logiciel adéquat pourrait encore modifier la copie signée. Si vous devez pouvoir montrer plus tard qu’un fichier n’a pas été modifié, ajoutez un certificat de signature.
+- Elle ne verrouille pas le PDF. Toute personne disposant du logiciel adéquat pourrait encore modifier la copie signée. Un certificat de signature enregistre une empreinte de l’original non signé. Il permet de montrer plus tard quel document vous avez signé, mais il ne détecte pas les modifications apportées à la copie signée.
 - Les signatures tapées utilisent l’une des polices cursives intégrées, ou un fichier de police que vous importez. Une police importée n’est utilisée que sur votre appareil, pendant la session.
 
 ## Conseils

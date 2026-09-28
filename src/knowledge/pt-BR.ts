@@ -81,7 +81,7 @@ Como assinar não depende de nenhum servidor, você pode assinar um PDF com a in
 ## O que ele faz e o que não faz
 
 - Ele coloca uma imagem da sua assinatura em uma página do documento. Não preenche campos de formulário nem junta vários documentos.
-- Ele não bloqueia o PDF. Qualquer pessoa com o programa certo ainda poderia editar a cópia assinada. Se você precisar mostrar depois que um arquivo não foi alterado, adicione um certificado de assinatura.
+- Ele não bloqueia o PDF. Qualquer pessoa com o programa certo ainda poderia editar a cópia assinada. Um certificado de assinatura registra uma impressão digital do original sem assinatura. Ele permite mostrar depois qual documento você assinou, mas não detecta alterações feitas na cópia assinada.
 - Assinaturas digitadas usam uma das fontes cursivas incluídas ou um arquivo de fonte que você mesmo importar. Uma fonte importada só é usada no seu dispositivo, durante aquela sessão.
 
 ## Dicas

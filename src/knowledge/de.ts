@@ -81,7 +81,7 @@ Da das Unterschreiben keinen Server braucht, können Sie ein PDF auch ohne Inter
 ## Was die App kann und was nicht
 
 - Sie setzt ein Bild Ihrer Unterschrift auf eine Seite des Dokuments. Sie füllt keine Formularfelder aus und fügt keine Dokumente zusammen.
-- Sie sperrt das PDF nicht. Wer die passende Software hat, könnte die unterschriebene Kopie weiterhin bearbeiten. Wenn Sie später zeigen müssen, dass eine Datei nicht verändert wurde, fügen Sie ein Signaturzertifikat hinzu.
+- Sie sperrt das PDF nicht. Wer die passende Software hat, könnte die unterschriebene Kopie weiterhin bearbeiten. Ein Signaturzertifikat speichert einen Fingerabdruck des nicht unterschriebenen Originals. Damit lässt sich später zeigen, welches Dokument Sie unterschrieben haben, Änderungen an der unterschriebenen Kopie erkennt es aber nicht.
 - Getippte Unterschriften verwenden eine der eingebauten Schreibschriften oder eine Schriftdatei, die Sie selbst importieren. Eine importierte Schrift wird nur auf Ihrem Gerät und nur in dieser Sitzung verwendet.
 
 ## Tipps

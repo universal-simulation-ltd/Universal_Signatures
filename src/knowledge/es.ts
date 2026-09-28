@@ -81,7 +81,7 @@ Como firmar no necesita ningún servidor, puede firmar un PDF con la conexión a
 ## Qué hace y qué no hace
 
 - Coloca una imagen de su firma en una página del documento. No rellena campos de formulario ni une varios documentos.
-- No bloquea el PDF. Cualquier persona con el programa adecuado podría seguir editando la copia firmada. Si necesita demostrar más adelante que un archivo no se ha modificado, añada un certificado de firma.
+- No bloquea el PDF. Cualquier persona con el programa adecuado podría seguir editando la copia firmada. Un certificado de firma guarda una huella del original sin firmar. Sirve para demostrar más adelante qué documento firmó, pero no detecta cambios hechos en la copia firmada.
 - Las firmas escritas usan una de las fuentes cursivas incluidas o un archivo de fuente que usted importe. Una fuente importada solo se usa en su dispositivo durante esa sesión.
 
 ## Consejos

@@ -81,7 +81,7 @@ Como assinar não precisa de nenhum servidor, pode assinar um PDF com a ligaçã
 ## O que faz e o que não faz
 
 - Coloca uma imagem da sua assinatura numa página do documento. Não preenche campos de formulários nem junta vários documentos.
-- Não bloqueia o PDF. Qualquer pessoa com o programa adequado poderia continuar a editar a cópia assinada. Se precisar de mostrar mais tarde que um ficheiro não foi alterado, adicione um certificado de assinatura.
+- Não bloqueia o PDF. Qualquer pessoa com o programa adequado poderia continuar a editar a cópia assinada. Um certificado de assinatura regista uma impressão digital do original sem assinatura. Permite mostrar mais tarde que documento assinou, mas não deteta alterações feitas à cópia assinada.
 - As assinaturas escritas usam um dos tipos de letra cursivos incluídos ou um ficheiro de tipo de letra que importe. Um tipo de letra importado só é usado no seu dispositivo, durante essa sessão.
 
 ## Sugestões

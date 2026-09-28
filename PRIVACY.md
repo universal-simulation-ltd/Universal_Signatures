@@ -71,12 +71,20 @@ each other.
 
 ### 3. "Create a verifiable record" (the certificate page)
 
-If you are signed in and tick this, the app creates a record that lets anyone
-holding the signed PDF confirm it hasn't been altered since you signed it.
+If you are signed in and tick this, the app creates a record that your
+Universal ID signed a particular document at a particular time.
+
+What the hash covers, precisely: it is a SHA-256 of the **unsigned original**
+PDF, taken in your browser before the signature, QR code and certificate page
+are added. So the record lets anyone holding **that original file** confirm it
+is the document you signed, by hashing it and comparing. It does **not** cover
+the signed copy you download: the signed PDF's own hash will never match the
+record, and the record cannot tell you whether the signed copy has been edited
+since. Keep the unsigned original if you may need to prove this later.
 
 - The code: [`src/components/sig/ApplyToPdf.tsx`](src/components/sig/ApplyToPdf.tsx)
   and the shared [`signingAudit.ts`](https://github.com/universal-simulation-ltd/universal-platform/blob/main/packages/sdk/src/signingAudit.ts)
-- What travels: **a SHA-256 hash of the document**, the **original filename**,
+- What travels: **a SHA-256 hash of the unsigned original**, the **original filename**,
   and the **email address on your Universal ID**. A hash is a fingerprint — it
   cannot be turned back into the document, which is the entire point: it proves
   a file matches without anyone needing to hold the file.

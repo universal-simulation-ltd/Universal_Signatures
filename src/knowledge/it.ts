@@ -81,7 +81,7 @@ Poiché la firma non ha bisogno di alcun server, puoi firmare un PDF con la conn
 ## Cosa fa e cosa non fa
 
 - Inserisce un’immagine della tua firma su una pagina del documento. Non compila campi di moduli e non unisce più documenti.
-- Non blocca il PDF. Chiunque abbia il programma adatto potrebbe ancora modificare la copia firmata. Se in seguito devi poter dimostrare che un file non è stato modificato, aggiungi un certificato di firma.
+- Non blocca il PDF. Chiunque abbia il programma adatto potrebbe ancora modificare la copia firmata. Un certificato di firma registra un’impronta dell’originale non firmato. Serve a dimostrare in seguito quale documento hai firmato, ma non rileva le modifiche fatte alla copia firmata.
 - Le firme digitate usano uno dei caratteri corsivi integrati oppure un file di carattere che importi tu. Un carattere importato viene usato solo sul tuo dispositivo, per quella sessione.
 
 ## Consigli

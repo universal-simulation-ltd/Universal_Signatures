@@ -317,7 +317,7 @@ export default function ApplyToPdf() {
             />
             <span className="text-xs text-slate-600">
               <span className="font-semibold text-slate-800">Add a signing certificate</span> — appends a certificate page and a
-              QR to the PDF, and saves a free, verifiable record (your email, the file name, a document hash and the time). The page also
+              QR to the PDF, and saves a free, verifiable record (your email, the file name, a hash of the unsigned original and the time). The page also
               shows your device's clock and timezone, marked as self-reported. The document itself is never uploaded.
             </span>
           </label>
