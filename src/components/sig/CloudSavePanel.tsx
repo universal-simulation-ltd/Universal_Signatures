@@ -1,7 +1,15 @@
 import { useState } from 'react'
 import { Chip, useUniversal, useUser } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
-import { useCloudGate, saveSignature, holdSignatureToken, removeStoredSignature } from '../../lib/cloud'
+import {
+  useCloudGate,
+  useStoredSignatures,
+  saveSignature,
+  holdSignatureToken,
+  removeStoredSignature,
+  type StoredSignature,
+} from '../../lib/cloud'
+import { useFreeAllowance } from '../../lib/useFreeAllowance'
 
 const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatures'
 const SELFHOST_DOCS = 'https://github.com/universal-simulation-ltd/Universal_Signatures#self-hosting'
@@ -9,9 +17,12 @@ const SIGNUP_URL = 'https://app.unisim.co.uk/login'
 const BILLING_URL = 'https://app.unisim.co.uk/billing'
 
 export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
-  const { supabase, activeOrgId } = useUniversal()
+  const { supabase, activeOrgId, session } = useUniversal()
   const { user } = useUser()
   const gate = useCloudGate()
+  const signedIn = !!session?.user && session.user.is_anonymous !== true
+  const stored = useStoredSignatures(activeOrgId, signedIn)
+  const { status: allowance, refresh: refreshAllowance } = useFreeAllowance('signatures')
   const mode = useSigStore((s) => s.mode)
   const fontId = useSigStore((s) => s.fontId)
   const signerName = useSigStore((s) => s.signerName)
@@ -21,6 +32,25 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
   const [certId, setCertId] = useState<string | null>(null)
   const [heldByToken, setHeldByToken] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [removingCert, setRemovingCert] = useState<string | null>(null)
+  const [listError, setListError] = useState<string | null>(null)
+
+  // After anything that changes what is stored: the list, the usage numbers
+  // and the gate (a blocked panel turns entitled again once there is room).
+  function refreshAll() {
+    stored.refresh()
+    refreshAllowance()
+    gate.refresh()
+  }
+
+  const myUserId = user?.id ?? null
+  const myRows = stored.rows.filter((r) => r.user_id === myUserId)
+
+  // Free-allowance numbers, straight from free_allowance_status (0199) — never
+  // hardcoded, as the limits are set to change.
+  const freeLimit = allowance && !allowance.unlimited && allowance.limit ? allowance.limit : null
+  const nearFreeLimit =
+    !!allowance && freeLimit !== null && allowance.has_room && allowance.used / freeLimit >= 0.8
 
   const via = gate.state === 'entitled' ? gate.via : null
 
@@ -55,6 +85,7 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
     }
     setBusy(false)
     setCertId(res.certId)
+    refreshAll()
   }
 
   async function onRemove() {
@@ -65,6 +96,19 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
     if (!res.ok) { setError(res.error ?? 'Could not remove.'); return }
     setCertId(null)
     setHeldByToken(false)
+    refreshAll()
+  }
+
+  // Remove one from "Your stored signatures" — the same delete + token release
+  // as above, for a signature saved in any session.
+  async function onRemoveStored(row: StoredSignature) {
+    if (removingCert) return
+    setRemovingCert(row.cert_id); setListError(null)
+    const res = await removeStoredSignature(supabase, row.cert_id)
+    setRemovingCert(null)
+    if (!res.ok) { setListError(res.error ?? 'Could not remove.'); return }
+    if (row.cert_id === certId) { setCertId(null); setHeldByToken(false) }
+    refreshAll()
   }
 
   const content = (
@@ -112,6 +156,11 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
                 ? 'Stored against your Universal ID — remove it any time.'
                 : `Cloud hosting included via your ${gate.via === 'subscription' ? 'subscription' : 'active project'}.`}
             </p>
+            {gate.via === 'token' && nearFreeLimit && allowance && (
+              <p className="mt-1 text-[11px] text-slate-500" data-testid="free-allowance-usage">
+                You’ve used {allowance.used} of your {freeLimit} free stored signatures.
+              </p>
+            )}
             {error && <p className="mt-2 text-sm text-rose-600">{error}</p>}
           </div>
         )}
@@ -153,7 +202,11 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
             {/* Only reached once the free allowance is used (useCloudGate counts
                 the app's free token), so this is where the limit is mentioned. */}
             <p className="text-sm text-amber-800">
-              You’ve used your free signature storage. Get more, or self-host your own copy for free.
+              {freeLimit !== null
+                ? myRows.length > 0
+                  ? `You’ve used all ${freeLimit} of your free stored signatures. Remove one below, get more, or self-host your own copy for free.`
+                  : `You’ve used all ${freeLimit} of your free stored signatures. Get more, or self-host your own copy for free.`
+                : 'You’ve used your free signature storage. Get more, or self-host your own copy for free.'}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <a href={SELFHOST_DOCS} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-black">
@@ -167,10 +220,85 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
             <p className="mt-2 text-[11px] text-amber-700">Source: <a href={REPO_URL} target="_blank" rel="noreferrer" className="underline">{REPO_URL.replace('https://', '')}</a></p>
           </div>
         )}
+
+        {signedIn && gate.state !== 'loading' && (
+          <StoredSignatureList
+            rows={stored.rows}
+            loading={stored.loading}
+            error={listError ?? stored.error}
+            myUserId={myUserId}
+            removingCert={removingCert}
+            onRemove={onRemoveStored}
+          />
+        )}
       </div>
     </>
   )
 
   if (bare) return content
   return <div className="rounded-xl border border-slate-200 bg-white p-5">{content}</div>
+}
+
+// "Your stored signatures" — every signature kept online for this workspace,
+// newest first. Styled like the on-device list in LocalSavePanel. Only your
+// own rows can be removed (RLS: owner delete); a colleague's is shown as such.
+function StoredSignatureList({
+  rows,
+  loading,
+  error,
+  myUserId,
+  removingCert,
+  onRemove,
+}: {
+  rows: StoredSignature[]
+  loading: boolean
+  error: string | null
+  myUserId: string | null
+  removingCert: string | null
+  onRemove: (row: StoredSignature) => void
+}) {
+  return (
+    <div className="mt-5 border-t border-slate-100 pt-4" data-testid="stored-signatures">
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Your stored signatures</h3>
+      {loading && rows.length === 0 ? (
+        <p className="mt-2 text-xs text-slate-400">Loading…</p>
+      ) : rows.length === 0 ? (
+        <p className="mt-2 text-xs text-slate-400">None stored online yet.</p>
+      ) : (
+        <ul className="mt-2 space-y-2">
+          {rows.map((row) => {
+            const mine = row.user_id === myUserId
+            return (
+              <li key={row.id} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2">
+                <span className="flex h-12 w-24 shrink-0 items-center justify-center overflow-hidden rounded bg-white ring-1 ring-slate-200">
+                  <img src={row.image_data} alt="Stored signature" className="max-h-11 max-w-[5.5rem] object-contain" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-xs font-medium text-slate-700">
+                    {row.signer_name || (row.style === 'type' ? 'Typed signature' : 'Drawn signature')}
+                  </span>
+                  <span className="block text-[10px] uppercase tracking-wide text-slate-400">
+                    {row.style} · {new Date(row.created_at).toLocaleDateString()}
+                    {!mine && ' · Saved by a colleague'}
+                  </span>
+                </span>
+                {mine && (
+                  <button
+                    type="button"
+                    onClick={() => onRemove(row)}
+                    disabled={removingCert !== null}
+                    aria-label="Remove stored signature"
+                    className="shrink-0 rounded-md px-2 py-1.5 text-xs font-medium text-slate-400 hover:text-rose-600 disabled:opacity-50"
+                  >
+                    {removingCert === row.cert_id ? 'Removing…' : 'Remove'}
+                  </button>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+      {error && <p className="mt-2 text-sm text-rose-600">{error}</p>}
+    </div>
+  )
 }

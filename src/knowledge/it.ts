@@ -174,7 +174,7 @@ Se hai effettuato l’accesso con un Universal ID, puoi anche salvare una firma 
 - Cosa viene salvato: l’immagine della firma, il nome inserito, se è stata disegnata o digitata e con quale carattere, un’impronta SHA-256 dell’immagine e la data.
 - Chi può vederla: il tuo account e gli altri membri della tua organizzazione Universal ID, se ne condividi una.
 - Una firma salvata riceve un link di certificato. Chiunque abbia quel link può vedere il nome del firmatario, il nome dell’organizzazione, la data e l’impronta. Il link non mostra l’immagine della firma.
-- Puoi rimuovere una firma salvata in qualsiasi momento. Salvare le firme online è gratuito con un Universal ID. Gli account gratuiti hanno un limite generoso: se mai lo raggiungi, rimuovi una firma che non ti serve più, oppure ottieni più spazio.
+- Puoi rimuovere una firma salvata in qualsiasi momento. Quando hai effettuato l’accesso, il pannello di salvataggio online elenca tutte le firme salvate nel tuo account, dalla più recente, così puoi rimuoverne una anche se l’hai salvata in un altro giorno o su un altro dispositivo. Salvare le firme online è gratuito con un Universal ID. Gli account gratuiti hanno un limite generoso: se mai lo raggiungi, rimuovi una firma che non ti serve più, oppure ottieni più spazio.
 
 L’archiviazione nel cloud **non è crittografata end-to-end**. I dati viaggiano su una connessione crittografata e sono protetti da regole di accesso, ma i nostri sistemi possono tecnicamente leggerli. Se preferisci evitare questo compromesso, salva su questo dispositivo.
 

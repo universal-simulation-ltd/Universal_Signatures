@@ -174,7 +174,7 @@ Bir Universal ID ile oturum açtıysanız, diğer cihazlarınızda da kullanabil
 - Saklananlar: imza görüntüsü, girdiğiniz ad, çizilip çizilmediği veya yazıldıysa hangi yazı tipiyle yazıldığı, görüntünün SHA-256 parmak izi ve tarih.
 - Kimler görebilir: hesabınız ve bir Universal ID kuruluşunu paylaşıyorsanız o kuruluşun diğer üyeleri.
 - Kaydedilen bir imza bir sertifika bağlantısı alır. Bu bağlantıya sahip herkes imzalayanın adını, kuruluşun adını, tarihi ve parmak izini görebilir. Bağlantı imza görüntüsünü göstermez.
-- Kaydedilen bir imzayı istediğiniz zaman kaldırabilirsiniz. İmzaları çevrimiçi saklamak Universal ID ile ücretsizdir. Ücretsiz hesapların cömert bir sınırı vardır; bir gün bu sınıra ulaşırsanız artık ihtiyacınız olmayan bir imzayı kaldırın ya da daha fazlasını edinin.
+- Kaydedilen bir imzayı istediğiniz zaman kaldırabilirsiniz. Oturum açtığınızda çevrimiçi kaydetme panelinde hesabınız için saklanan tüm imzalar en yenisinden başlayarak listelenir; böylece başka bir gün ya da başka bir cihazda kaydettiğiniz bir imzayı da kaldırabilirsiniz. İmzaları çevrimiçi saklamak Universal ID ile ücretsizdir. Ücretsiz hesapların cömert bir sınırı vardır; bir gün bu sınıra ulaşırsanız artık ihtiyacınız olmayan bir imzayı kaldırın ya da daha fazlasını edinin.
 
 Bulut depolama **uçtan uca şifreli değildir**. Veriler şifreli bir bağlantı üzerinden iletilir ve erişim kurallarıyla korunur, ancak sistemlerimiz teknik olarak bunları okuyabilir. Bu ödünleşimi yapmak istemiyorsanız bu cihaza kaydediniz.
 

@@ -1,10 +1,10 @@
 'use client'
 
-import { useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useUniversal, useOrg, useSubscription, useCredits, useProjects, useAppFreeToken } from '@unisim/sdk'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { sha256Hex } from './signature'
-import type { AnyVerifyResult, CloudGate, SignatureMode, VerifyResult } from './types'
+import type { AnyVerifyResult, CloudGate, SavedSignature, SignatureMode, VerifyResult } from './types'
 
 // ── The gate ────────────────────────────────────────────────────────────────
 // Saving a verified signature to the cloud costs us hosting, so it's gated on
@@ -13,13 +13,21 @@ import type { AnyVerifyResult, CloudGate, SignatureMode, VerifyResult } from './
 // token/credit balance, or at least one project. Otherwise the free allowance
 // is used up and CloudSavePanel says so. Anonymous visitors are asked to create /
 // sign in with a Universal ID first.
-export function useCloudGate(): CloudGate {
+//
+// `refresh` re-reads the free token and the credit balance — after a stored
+// signature is saved or removed, so a blocked panel becomes entitled again (and
+// vice versa) without a reload.
+export function useCloudGate(): CloudGate & { refresh: () => void } {
   const { session, loading: provLoading } = useUniversal()
   const { org, loading: orgLoading } = useOrg()
   const { subscription, loading: subLoading } = useSubscription()
-  const { credits, loading: creditsLoading } = useCredits()
+  const { credits, loading: creditsLoading, refresh: refreshCredits } = useCredits()
   const { projects, loading: projLoading } = useProjects()
-  const { status: freeToken, loading: freeLoading } = useAppFreeToken('signatures')
+  const { status: freeToken, loading: freeLoading, refresh: refreshFreeToken } = useAppFreeToken('signatures')
+  const refresh = useCallback(() => {
+    refreshFreeToken()
+    refreshCredits()
+  }, [refreshFreeToken, refreshCredits])
 
   const signedIn = !!session?.user && session.user.is_anonymous !== true
   const orgId = org?.id ?? null
@@ -35,22 +43,79 @@ export function useCloudGate(): CloudGate {
   const fetchStartedForOrg = useRef<string | null>(null)
   if (anyDataLoading && orgId) fetchStartedForOrg.current = orgId
   const dataReady = !!orgId && !anyDataLoading && fetchStartedForOrg.current === orgId
+  // The last settled answer for this org: a refresh re-checks in the background
+  // instead of flashing "Checking your account…" over the panel.
+  const settled = useRef<{ orgId: string; gate: CloudGate } | null>(null)
 
-  if (provLoading) return { state: 'loading' }
-  if (!signedIn) return { state: 'signed_out' }
+  if (provLoading) return { state: 'loading', refresh }
+  if (!signedIn) return { state: 'signed_out', refresh }
   // Signed in but the account isn't checked yet: keep showing "Checking your
   // account…" until the org resolves and its entitlement data is in.
-  if (orgLoading) return { state: 'loading' }
-  if (orgId && !dataReady) return { state: 'loading' }
+  if (orgLoading) return { state: 'loading', refresh }
+  if (orgId && !dataReady) {
+    const last = settled.current
+    return last && last.orgId === orgId ? { ...last.gate, refresh } : { state: 'loading', refresh }
+  }
 
-  const hasSub = !!subscription && subscription.status === 'active' && subscription.tier !== 'free'
-  if (hasSub) return { state: 'entitled', via: 'subscription' }
-  // acquire_token_hold spends the free token before purchased credits, so both
-  // take the same 'token' path in CloudSavePanel.
-  if (freeToken === 'available') return { state: 'entitled', via: 'token' }
-  if ((credits ?? 0) > 0) return { state: 'entitled', via: 'token' }
-  if ((projects?.length ?? 0) > 0) return { state: 'entitled', via: 'project' }
-  return { state: 'blocked' }
+  const gate = decideGate()
+  if (orgId) settled.current = { orgId, gate }
+  return { ...gate, refresh }
+
+  function decideGate(): CloudGate {
+    const hasSub = !!subscription && subscription.status === 'active' && subscription.tier !== 'free'
+    if (hasSub) return { state: 'entitled', via: 'subscription' }
+    // acquire_token_hold spends the free token before purchased credits, so both
+    // take the same 'token' path in CloudSavePanel.
+    if (freeToken === 'available') return { state: 'entitled', via: 'token' }
+    if ((credits ?? 0) > 0) return { state: 'entitled', via: 'token' }
+    if ((projects?.length ?? 0) > 0) return { state: 'entitled', via: 'project' }
+    return { state: 'blocked' }
+  }
+}
+
+// ── Your stored signatures ───────────────────────────────────────────────────
+// Every signature stored against the workspace, newest first, so one saved in
+// an earlier session can still be seen and removed. RLS (platform 0028) lets
+// any member read the org's rows but only the owner delete one, so a
+// colleague's row is listed without a Remove button.
+export type StoredSignature = SavedSignature & { user_id: string; image_data: string }
+
+const STORED_COLUMNS = 'id, user_id, signer_name, style, font, image_data, signature_hash, cert_id, created_at'
+
+export function useStoredSignatures(orgId: string | null | undefined, signedIn: boolean) {
+  const { supabase } = useUniversal()
+  const [rows, setRows] = useState<StoredSignature[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [tick, setTick] = useState(0)
+
+  useEffect(() => {
+    if (!orgId || !signedIn) {
+      setRows([])
+      setLoading(false)
+      setError(null)
+      return
+    }
+    let cancelled = false
+    setLoading(true)
+    supabase
+      .from('signatures')
+      .select(STORED_COLUMNS)
+      .eq('org_id', orgId)
+      .order('created_at', { ascending: false })
+      .then(({ data, error: err }) => {
+        if (cancelled) return
+        setRows(err ? [] : ((data ?? []) as StoredSignature[]))
+        setError(err ? 'Could not load your stored signatures.' : null)
+        setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [supabase, orgId, signedIn, tick])
+
+  const refresh = useCallback(() => setTick((t) => t + 1), [])
+  return { rows, loading, error, refresh }
 }
 
 // ── Save ────────────────────────────────────────────────────────────────────

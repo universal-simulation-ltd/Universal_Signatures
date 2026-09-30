@@ -174,7 +174,7 @@ If you are signed in with a Universal ID, you can also save a signature to the c
 - What is stored: the signature image, the name you entered, whether it was drawn or typed and in which font, a SHA-256 fingerprint of the image, and the date.
 - Who can see it: your account, and other members of your Universal ID organisation if you share one.
 - A saved signature gets a certificate link. Anyone with that link can see the signer name, the organisation name, the date and the fingerprint. The link does not show the signature image.
-- You can remove a stored signature at any time. Storing signatures online is free with a Universal ID. Free accounts have a generous limit — if you ever reach it, remove a signature you no longer need, or get more.
+- You can remove a stored signature at any time. When you are signed in, the online save panel lists every signature stored for your account, newest first, so you can remove one even if you saved it on another day or device. Storing signatures online is free with a Universal ID. Free accounts have a generous limit — if you ever reach it, remove a signature you no longer need, or get more.
 
 Cloud storage is **not end-to-end encrypted**. Data travels over an encrypted connection and is protected by access rules, but our systems can technically read it. If you would rather not make that trade, save on this device instead.
 
