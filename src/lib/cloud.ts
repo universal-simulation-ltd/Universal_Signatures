@@ -1,16 +1,17 @@
 'use client'
 
 import { useRef } from 'react'
-import { useUniversal, useOrg, useSubscription, useCredits, useProjects } from '@unisim/sdk'
+import { useUniversal, useOrg, useSubscription, useCredits, useProjects, useAppFreeToken } from '@unisim/sdk'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { sha256Hex } from './signature'
 import type { AnyVerifyResult, CloudGate, SignatureMode, VerifyResult } from './types'
 
 // ── The gate ────────────────────────────────────────────────────────────────
 // Saving a verified signature to the cloud costs us hosting, so it's gated on
-// the org having ANY of: an active paid subscription, a positive token/credit
-// balance, or at least one project. Otherwise the user is shown the "self-host
-// for free" block (CloudSavePanel). Anonymous visitors are asked to create /
+// the org having ANY of: an active paid subscription, this app's free token
+// (migration 0045 — a missing row means available), a positive purchased
+// token/credit balance, or at least one project. Otherwise the free allowance
+// is used up and CloudSavePanel says so. Anonymous visitors are asked to create /
 // sign in with a Universal ID first.
 export function useCloudGate(): CloudGate {
   const { session, loading: provLoading } = useUniversal()
@@ -18,10 +19,11 @@ export function useCloudGate(): CloudGate {
   const { subscription, loading: subLoading } = useSubscription()
   const { credits, loading: creditsLoading } = useCredits()
   const { projects, loading: projLoading } = useProjects()
+  const { status: freeToken, loading: freeLoading } = useAppFreeToken('signatures')
 
   const signedIn = !!session?.user && session.user.is_anonymous !== true
   const orgId = org?.id ?? null
-  const anyDataLoading = subLoading || creditsLoading || projLoading
+  const anyDataLoading = subLoading || creditsLoading || projLoading || freeLoading
 
   // Know when the subscription/credits/projects data has actually been fetched
   // for the CURRENT org. Those hooks short-circuit to `loading:false` with empty
@@ -43,6 +45,9 @@ export function useCloudGate(): CloudGate {
 
   const hasSub = !!subscription && subscription.status === 'active' && subscription.tier !== 'free'
   if (hasSub) return { state: 'entitled', via: 'subscription' }
+  // acquire_token_hold spends the free token before purchased credits, so both
+  // take the same 'token' path in CloudSavePanel.
+  if (freeToken === 'available') return { state: 'entitled', via: 'token' }
   if ((credits ?? 0) > 0) return { state: 'entitled', via: 'token' }
   if ((projects?.length ?? 0) > 0) return { state: 'entitled', via: 'project' }
   return { state: 'blocked' }
