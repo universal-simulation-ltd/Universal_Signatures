@@ -1,4 +1,4 @@
-import { UniversalAppsNavBar, UpdateNotice } from '@unisim/sdk'
+import { DefaultViewSelect, UniversalAppsNavBar, UpdateNotice } from '@unisim/sdk'
 // Generated — `npm run credits` after any dependency change. Never edit it by
 // hand: it is read off the installed tree, so a hand-kept list drifts from the
 // lockfile the first time anyone upgrades anything, and a credits list naming a
@@ -60,6 +60,22 @@ export default function App() {
         productHomeHref={import.meta.env.BASE_URL}
         suiteSwitcherIconSrc={`${import.meta.env.BASE_URL}unisim-icon.png`}
         contentClassName={CONTAINER}
+        // The mode Create your signature opens on — the twin of double-tapping
+        // a mode, for anybody who cannot double-tap (James, 2026-09-30). No
+        // onResetDefaults: nothing of this app's own persists, and the SDK's
+        // Reset clears this row by itself.
+        appPreferences={
+          <DefaultViewSelect
+            id="mode"
+            label="Opens on"
+            fallback="draw"
+            views={[
+              { value: 'draw', label: 'Draw' },
+              { value: 'type', label: 'Type' },
+              { value: 'phone', label: 'Sign on phone' },
+            ]}
+          />
+        }
       />
 
       {/* Renders nothing until this tab is genuinely running superseded code.
