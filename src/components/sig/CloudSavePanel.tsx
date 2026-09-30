@@ -48,7 +48,7 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
         // Couldn't reserve the token — roll the just-saved signature back.
         await removeStoredSignature(supabase, res.certId)
         setBusy(false)
-        setError(held.error ?? 'Could not reserve your token.')
+        setError(held.error ?? 'Could not store your signature.')
         return
       }
       setHeldByToken(true)
@@ -89,7 +89,7 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
         {gate.state === 'signed_out' && (
           <div className="rounded-lg bg-slate-50 p-4">
             <p className="text-sm text-slate-700">
-              Create a free <strong>Universal ID</strong> (or sign in) to save a verified signature to the cloud.
+              Create a <strong>Universal ID</strong> to store your signature online for FREE.
             </p>
             <a href={SIGNUP_URL} className="mt-3 inline-flex rounded-lg bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800">
               Create / sign in with Universal ID →
@@ -109,7 +109,7 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
             </button>
             <p className="mt-2 text-[11px] text-slate-400">
               {gate.via === 'token'
-                ? 'Uses your free Signatures token while stored — remove the signature anytime to get it back.'
+                ? 'Stored against your Universal ID — remove it any time.'
                 : `Cloud hosting included via your ${gate.via === 'subscription' ? 'subscription' : 'active project'}.`}
             </p>
             {error && <p className="mt-2 text-sm text-rose-600">{error}</p>}
@@ -133,7 +133,7 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
             {heldByToken && (
               <div className="mt-3 border-t border-emerald-200 pt-3">
                 <p className="text-[11px] text-emerald-700">
-                  This signature is using your free Signatures token. Remove it to get the token straight back.
+                  You can remove this stored signature at any time.
                 </p>
                 <button
                   type="button"
@@ -141,7 +141,7 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
                   disabled={busy}
                   className="mt-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-200 hover:bg-rose-50 disabled:opacity-50"
                 >
-                  {busy ? 'Removing…' : 'Remove stored signature & free token'}
+                  {busy ? 'Removing…' : 'Remove stored signature'}
                 </button>
               </div>
             )}

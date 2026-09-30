@@ -174,7 +174,7 @@ Se você estiver conectado com um Universal ID, também pode salvar uma assinatu
 - O que é guardado: a imagem da assinatura, o nome que você informou, se ela foi desenhada ou digitada e em qual fonte, uma impressão digital SHA-256 da imagem e a data.
 - Quem pode ver: sua conta e os outros membros da sua organização do Universal ID, se você compartilhar uma.
 - Uma assinatura salva recebe um link de certificado. Qualquer pessoa com esse link pode ver o nome de quem assinou, o nome da organização, a data e a impressão digital. O link não mostra a imagem da assinatura.
-- Você pode remover uma assinatura salva a qualquer momento. Em uma conta gratuita, uma assinatura salva usa seu token gratuito do Signatures, que é devolvido quando você a remove.
+- Você pode remover uma assinatura salva a qualquer momento. Salvar assinaturas online é grátis com um Universal ID. Contas gratuitas têm um limite generoso: se algum dia você chegar a ele, remova uma assinatura de que não precisa mais ou obtenha mais espaço.
 
 O armazenamento na nuvem **não tem criptografia de ponta a ponta**. Os dados trafegam por uma conexão criptografada e são protegidos por regras de acesso, mas nossos sistemas conseguem tecnicamente lê-los. Se você preferir não fazer essa troca, salve neste dispositivo.
 

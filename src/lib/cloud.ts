@@ -88,11 +88,11 @@ export async function saveSignature(
 // Removing the signature releases + refunds it. Paid/project-entitled accounts
 // don't touch the token, so the caller only holds when entitled `via: 'token'`.
 export function friendlyTokenError(msg: string): string {
-  if (msg.includes('token_in_use:')) {
-    const what = msg.split('token_in_use:')[1]?.trim() || 'a stored signature'
-    return `Your free Signatures token is already in use (${what}). Remove it or add a token to store another signature.`
+  // Only reached at the limit, so this is the one place the allowance is
+  // mentioned — number-free, as the free limits are set to change.
+  if (msg.includes('token_in_use') || msg.includes('no_credits')) {
+    return 'You’ve used your free signature storage. Remove a stored signature to make room, or get more.'
   }
-  if (msg.includes('no_credits')) return 'No tokens available — add a token to store a signature on the cloud.'
   return msg
 }
 

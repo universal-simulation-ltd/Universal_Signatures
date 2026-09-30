@@ -174,7 +174,7 @@ Se tiver sessão iniciada com um Universal ID, também pode guardar uma assinatu
 - O que é guardado: a imagem da assinatura, o nome que indicou, se foi desenhada ou escrita e em que tipo de letra, uma impressão digital SHA-256 da imagem e a data.
 - Quem a pode ver: a sua conta e os outros membros da sua organização Universal ID, se partilhar uma.
 - Uma assinatura guardada recebe uma ligação de certificado. Qualquer pessoa com essa ligação pode ver o nome de quem assinou, o nome da organização, a data e a impressão digital. A ligação não mostra a imagem da assinatura.
-- Pode remover uma assinatura guardada a qualquer momento. Numa conta gratuita, uma assinatura guardada usa o seu token gratuito do Signatures, que lhe é devolvido quando a remove.
+- Pode remover uma assinatura guardada a qualquer momento. Guardar assinaturas online é gratuito com um Universal ID. As contas gratuitas têm um limite generoso: se algum dia o atingir, remova uma assinatura de que já não precise ou obtenha mais espaço.
 
 O armazenamento na nuvem **não tem encriptação ponto a ponto**. Os dados circulam por uma ligação encriptada e estão protegidos por regras de acesso, mas os nossos sistemas conseguem tecnicamente lê-los. Se preferir não aceitar esse compromisso, guarde neste dispositivo.
 

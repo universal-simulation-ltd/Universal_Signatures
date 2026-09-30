@@ -174,7 +174,7 @@ Si ha iniciado sesión con un Universal ID, también puede guardar una firma en 
 - Qué se guarda: la imagen de la firma, el nombre que introdujo, si se dibujó o se escribió y con qué fuente, una huella SHA-256 de la imagen y la fecha.
 - Quién puede verla: su cuenta y los demás miembros de su organización de Universal ID, si comparte una.
 - Una firma guardada recibe un enlace de certificado. Cualquiera con ese enlace puede ver el nombre del firmante, el nombre de la organización, la fecha y la huella. El enlace no muestra la imagen de la firma.
-- Puede eliminar una firma guardada en cualquier momento. En una cuenta gratuita, una firma guardada usa su token gratuito de Signatures, que se le devuelve al eliminarla.
+- Puede eliminar una firma guardada en cualquier momento. Guardar firmas en línea es gratis con un Universal ID. Las cuentas gratuitas tienen un límite generoso: si alguna vez lo alcanza, elimine una firma que ya no necesite u obtenga más espacio.
 
 El almacenamiento en la nube **no está cifrado de extremo a extremo**. Los datos viajan por una conexión cifrada y están protegidos por reglas de acceso, pero nuestros sistemas pueden leerlos técnicamente. Si prefiere no aceptar ese compromiso, guárdela en este dispositivo.
 
