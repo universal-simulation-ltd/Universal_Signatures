@@ -69,20 +69,59 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   })
 }
 
+// Crop a signature image to its ink: the bounding box of every pixel that isn't
+// (near-)transparent, plus a small margin. The pad's PNG is the whole pad, so
+// without this a left-aligned name lines up with the pad's edge rather than the
+// first stroke, leaving dead space (James, 2026-10-03). Returns the image as-is
+// when nothing is drawn. 6px margin matches Universal PDF's renderInkSignature.
+function cropToInk(img: HTMLImageElement): HTMLCanvasElement | HTMLImageElement {
+  const w = img.width
+  const h = img.height
+  const src = document.createElement('canvas')
+  src.width = w
+  src.height = h
+  const sctx = src.getContext('2d')!
+  sctx.drawImage(img, 0, 0)
+  const px = sctx.getImageData(0, 0, w, h).data
+  let minX = w, minY = h, maxX = -1, maxY = -1
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (px[(y * w + x) * 4 + 3] > 16) {
+        if (x < minX) minX = x
+        if (x > maxX) maxX = x
+        if (y < minY) minY = y
+        if (y > maxY) maxY = y
+      }
+    }
+  }
+  if (maxX < 0) return img
+  const PAD = 6
+  minX = Math.max(0, minX - PAD)
+  minY = Math.max(0, minY - PAD)
+  maxX = Math.min(w - 1, maxX + PAD)
+  maxY = Math.min(h - 1, maxY + PAD)
+  const out = document.createElement('canvas')
+  out.width = maxX - minX + 1
+  out.height = maxY - minY + 1
+  out.getContext('2d')!.drawImage(src, minX, minY, out.width, out.height, 0, 0, out.width, out.height)
+  return out
+}
+
 export type LabelAlign = 'left' | 'center' | 'right'
 
 // Stack one or more text lines (name, then date/time) beneath a signature PNG,
 // returning a new transparent PNG data URL. Rendered at 2× for crispness.
-// `align` places the labels against the left edge, centre, or right edge of the
-// signature box. Mirrors Universal PDF's composeSignatureWithLabels.
+// The signature is first cropped to its ink, so `align` places the labels
+// against the first stroke, the ink's centre, or the last stroke — not the pad's
+// edges. Mirrors Universal PDF's composeSignatureWithLabels.
 export async function composeSignatureWithLabels(
   sigDataUrl: string,
   labels: { text: string; scale: number }[],
   opts: { color?: string; align?: LabelAlign } = {},
 ): Promise<string> {
   const { color = '#0f172a', align = 'center' } = opts
-  const img = await loadImage(sigDataUrl)
   if (labels.length === 0) return sigDataUrl
+  const img = cropToInk(await loadImage(sigDataUrl))
 
   const RS = 2
   const FONT = 'Helvetica, Arial, sans-serif'
@@ -106,11 +145,10 @@ export async function composeSignatureWithLabels(
   canvas.width = Math.ceil(outW * RS)
   canvas.height = Math.ceil(outH * RS)
 
-  // Keep the signature centred in the output; align only the text labels to the
-  // signature box's left/centre/right edge.
-  const sigLeft = (outW - sigW) / 2
-  const sigRight = sigLeft + sigW
-  const textX = align === 'left' ? sigLeft : align === 'right' ? sigRight : outW / 2
+  // When a label is wider than the ink, the ink follows the alignment (flush
+  // left / centred / flush right) so the text still starts or ends at its edge.
+  const sigLeft = align === 'left' ? 0 : align === 'right' ? outW - sigW : (outW - sigW) / 2
+  const textX = align === 'left' ? 0 : align === 'right' ? outW : outW / 2
 
   ctx.drawImage(img, sigLeft * RS, 0, sigW * RS, sigH * RS)
   ctx.fillStyle = color
