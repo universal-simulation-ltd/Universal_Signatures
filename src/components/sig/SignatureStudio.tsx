@@ -9,6 +9,8 @@ import TypeSignature from './TypeSignature'
 import PhoneSignPanel from './PhoneSignPanel'
 import ApplyToPdf from './ApplyToPdf'
 import SaveTabs from './SaveTabs'
+import MainSignatureBar from './MainSignatureBar'
+import { useMainSignature } from '../../lib/cloud'
 import { CONTAINER } from '../../lib/layout'
 
 const MODES: { id: StudioMode; label: string }[] = [
@@ -36,6 +38,7 @@ export default function SignatureStudio() {
   const setIncludeTime = useSigStore((s) => s.setIncludeTime)
   const setLabelAlign = useSigStore((s) => s.setLabelAlign)
   const setComposed = useSigStore((s) => s.setComposed)
+  const { main } = useMainSignature()
 
   const base = mode === 'type' ? typedDataUrl : drawnDataUrl
   const hasLabels = (includeName && signerName.trim().length > 0) || includeDate || includeTime
@@ -76,6 +79,7 @@ export default function SignatureStudio() {
             </div>
           </div>
           <div className="mt-4">
+            {main && <MainSignatureBar main={main} />}
             {mode === 'type' ? <TypeSignature /> : mode === 'phone' ? <PhoneSignPanel /> : <SignaturePad />}
           </div>
 

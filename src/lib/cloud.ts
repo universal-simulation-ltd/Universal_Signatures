@@ -277,3 +277,80 @@ export async function verifyAny(supabase: SupabaseClient, certId: string): Promi
   const sig = await verifyCert(supabase, certId)
   return sig ? { kind: 'signature', data: sig } : null
 }
+
+// ── Your main signature (one per Universal ID) ───────────────────────────────
+// Platform 0224: every Universal ID can keep ONE main signature, with or
+// without a company — a row in the same `signatures` table (is_main = true,
+// org_id = null) written only through save_main_signature(), which replaces
+// any previous main. It takes no free-allowance token. The hub's Me page saves
+// it in place; this app reads it (to sign with) and can save it too.
+export interface MainSignature {
+  id: string
+  cert_id: string
+  image_data: string
+  created_at: string
+}
+
+const MAIN_CHANGED = 'unisim:main-signature-changed'
+
+export function useMainSignature() {
+  const { supabase, session } = useUniversal()
+  const userId = session?.user && session.user.is_anonymous !== true ? session.user.id : null
+  const [main, setMain] = useState<MainSignature | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [tick, setTick] = useState(0)
+
+  useEffect(() => {
+    if (!userId) {
+      setMain(null)
+      setLoading(false)
+      return
+    }
+    let cancelled = false
+    setLoading(true)
+    supabase
+      .from('signatures')
+      .select('id, cert_id, image_data, created_at')
+      .eq('user_id', userId)
+      .eq('is_main', true)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (cancelled) return
+        setMain(error ? null : ((data as MainSignature | null) ?? null))
+        setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [supabase, userId, tick])
+
+  // Every reader of the main signature re-reads when any of them saves one
+  // (the studio's "Use it" bar and the save panel are separate components).
+  useEffect(() => {
+    const on = () => setTick((t) => t + 1)
+    window.addEventListener(MAIN_CHANGED, on)
+    return () => window.removeEventListener(MAIN_CHANGED, on)
+  }, [])
+
+  const refresh = useCallback(() => setTick((t) => t + 1), [])
+  return { main, loading, refresh, signedIn: !!userId }
+}
+
+export async function saveMainSignature(
+  supabase: SupabaseClient,
+  input: SaveInput,
+): Promise<{ ok: boolean; certId?: string; error?: string }> {
+  const { data, error } = await supabase.rpc('save_main_signature', {
+    p_image_data: input.imageDataUrl,
+    p_signer_name: input.signerName.trim() || null,
+    p_style: input.style,
+    p_font: input.font,
+  })
+  if (error) return { ok: false, error: error.message }
+  const d = data as { ok: boolean; cert_id?: string; error?: string } | null
+  if (!d?.ok || !d.cert_id) {
+    return { ok: false, error: d?.error === 'too_large' ? 'That signature image is too large to store.' : 'Could not save your main signature.' }
+  }
+  window.dispatchEvent(new Event(MAIN_CHANGED))
+  return { ok: true, certId: d.cert_id }
+}

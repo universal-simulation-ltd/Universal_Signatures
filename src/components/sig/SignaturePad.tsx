@@ -41,7 +41,12 @@ export default function SignaturePad() {
     const img = new Image()
     img.onload = () => {
       ctx.clearRect(0, 0, rect.width, rect.height)
-      ctx.drawImage(img, 0, 0, rect.width, rect.height)
+      // Fit, don't stretch: a main signature (0224) is cropped to its ink, so
+      // its shape is nothing like the pad's. A full-pad image fits exactly.
+      const k = Math.min(rect.width / img.width, rect.height / img.height)
+      const w = img.width * k
+      const h = img.height * k
+      ctx.drawImage(img, (rect.width - w) / 2, (rect.height - h) / 2, w, h)
     }
     img.src = drawnDataUrl
   }, [drawnDataUrl])

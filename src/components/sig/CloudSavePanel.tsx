@@ -7,6 +7,8 @@ import {
   saveSignature,
   holdSignatureToken,
   removeStoredSignature,
+  saveMainSignature,
+  useMainSignature,
   type StoredSignature,
 } from '../../lib/cloud'
 import { useFreeAllowance } from '../../lib/useFreeAllowance'
@@ -143,13 +145,22 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
         )}
 
         {gate.state === 'no_company' && (
-          <div className="rounded-lg bg-slate-50 p-4">
-            <p className="text-sm text-slate-700">
-              Signatures are stored with your company. Set one up on your <strong>Universal ID</strong> (it’s free) to store your signature online.
-            </p>
-            <a href={SET_UP_COMPANY_URL} className="mt-3 inline-flex rounded-lg bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800">
-              Set up a company →
-            </a>
+          <div className="space-y-3">
+            <MainSignatureSave primary />
+            <div className="rounded-lg bg-slate-50 p-4">
+              <p className="text-sm text-slate-700">
+                To store more signatures, with a certificate for each, set up a company on your <strong>Universal ID</strong> (it’s free).
+              </p>
+              <a href={SET_UP_COMPANY_URL} className="mt-3 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-100">
+                Set up a company →
+              </a>
+            </div>
+          </div>
+        )}
+
+        {(gate.state === 'entitled' || gate.state === 'blocked') && (
+          <div className="mb-3">
+            <MainSignatureSave />
           </div>
         )}
 
@@ -311,6 +322,74 @@ function StoredSignatureList({
         </ul>
       )}
       {error && <p className="mt-2 text-sm text-rose-600">{error}</p>}
+    </div>
+  )
+}
+
+// Save the current signature as your MAIN signature (platform 0224): one per
+// Universal ID, with or without a company, free (no allowance token), and the
+// one the hub's Me page and Universal PDF pick up. Saving replaces the old
+// one, so an existing main asks first.
+function MainSignatureSave({ primary = false }: { primary?: boolean }) {
+  const { supabase } = useUniversal()
+  const { main, refresh } = useMainSignature()
+  const mode = useSigStore((s) => s.mode)
+  const fontId = useSigStore((s) => s.fontId)
+  const signerName = useSigStore((s) => s.signerName)
+  const currentImage = useSigStore((s) => s.currentImage())
+  const [busy, setBusy] = useState(false)
+  const [confirming, setConfirming] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const isMain = !!main && !!currentImage && main.image_data === currentImage
+
+  async function save() {
+    if (!currentImage) return
+    if (main && !confirming) { setConfirming(true); return }
+    setBusy(true); setError(null)
+    const res = await saveMainSignature(supabase, {
+      signerName,
+      style: mode === 'type' ? 'type' : 'draw',
+      font: mode === 'type' ? fontId : null,
+      imageDataUrl: currentImage,
+    })
+    setBusy(false)
+    setConfirming(false)
+    if (!res.ok) { setError(res.error ?? 'Could not save your main signature.'); return }
+    setSaved(true)
+    refresh()
+  }
+
+  const btn = primary
+    ? 'w-full rounded-lg bg-orange-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-800 disabled:opacity-50'
+    : 'w-full rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-50 disabled:opacity-50'
+
+  return (
+    <div data-testid="main-signature-save">
+      {confirming ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+          <p className="text-sm text-amber-900">Your Universal ID keeps one main signature. Replace the one you have now?</p>
+          <div className="mt-2 flex gap-2">
+            <button type="button" onClick={save} disabled={busy} className="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black disabled:opacity-50">
+              {busy ? 'Saving…' : 'Replace it'}
+            </button>
+            <button type="button" onClick={() => setConfirming(false)} disabled={busy} className="rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-300">
+              Keep the current one
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" onClick={save} disabled={busy || !currentImage || isMain} className={btn}>
+          {busy ? 'Saving…' : !currentImage ? 'Create a signature first' : isMain ? 'This is your main signature ✓' : 'Save as my main signature'}
+        </button>
+      )}
+      <p className="mt-1.5 text-[11px] text-slate-400">
+        {saved
+          ? 'Saved to your Universal ID — use it here, in Universal PDF and on any device.'
+          : 'One per Universal ID, free, with or without a company. Use it here, in Universal PDF and on any device.'}
+      </p>
+      {error && <p className="mt-1 text-sm text-rose-600">{error}</p>}
     </div>
   )
 }

@@ -97,7 +97,7 @@ export default function SignMobilePage({ token }: { token: string }) {
       <main className="flex min-h-svh flex-col items-center justify-center gap-3 bg-slate-900 p-6 text-center text-white">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-600/20 text-3xl">✓</div>
         <h1 className="text-lg font-semibold">Signature sent</h1>
-        <p className="text-sm text-slate-400">You can return to Universal Signatures — your signature is ready there.</p>
+        <p className="text-sm text-slate-400">Go back to the page you scanned the code from — your signature is ready there.</p>
       </main>
     )
   }
