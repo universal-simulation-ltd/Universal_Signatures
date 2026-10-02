@@ -15,6 +15,7 @@ const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatur
 const SELFHOST_DOCS = 'https://github.com/universal-simulation-ltd/Universal_Signatures#self-hosting'
 const SIGNUP_URL = 'https://app.unisim.co.uk/login'
 const BILLING_URL = 'https://app.unisim.co.uk/billing'
+const SET_UP_COMPANY_URL = 'https://app.unisim.co.uk/branding'
 
 export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
   const { supabase, activeOrgId, session } = useUniversal()
@@ -137,6 +138,17 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
             </p>
             <a href={SIGNUP_URL} className="mt-3 inline-flex rounded-lg bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800">
               Create / sign in with Universal ID →
+            </a>
+          </div>
+        )}
+
+        {gate.state === 'no_company' && (
+          <div className="rounded-lg bg-slate-50 p-4">
+            <p className="text-sm text-slate-700">
+              Signatures are stored with your company. Set one up on your <strong>Universal ID</strong> (it’s free) to store your signature online.
+            </p>
+            <a href={SET_UP_COMPANY_URL} className="mt-3 inline-flex rounded-lg bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800">
+              Set up a company →
             </a>
           </div>
         )}

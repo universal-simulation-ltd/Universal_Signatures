@@ -19,7 +19,7 @@ import type { AnyVerifyResult, CloudGate, SavedSignature, SignatureMode, VerifyR
 // vice versa) without a reload.
 export function useCloudGate(): CloudGate & { refresh: () => void } {
   const { session, loading: provLoading } = useUniversal()
-  const { org, loading: orgLoading } = useOrg()
+  const { org, orgs, loading: orgLoading, error: orgError } = useOrg()
   const { subscription, loading: subLoading } = useSubscription()
   const { credits, loading: creditsLoading, refresh: refreshCredits } = useCredits()
   const { projects, loading: projLoading } = useProjects()
@@ -52,6 +52,11 @@ export function useCloudGate(): CloudGate & { refresh: () => void } {
   // Signed in but the account isn't checked yet: keep showing "Checking your
   // account…" until the org resolves and its entitlement data is in.
   if (orgLoading) return { state: 'loading', refresh }
+  // No company at all. Since 2026-10-02 the hub no longer makes every new ID
+  // create one at sign-in, so this is a normal state, not a broken one — say
+  // so, instead of falling through to "you've used your free storage". Only a
+  // SUCCESSFUL empty read counts: an org query error is "unknown" (SDK rule).
+  if (!orgError && orgs.length === 0) return { state: 'no_company', refresh }
   if (orgId && !dataReady) {
     const last = settled.current
     return last && last.orgId === orgId ? { ...last.gate, refresh } : { state: 'loading', refresh }
@@ -209,7 +214,9 @@ export async function recordSigningEvent(
   userId: string | null,
   input: SigningRecordInput,
 ): Promise<{ ok: boolean; certId?: string; recordedAt?: string; error?: string }> {
-  if (!orgId || !userId) return { ok: false, error: 'Sign in with your Universal ID to create a verifiable record.' }
+  if (!userId) return { ok: false, error: 'Sign in with your Universal ID to create a verifiable record.' }
+  // Signed in with no company: records are kept per company (signing_events.org_id).
+  if (!orgId) return { ok: false, error: 'Set up a company on your Universal ID (it’s free) at app.unisim.co.uk to create a verifiable record.' }
   const { data, error } = await supabase
     .from('signing_events')
     .insert({

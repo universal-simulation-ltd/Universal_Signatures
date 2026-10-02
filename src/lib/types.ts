@@ -48,3 +48,6 @@ export type CloudGate =
   | { state: 'signed_out' }
   | { state: 'entitled'; via: 'subscription' | 'token' | 'project' }
   | { state: 'blocked' }
+  // Signed in, but the Universal ID belongs to no company yet, so there is
+  // nowhere to store a signature (signatures.org_id is required).
+  | { state: 'no_company' }
