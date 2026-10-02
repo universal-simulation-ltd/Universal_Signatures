@@ -166,7 +166,7 @@ export function friendlyTokenError(msg: string): string {
   // Only reached at the limit, so this is the one place the allowance is
   // mentioned — number-free, as the free limits are set to change.
   if (msg.includes('token_in_use') || msg.includes('no_credits')) {
-    return 'You’ve used your free signature storage. Remove a stored signature to make room, or get more.'
+    return 'You’ve used your free signature storage. Remove a stored signature to make room.'
   }
   return msg
 }

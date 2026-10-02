@@ -16,7 +16,7 @@ import { useFreeAllowance } from '../../lib/useFreeAllowance'
 const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatures'
 const SELFHOST_DOCS = 'https://github.com/universal-simulation-ltd/Universal_Signatures#self-hosting'
 const SIGNUP_URL = 'https://app.unisim.co.uk/login'
-const BILLING_URL = 'https://app.unisim.co.uk/billing'
+const NEED_MORE_URL = 'https://www.unisim.co.uk/support'
 const SET_UP_COMPANY_URL = 'https://app.unisim.co.uk/branding'
 
 export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
@@ -227,19 +227,22 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
             <p className="text-sm text-amber-800">
               {freeLimit !== null
                 ? myRows.length > 0
-                  ? `You’ve used all ${freeLimit} of your free stored signatures. Remove one below, get more, or self-host your own copy for free.`
-                  : `You’ve used all ${freeLimit} of your free stored signatures. Get more, or self-host your own copy for free.`
-                : 'You’ve used your free signature storage. Get more, or self-host your own copy for free.'}
+                  ? `You’ve used all ${freeLimit} of your free stored signatures. Remove one below to make room, or self-host your own copy for free.`
+                  : `You’ve used all ${freeLimit} of your free stored signatures. You can self-host your own copy for free.`
+                : 'You’ve used your free signature storage. You can self-host your own copy for free.'}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <a href={SELFHOST_DOCS} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-black">
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12.02c0 5.09 3.29 9.4 7.86 10.92.57.1.78-.25.78-.55 0-.27-.01-1-.02-1.96-3.2.69-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.7 1.25 3.36.95.1-.74.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.18 1.82 1.18 3.08 0 4.42-2.69 5.39-5.26 5.68.41.35.77 1.05.77 2.12 0 1.53-.01 2.76-.01 3.14 0 .3.21.66.79.55 4.57-1.52 7.86-5.83 7.86-10.92C23.5 5.65 18.35.5 12 .5z" /></svg>
                 Self-host for free
               </a>
-              <a href={BILLING_URL} className="inline-flex items-center rounded-lg bg-white px-3.5 py-2 text-sm font-semibold text-amber-900 ring-1 ring-amber-300 hover:bg-amber-100">
-                Get more →
-              </a>
             </div>
+            {/* Nothing is for sale for the everyday apps (2026-10-03). One quiet
+                link asks people who need more to tell us — that is the signal
+                for when a paid tier is worth building. */}
+            <a href={NEED_MORE_URL} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs text-amber-800 underline underline-offset-2 hover:text-amber-950">
+              Need more? Tell us
+            </a>
             <p className="mt-2 text-[11px] text-amber-700">Source: <a href={REPO_URL} target="_blank" rel="noreferrer" className="underline">{REPO_URL.replace('https://', '')}</a></p>
           </div>
         )}
