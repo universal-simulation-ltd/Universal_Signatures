@@ -1,12 +1,19 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { DropAnywhere, DropRing, useFileDrop, useUniversal, useUser, type SigningAuditFields } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
-import { signPdf, pageCount, type Anchor, type PlacePoint } from '../../lib/pdf'
+import type { Anchor, PlacePoint } from '../../lib/pdf'
 import { sha256Bytes } from '../../lib/signature'
-import { makeQrPng } from '../../lib/qr'
 import { recordSigningEvent } from '../../lib/cloud'
-import PositionPicker from './PositionPicker'
 import DropWatermark from './DropWatermark'
+
+// pdf-lib (~500 kB), pdf.js (+ its 1.3 MB worker) and the QR encoder are only
+// needed once a PDF is in play, so they load on demand rather than in the
+// first-load bundle. The picker pulls pdf.js in with it, and pdf.js spins up
+// its worker the moment its module runs — before this split, every visit to
+// the studio started that worker whether or not a PDF was ever opened.
+const PositionPicker = lazy(() => import('./PositionPicker'))
+const loadPdf = () => import('../../lib/pdf')
+const loadQr = () => import('../../lib/qr')
 
 const ANCHORS: Anchor[] = [
   'top-left', 'top-center', 'top-right',
@@ -74,6 +81,7 @@ export default function ApplyToPdf() {
     }
     setFile(f)
     try {
+      const { pageCount } = await loadPdf()
       const n = await pageCount(await f.arrayBuffer())
       setPages(n)
       setPageIndex(0)
@@ -116,7 +124,7 @@ export default function ApplyToPdf() {
           return
         }
         const url = `${location.origin}${import.meta.env.BASE_URL}verify/${res.certId}`
-        qrPng = await makeQrPng(url)
+        qrPng = await (await loadQr()).makeQrPng(url)
         setVerifyUrl(url)
 
         // Everything on the certificate page is either already in the record
@@ -136,6 +144,7 @@ export default function ApplyToPdf() {
         }
       }
 
+      const { signPdf } = await loadPdf()
       const bytes = await signPdf(buf, currentImage, { pageIndex, anchor, widthPct, pos: pos ?? undefined, qrPng, audit })
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
       const url = URL.createObjectURL(blob)
@@ -278,6 +287,7 @@ export default function ApplyToPdf() {
       )}
 
       {pickerOpen && file && currentImage && (
+        <Suspense fallback={null}>
         <PositionPicker
           file={file}
           pageIndex={pageIndex}
@@ -288,6 +298,7 @@ export default function ApplyToPdf() {
           onConfirm={(p) => { setPos(p); setPickerOpen(false) }}
           onClose={() => setPickerOpen(false)}
         />
+        </Suspense>
       )}
 
       {file && hasExtras && (

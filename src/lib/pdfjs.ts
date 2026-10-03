@@ -18,7 +18,17 @@ export async function renderPageToCanvas(
 ): Promise<{ canvas: HTMLCanvasElement; pageWidth: number; pageHeight: number }> {
   // getDocument transfers/detaches the buffer, so hand it a copy — the caller
   // keeps the original bytes for signing.
-  const doc = await pdfjsLib.getDocument({ data: data.slice(0) }).promise
+  //
+  // The file is untrusted (whatever someone dropped on the page), so pdf.js is
+  // told not to compile font programs with `new Function` (the vector behind
+  // CVE-2024-4367, fixed upstream in 4.2.67 — this is belt and braces) and not
+  // to fetch anything on the document's behalf.
+  const doc = await pdfjsLib.getDocument({
+    data: data.slice(0),
+    isEvalSupported: false,
+    disableAutoFetch: true,
+    disableStream: true,
+  }).promise
   try {
     const idx = pageIndex < 0 ? doc.numPages : Math.min(pageIndex + 1, doc.numPages)
     const page = await doc.getPage(idx)
