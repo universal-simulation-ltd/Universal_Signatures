@@ -1,114 +1,79 @@
 import { useEffect, useRef } from 'react'
 import { useSigStore } from '../../stores/sigStore'
+import { useInkCanvas } from '../../lib/useInkCanvas'
 
 // A pointer-driven drawing pad. Emits a transparent PNG data URL to the store
-// on every stroke end. Handles mouse, touch and stylus via Pointer Events.
+// at the end of every stroke (and on undo/clear). Handles mouse, touch and
+// stylus via Pointer Events; the drawing itself lives in useInkCanvas.
 export default function SignaturePad() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const drawing = useRef(false)
-  const last = useRef<{ x: number; y: number } | null>(null)
+  const setDrawn = useSigStore((s) => s.setDrawn)
+  const setMode = useSigStore((s) => s.setMode)
+  const drawnDataUrl = useSigStore((s) => s.drawnDataUrl)
   // The last data URL this pad itself emitted — lets us tell our own strokes
   // apart from an externally restored signature (a reused "Save on this device"
-  // entry), which we paint onto the canvas so it's visible here too.
+  // entry, or your main signature), which we paint onto the canvas so it's
+  // visible here too.
   const emitted = useRef<string | null>(null)
-  const setDrawn = useSigStore((s) => s.setDrawn)
-  const drawnDataUrl = useSigStore((s) => s.drawnDataUrl)
-
-  // Size the canvas backing store to its CSS box (crisp on HiDPI).
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ratio = window.devicePixelRatio || 1
-    const rect = canvas.getBoundingClientRect()
-    canvas.width = Math.round(rect.width * ratio)
-    canvas.height = Math.round(rect.height * ratio)
-    const ctx = canvas.getContext('2d')!
-    ctx.scale(ratio, ratio)
-    ctx.lineWidth = 2.5
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
-    ctx.strokeStyle = '#0f172a'
-  }, [])
-
-  // Paint a signature set from outside this pad (e.g. reusing a saved one) so
-  // it shows in the box. Our own stroke output is skipped via `emitted`.
-  useEffect(() => {
-    if (!drawnDataUrl || drawnDataUrl === emitted.current) return
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')!
-    const rect = canvas.getBoundingClientRect()
-    const img = new Image()
-    img.onload = () => {
-      ctx.clearRect(0, 0, rect.width, rect.height)
-      // Fit, don't stretch: a main signature (0224) is cropped to its ink, so
-      // its shape is nothing like the pad's. A full-pad image fits exactly.
-      const k = Math.min(rect.width / img.width, rect.height / img.height)
-      const w = img.width * k
-      const h = img.height * k
-      ctx.drawImage(img, (rect.width - w) / 2, (rect.height - h) / 2, w, h)
-    }
-    img.src = drawnDataUrl
-  }, [drawnDataUrl])
-
-  function pos(e: React.PointerEvent): { x: number; y: number } {
-    const rect = canvasRef.current!.getBoundingClientRect()
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top }
-  }
-
-  function start(e: React.PointerEvent) {
-    e.preventDefault()
-    drawing.current = true
-    last.current = pos(e)
-    canvasRef.current?.setPointerCapture(e.pointerId)
-  }
-
-  function move(e: React.PointerEvent) {
-    if (!drawing.current || !last.current) return
-    const ctx = canvasRef.current!.getContext('2d')!
-    const p = pos(e)
-    ctx.beginPath()
-    ctx.moveTo(last.current.x, last.current.y)
-    ctx.lineTo(p.x, p.y)
-    ctx.stroke()
-    last.current = p
-  }
-
-  function end() {
-    if (!drawing.current) return
-    drawing.current = false
-    last.current = null
-    const url = canvasRef.current?.toDataURL('image/png') ?? null
+  const ink = useInkCanvas((url) => {
     emitted.current = url
     setDrawn(url)
-  }
+  })
+  const { showImage, clear } = ink
 
-  function clear() {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')!
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    emitted.current = null
-    setDrawn(null)
-  }
+  // Paint a signature set from outside this pad so it shows in the box. Fitted,
+  // not stretched: a main signature (0224) is cropped to its ink, so its shape
+  // is nothing like the pad's. A full-pad image fits exactly.
+  useEffect(() => {
+    if (drawnDataUrl === emitted.current) return
+    emitted.current = drawnDataUrl
+    if (drawnDataUrl) showImage(drawnDataUrl)
+    // Cleared from elsewhere: wipe the pad without echoing back to the store.
+    else if (ink.hasInk) clear()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drawnDataUrl, showImage])
 
   return (
     <div>
       <div className="relative rounded-lg border-2 border-dashed border-slate-300 bg-white">
         <canvas
-          ref={canvasRef}
+          ref={ink.canvasRef}
+          role="img"
+          aria-label="Signature pad. Draw your signature with a mouse, finger or stylus. To use the keyboard instead, choose Type."
           className="sig-pad block h-44 w-full rounded-lg"
-          onPointerDown={start}
-          onPointerMove={move}
-          onPointerUp={end}
-          onPointerLeave={end}
+          {...ink.handlers}
         />
-        <span className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 text-[11px] text-slate-300">
-          Sign above
-        </span>
+        {!ink.hasInk && (
+          <span className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 text-[11px] text-slate-400">
+            Sign above
+          </span>
+        )}
       </div>
-      <div className="mt-2 flex justify-end">
-        <button onClick={clear} className="text-xs font-medium text-slate-500 hover:text-rose-600">Clear</button>
+      <div className="mt-1 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => setMode('type')}
+          className="rounded-md px-2 py-1.5 text-xs font-medium text-slate-500 hover:text-orange-700"
+        >
+          Rather type it?
+        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={ink.undo}
+            disabled={!ink.canUndo}
+            className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent"
+          >
+            Undo
+          </button>
+          <button
+            type="button"
+            onClick={ink.clear}
+            disabled={!ink.hasInk}
+            className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-rose-700 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-600"
+          >
+            Clear
+          </button>
+        </div>
       </div>
     </div>
   )
