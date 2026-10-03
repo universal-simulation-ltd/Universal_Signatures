@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import { useUniversal } from '@unisim/sdk'
 import { mobileSignChannel, type MobileSignResult } from '../../lib/mobileSign'
 import { randomHex } from '../../lib/signature'
@@ -8,6 +9,8 @@ type Status = 'idle' | 'sending' | 'sent' | 'unconfirmed' | 'invalid' | 'wrongPi
 
 // How long to wait for the computer to say it took the signature.
 const REPLY_TIMEOUT_MS = 6000
+// How long to wait to join the channel before calling it a connection problem.
+const JOIN_TIMEOUT_MS = 10000
 
 const MESSAGES: Partial<Record<Status, string>> = {
   invalid: 'Draw a signature and enter the 6-digit PIN shown on your computer.',
@@ -31,27 +34,62 @@ export default function SignMobilePage({ token }: { token: string }) {
   const [pin, setPin] = useState('')
   const [status, setStatus] = useState<Status>('idle')
 
+  // One channel for the life of the page, joined on the first send. A fresh
+  // channel per send re-joined the same topic while the last one was still
+  // leaving, and the second attempt (say, after a wrong PIN) hung on
+  // "Sending…" for ever. Replies are routed to the send that asked, by nonce.
+  const chan = useRef<{
+    channel: RealtimeChannel
+    ready: Promise<void>
+    waiters: Map<string, (r: MobileSignResult) => void>
+  } | null>(null)
+
+  useEffect(() => () => {
+    if (chan.current) void supabase.removeChannel(chan.current.channel)
+    chan.current = null
+  }, [supabase])
+
+  function join() {
+    if (chan.current) return chan.current
+    const waiters = new Map<string, (r: MobileSignResult) => void>()
+    const channel = supabase.channel(mobileSignChannel(token))
+    channel.on('broadcast', { event: 'result' }, (msg: { payload: MobileSignResult }) => {
+      const nonce = msg.payload?.nonce
+      const waiter = nonce ? waiters.get(nonce) : undefined
+      if (!nonce || !waiter) return
+      waiters.delete(nonce)
+      waiter(msg.payload)
+    })
+    const ready = new Promise<void>((resolve, reject) => {
+      const timer = window.setTimeout(() => reject(new Error('TIMED_OUT')), JOIN_TIMEOUT_MS)
+      channel.subscribe((s) => {
+        if (s === 'SUBSCRIBED') { window.clearTimeout(timer); resolve() }
+        if (s === 'CHANNEL_ERROR' || s === 'TIMED_OUT' || s === 'CLOSED') { window.clearTimeout(timer); reject(new Error(s)) }
+      })
+    })
+    const joined = { channel, ready, waiters }
+    chan.current = joined
+    // A failed join is thrown away, so the next send starts a clean one.
+    ready.catch(() => {
+      if (chan.current === joined) chan.current = null
+      void supabase.removeChannel(channel)
+    })
+    return joined
+  }
+
   async function submit() {
     const signature = ink.toDataUrl()
     if (!signature || pin.length !== 6) { setStatus('invalid'); return }
     setStatus('sending')
     const nonce = randomHex(8)
-    const channel = supabase.channel(mobileSignChannel(token))
     try {
-      // Listen for the desktop's reply before sending, so it can't be missed.
+      const { channel, ready, waiters } = join()
+      await ready
+      // Wait for the desktop's reply — registered before sending, so it can't
+      // be missed.
       const reply = new Promise<MobileSignResult | null>((resolve) => {
-        const timer = window.setTimeout(() => resolve(null), REPLY_TIMEOUT_MS)
-        channel.on('broadcast', { event: 'result' }, (msg: { payload: MobileSignResult }) => {
-          if (msg.payload?.nonce !== nonce) return
-          window.clearTimeout(timer)
-          resolve(msg.payload)
-        })
-      })
-      await new Promise<void>((resolve, reject) => {
-        channel.subscribe((s) => {
-          if (s === 'SUBSCRIBED') resolve()
-          if (s === 'CHANNEL_ERROR' || s === 'TIMED_OUT') reject(new Error(s))
-        })
+        const timer = window.setTimeout(() => { waiters.delete(nonce); resolve(null) }, REPLY_TIMEOUT_MS)
+        waiters.set(nonce, (r) => { window.clearTimeout(timer); resolve(r) })
       })
       await channel.send({ type: 'broadcast', event: 'signature', payload: { pin, signature, nonce } })
       const result = await reply
@@ -62,8 +100,6 @@ export default function SignMobilePage({ token }: { token: string }) {
       else setStatus(result.reason === 'image' ? 'refused' : 'wrongPin')
     } catch {
       setStatus('error')
-    } finally {
-      window.setTimeout(() => { supabase.removeChannel(channel) }, 500)
     }
   }
 
