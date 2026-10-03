@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useUniversal } from '@unisim/sdk'
 import { verifyAny } from '../../lib/cloud'
+import { sha256Bytes } from '../../lib/signature'
 import type { AnyVerifyResult } from '../../lib/types'
 
 // Public certificate verification: anyone with a cert link (typically by
@@ -10,14 +11,21 @@ export default function VerifyPage({ certId }: { certId: string }) {
   const { supabase } = useUniversal()
   const [result, setResult] = useState<AnyVerifyResult | null>(null)
   const [loading, setLoading] = useState(true)
+  // The lookup itself failed (offline, service down) — not the same as "no
+  // such certificate", and must not be reported as one.
+  const [failed, setFailed] = useState(false)
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     let cancelled = false
+    setLoading(true)
+    setFailed(false)
     verifyAny(supabase, certId)
       .then((r) => { if (!cancelled) setResult(r) })
+      .catch(() => { if (!cancelled) setFailed(true) })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
-  }, [supabase, certId])
+  }, [supabase, certId, attempt])
 
   function fmt(iso: string) {
     try { return new Date(iso).toLocaleString('en-GB') } catch { return iso }
@@ -47,9 +55,9 @@ export default function VerifyPage({ certId }: { certId: string }) {
               <Row k="Document hash (SHA-256)" v={result.data.document_hash} mono />
             </dl>
             <p className="mt-4 text-xs text-slate-500">
-              The hash above fingerprints the <strong>original</strong> document. To confirm a copy is the one
-              that was signed, hash the original PDF (before the signature was added) and compare.
+              The hash above fingerprints the <strong>original</strong> document, before the signature was added.
             </p>
+            <CheckOriginal expected={result.data.document_hash} />
           </div>
         ) : result?.kind === 'signature' ? (
           <div className="mt-6">
@@ -63,6 +71,18 @@ export default function VerifyPage({ certId }: { certId: string }) {
               <Row k="Saved" v={fmt(result.data.created_at)} />
               <Row k="Signature hash (SHA-256)" v={result.data.signature_hash} mono />
             </dl>
+          </div>
+        ) : failed ? (
+          <div role="alert" className="mt-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Couldn’t reach the verification service, so this certificate hasn’t been checked yet. Check your
+            connection and try again.
+            <button
+              type="button"
+              onClick={() => setAttempt((n) => n + 1)}
+              className="mt-2 block rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 ring-1 ring-amber-200 hover:bg-amber-100"
+            >
+              Try again
+            </button>
           </div>
         ) : (
           <div className="mt-6 rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -83,6 +103,65 @@ function Row({ k, v, mono = false }: { k: string; v: string; mono?: boolean }) {
     <div className="flex justify-between gap-4 py-2">
       <dt className="text-slate-500">{k}</dt>
       <dd className={`text-right text-slate-900 ${mono ? 'font-mono text-xs break-all' : ''}`}>{v}</dd>
+    </div>
+  )
+}
+
+// "Is this the document that was signed?" — hash a PDF in the browser and
+// compare it with the record. The record holds the hash of the ORIGINAL, so it
+// is the unsigned original that matches; a signed copy (with the signature
+// stamped on) is a different file and says so.
+function CheckOriginal({ expected }: { expected: string }) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [state, setState] = useState<
+    { kind: 'idle' } | { kind: 'busy' } | { kind: 'done'; name: string; match: boolean } | { kind: 'error' }
+  >({ kind: 'idle' })
+
+  async function onPick(file: File | undefined) {
+    if (!file) return
+    setState({ kind: 'busy' })
+    try {
+      const hash = await sha256Bytes(await file.arrayBuffer())
+      setState({ kind: 'done', name: file.name, match: hash.toLowerCase() === expected.toLowerCase() })
+    } catch {
+      setState({ kind: 'error' })
+    } finally {
+      if (inputRef.current) inputRef.current.value = ''
+    }
+  }
+
+  return (
+    <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+      <p className="text-xs text-slate-600">
+        Have the original PDF? Check it against this record — it’s fingerprinted in your browser and never uploaded.
+      </p>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={state.kind === 'busy'}
+        className="mt-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-orange-400 hover:bg-orange-50/40 disabled:opacity-60"
+      >
+        {state.kind === 'busy' ? 'Checking…' : 'Check a PDF'}
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="application/pdf,.pdf"
+        className="hidden"
+        onChange={(e) => void onPick(e.target.files?.[0])}
+      />
+      <div role="status" className="text-xs [&>p]:mt-2">
+        {state.kind === 'done' && state.match && (
+          <p className="font-semibold text-emerald-700">✓ {state.name} is the document this record was made for.</p>
+        )}
+        {state.kind === 'done' && !state.match && (
+          <p className="text-rose-700">
+            ✗ {state.name} doesn’t match this record. A signed copy won’t match either — the record fingerprints the
+            original before the signature went on — so check the unsigned original.
+          </p>
+        )}
+        {state.kind === 'error' && <p className="text-rose-700">Couldn’t read that file.</p>}
+      </div>
     </div>
   )
 }

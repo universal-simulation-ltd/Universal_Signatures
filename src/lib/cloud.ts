@@ -240,9 +240,13 @@ export async function recordSigningEvent(
 // ── Verify (public) ──────────────────────────────────────────────────────────
 // Reads minimal public fields via SECURITY DEFINER RPCs so a cert can be
 // verified by anyone holding the (unguessable) cert id, without opening RLS.
+// Both return null for "no such record" and THROW when the lookup itself
+// failed, so the verify page doesn't tell someone with a genuine certificate
+// that it doesn't exist just because they were offline.
 export async function verifyCert(supabase: SupabaseClient, certId: string): Promise<VerifyResult | null> {
   const { data, error } = await supabase.rpc('verify_signature_cert', { p_cert: certId })
-  if (error || !data) return null
+  if (error) throw new Error(error.message)
+  if (!data) return null
   const row = Array.isArray(data) ? data[0] : data
   if (!row) return null
   return {
@@ -258,7 +262,11 @@ export async function verifyCert(supabase: SupabaseClient, certId: string): Prom
 // A cert link (e.g. from a scanned QR) can point at either a signing event or a
 // saved signature. Resolve signing events first (the QR case), then fall back.
 export async function verifyAny(supabase: SupabaseClient, certId: string): Promise<AnyVerifyResult | null> {
-  const { data } = await supabase.rpc('verify_signing_event_cert', { p_cert: certId })
+  // Cert ids are 32 hex characters (gen_random_uuid without its dashes); a
+  // mangled link can't match one, so don't spend two round trips finding out.
+  if (!/^[0-9a-f]{32}$/i.test(certId)) return null
+  const { data, error } = await supabase.rpc('verify_signing_event_cert', { p_cert: certId })
+  if (error) throw new Error(error.message)
   const row = Array.isArray(data) ? data[0] : data
   if (row) {
     return {
