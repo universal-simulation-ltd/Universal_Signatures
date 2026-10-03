@@ -4,13 +4,45 @@
 // channel; the desktop only accepts the payload if the PIN matches. Broadcast
 // messages are ephemeral — no DB rows are written, so this works the same for
 // signed-in and guest users.
+//
+// The token is the channel name, so it is the secret that keeps strangers off
+// the channel: 128 bits from the CSPRNG (the old fallback was Math.random). The
+// PIN proves line of sight to the desktop screen; it is also drawn from the
+// CSPRNG, and the desktop replaces the whole code after MAX_WRONG_PINS misses so
+// it can't be guessed by brute force.
+
+import { randomHex } from './signature'
+
+/** Wrong PINs the desktop will take before it replaces the token and PIN. */
+export const MAX_WRONG_PINS = 5
+
+/** Largest signature image the desktop will accept from a phone (characters of data URL). */
+const MAX_SIGNATURE_CHARS = 1_500_000
 
 export function randomToken(): string {
-  return (crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).replace(/-/g, '')
+  return randomHex(16)
 }
 
 export function randomPin(): string {
-  return String(Math.floor(Math.random() * 1_000_000)).padStart(6, '0')
+  // Rejection sampling keeps all 1,000,000 PINs equally likely.
+  const buf = new Uint32Array(1)
+  const limit = Math.floor(0x1_0000_0000 / 1_000_000) * 1_000_000
+  do crypto.getRandomValues(buf)
+  while (buf[0] >= limit)
+  return String(buf[0] % 1_000_000).padStart(6, '0')
+}
+
+/**
+ * True for a PNG data URL of a sane size — the only thing the desktop will load
+ * from the channel. Anyone holding the token can post to it, so the payload is
+ * checked before it reaches an <img> or pdf-lib.
+ */
+export function isPngDataUrl(v: unknown): v is string {
+  return (
+    typeof v === 'string' &&
+    v.length <= MAX_SIGNATURE_CHARS &&
+    /^data:image\/png;base64,[A-Za-z0-9+/]+=*$/.test(v)
+  )
 }
 
 export function mobileSignChannel(token: string): string {
@@ -31,4 +63,18 @@ export interface MobileSignPayload {
   pin?: string
   /** PNG data URL of the signature drawn on the phone (transparent background). */
   signature?: string
+  /** Echoed back in the desktop's `result`, so the phone matches the reply to its send. */
+  nonce?: string
+}
+
+/**
+ * The desktop's reply to a `signature` broadcast. `ok: false` means the PIN
+ * didn't match (`reason: 'pin'`) or the image was refused (`reason: 'image'`).
+ * Older desktop builds don't reply at all — the phone treats silence as
+ * "sent, unconfirmed" rather than as a failure.
+ */
+export interface MobileSignResult {
+  nonce?: string
+  ok: boolean
+  reason?: 'pin' | 'image'
 }

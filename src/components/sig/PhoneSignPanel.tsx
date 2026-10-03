@@ -2,11 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { QrLightbox, UnisimQr, useUniversal } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import {
+  MAX_WRONG_PINS,
+  isPngDataUrl,
   mobileSignChannel,
   mobileSignUrl,
   randomPin,
   randomToken,
   type MobileSignPayload,
+  type MobileSignResult,
 } from '../../lib/mobileSign'
 
 // The "Sign on phone" tab of Create your signature. Shows a QR + PIN; the phone
@@ -23,6 +26,8 @@ export default function PhoneSignPanel() {
   const [pin, setPin] = useState(randomPin)
   const [status, setStatus] = useState<'waiting' | 'received'>('waiting')
   const [enlarged, setEnlarged] = useState(false)
+  // Set when the code was replaced after too many wrong PINs.
+  const [replaced, setReplaced] = useState(false)
   const pinRef = useRef(pin)
   pinRef.current = pin
 
@@ -32,21 +37,59 @@ export default function PhoneSignPanel() {
   // and say so, rather than crash.
   const canRealtime = typeof (supabase as { channel?: unknown }).channel === 'function'
 
+  // One code, one signature: the channel is only open while waiting, so once a
+  // signature has arrived nothing else posted to it can replace it. Every
+  // attempt gets a reply, so the phone can say "wrong PIN" instead of claiming
+  // success; after MAX_WRONG_PINS misses the token and PIN are replaced, which
+  // makes guessing the PIN by brute force a dead end.
   useEffect(() => {
-    if (!canRealtime) return
+    if (!canRealtime || status !== 'waiting') return
+    let wrong = 0
     const channel = supabase.channel(mobileSignChannel(token))
+    const reply = (result: MobileSignResult) =>
+      channel.send({ type: 'broadcast', event: 'result', payload: result })
     channel
       .on('broadcast', { event: 'signature' }, (msg: { payload: MobileSignPayload }) => {
-        const payload = msg.payload
-        if (payload?.pin !== pinRef.current || !payload.signature) return
-        setStatus('received')
-        // Load it as the active (drawn) signature but stay on this panel so the
-        // name/date/time + alignment options below still apply to it.
-        setDrawn(payload.signature)
+        const payload = msg.payload ?? {}
+        const nonce = typeof payload.nonce === 'string' ? payload.nonce.slice(0, 64) : undefined
+        if (payload.pin !== pinRef.current) {
+          void reply({ nonce, ok: false, reason: 'pin' })
+          wrong += 1
+          if (wrong >= MAX_WRONG_PINS) {
+            setReplaced(true)
+            setToken(randomToken())
+            setPin(randomPin())
+          }
+          return
+        }
+        if (!isPngDataUrl(payload.signature)) {
+          void reply({ nonce, ok: false, reason: 'image' })
+          return
+        }
+        const signature = payload.signature
+        // Reply first: flipping the status closes this channel.
+        void reply({ nonce, ok: true }).finally(() => {
+          setReplaced(false)
+          setStatus('received')
+          // Load it as the active (drawn) signature but stay on this panel so
+          // the name/date/time + alignment options below still apply to it.
+          setDrawn(signature)
+        })
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [canRealtime, supabase, token, setDrawn])
+  }, [canRealtime, supabase, token, status, setDrawn])
+
+  // The received signature was cleared or replaced from elsewhere (say, a saved
+  // one was loaded): go back to waiting with a fresh code rather than showing a
+  // QR whose channel is already closed.
+  useEffect(() => {
+    if (status === 'received' && !drawnDataUrl) {
+      setStatus('waiting')
+      setToken(randomToken())
+      setPin(randomPin())
+    }
+  }, [status, drawnDataUrl])
 
   // Fresh token + PIN → new QR + channel, ready to receive a different capture.
   function signAgain() {
@@ -99,8 +142,13 @@ export default function PhoneSignPanel() {
         </button>
         <p className="text-xs text-slate-600">Scan with your phone camera, then enter this PIN:</p>
         <p className="text-2xl font-bold tracking-[0.3em] text-slate-900">{pin}</p>
+        {replaced && (
+          <p className="text-xs text-amber-700" role="status">
+            Too many wrong PINs, so this is a new code. Scan it again.
+          </p>
+        )}
         {canRealtime ? (
-          <p className="text-xs text-slate-400">Waiting for your phone…</p>
+          <p className="text-xs text-slate-500">Waiting for your phone…</p>
         ) : (
           <p className="text-xs text-amber-600">
             Offline demo — connect a real session (VITE_REAL_AUTH=1) or use the deployed app to receive from your phone.
