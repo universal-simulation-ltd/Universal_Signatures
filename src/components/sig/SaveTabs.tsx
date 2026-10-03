@@ -63,7 +63,9 @@ export default function SaveTabs() {
             {TABS.map((t) => (
               <button
                 key={t.id}
+                type="button"
                 onClick={() => choose(t.id)}
+                aria-pressed={tab === t.id}
                 className={`rounded px-3 py-1 text-xs font-semibold ${tab === t.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
               >
                 {t.label}

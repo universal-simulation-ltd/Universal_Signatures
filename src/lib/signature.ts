@@ -107,6 +107,17 @@ function cropToInk(img: HTMLImageElement): HTMLCanvasElement | HTMLImageElement 
   return out
 }
 
+/**
+ * The signature cropped to its ink, as a PNG data URL. The pad and the typed
+ * rasteriser both hand over the whole box, so a signature stamped as-is
+ * carried its empty margins onto the page: the size slider sized the box, not
+ * the signature, and a corner position sat the ink well in from the corner.
+ */
+export async function trimToInk(dataUrl: string): Promise<string> {
+  const out = cropToInk(await loadImage(dataUrl))
+  return out instanceof HTMLCanvasElement ? out.toDataURL('image/png') : dataUrl
+}
+
 export type LabelAlign = 'left' | 'center' | 'right'
 
 // Stack one or more text lines (name, then date/time) beneath a signature PNG,

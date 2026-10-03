@@ -1,6 +1,7 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import { appendSigningAuditPage, type SigningAuditFields } from '@unisim/sdk'
 import { dataUrlToBytes } from './signature'
+import { ALL_PAGES } from './types'
 
 export type Anchor =
   | 'top-left' | 'top-center' | 'top-right'
@@ -16,7 +17,7 @@ export interface PlacePoint {
 }
 
 export interface PlaceOpts {
-  pageIndex: number   // 0-based; -1 = last page
+  pageIndex: number   // 0-based; -1 = last page; ALL_PAGES = every page
   anchor: Anchor
   widthPct: number    // signature width as % of page width (5–60)
   // When set (from the "Choose position" picker), the signature is centred on
@@ -32,49 +33,81 @@ export interface PlaceOpts {
   audit?: SigningAuditFields
 }
 
-export async function pageCount(pdfBytes: ArrayBuffer): Promise<number> {
-  const doc = await PDFDocument.load(pdfBytes)
-  return doc.getPageCount()
+// Thrown for a password-protected PDF, so the UI can say so rather than
+// "could not read". pdf-lib can't decrypt, and saving one it loaded with
+// ignoreEncryption produces a file no viewer opens.
+// Checked by `name` in the UI, which only imports this module on demand.
+export class EncryptedPdfError extends Error {
+  name = 'EncryptedPdfError'
 }
 
-// Embed a signature PNG onto one page of the PDF and return the signed bytes.
+async function load(pdfBytes: ArrayBuffer): Promise<PDFDocument> {
+  try {
+    return await PDFDocument.load(pdfBytes)
+  } catch (err) {
+    if (err instanceof Error && /encrypt/i.test(err.message)) throw new EncryptedPdfError(err.message)
+    throw err
+  }
+}
+
+export async function pageCount(pdfBytes: ArrayBuffer): Promise<number> {
+  return (await load(pdfBytes)).getPageCount()
+}
+
+// Embed a signature PNG onto one page of the PDF (or every page) and return the
+// signed bytes.
 export async function signPdf(pdfBytes: ArrayBuffer, sigPng: string, opts: PlaceOpts): Promise<Uint8Array> {
-  const doc = await PDFDocument.load(pdfBytes)
+  const doc = await load(pdfBytes)
   const pages = doc.getPages()
-  const idx = opts.pageIndex < 0 ? pages.length - 1 : Math.min(opts.pageIndex, pages.length - 1)
-  const page = pages[idx]
-  const { width: pw, height: ph } = page.getSize()
+  const targets = opts.pageIndex === ALL_PAGES
+    ? pages
+    : [pages[opts.pageIndex < 0 ? pages.length - 1 : Math.min(opts.pageIndex, pages.length - 1)]]
 
   const png = await doc.embedPng(dataUrlToBytes(sigPng))
-  const w = (Math.max(5, Math.min(60, opts.widthPct)) / 100) * pw
-  const h = (png.height / png.width) * w
-
   const margin = 24
-  let x: number
-  let y: number
-  if (opts.pos) {
-    // Click point is the signature centre, in top-left-origin page fractions.
-    // pdf-lib's origin is bottom-left, so flip Y. Clamp so it can't clip off.
-    const cx = opts.pos.xPct * pw
-    const cyTop = opts.pos.yPct * ph
-    x = Math.max(0, Math.min(pw - w, cx - w / 2))
-    y = Math.max(0, Math.min(ph - h, ph - cyTop - h / 2))
-  } else {
-    const [vert, horiz] = anchorParts(opts.anchor)
-    x = margin
-    if (horiz === 'center') x = (pw - w) / 2
-    else if (horiz === 'right') x = pw - w - margin
-    // pdf-lib origin is bottom-left.
-    y = margin
-    if (vert === 'mid') y = (ph - h) / 2
-    else if (vert === 'top') y = ph - h - margin
+
+  // Where the signature sits on one page, in pdf-lib's bottom-left-origin space.
+  const place = (pw: number, ph: number) => {
+    const w = (Math.max(5, Math.min(60, opts.widthPct)) / 100) * pw
+    const h = (png.height / png.width) * w
+    let x: number
+    let y: number
+    if (opts.pos) {
+      // Click point is the signature centre, in top-left-origin page fractions.
+      // pdf-lib's origin is bottom-left, so flip Y. Clamp so it can't clip off.
+      const cx = opts.pos.xPct * pw
+      const cyTop = opts.pos.yPct * ph
+      x = Math.max(0, Math.min(pw - w, cx - w / 2))
+      y = Math.max(0, Math.min(ph - h, ph - cyTop - h / 2))
+    } else {
+      const [vert, horiz] = anchorParts(opts.anchor)
+      x = margin
+      if (horiz === 'center') x = (pw - w) / 2
+      else if (horiz === 'right') x = pw - w - margin
+      // pdf-lib origin is bottom-left.
+      y = margin
+      if (vert === 'mid') y = (ph - h) / 2
+      else if (vert === 'top') y = ph - h - margin
+    }
+    return { x, y, w, h }
   }
 
-  page.drawImage(png, { x, y, width: w, height: h })
+  // The same embedded image on each page: one copy in the file however many
+  // pages carry it.
+  let last = { x: 0, y: 0, w: 0, h: 0, pw: 0 }
+  for (const page of targets) {
+    const { width: pw, height: ph } = page.getSize()
+    const r = place(pw, ph)
+    page.drawImage(png, { x: r.x, y: r.y, width: r.w, height: r.h })
+    last = { ...r, pw }
+  }
+  const page = targets[targets.length - 1]
+  const { x, y, w, h, pw } = last
 
   // Optional verification QR, stamped just below the signature (or above, if
   // there isn't room) and right-aligned to the signature's edge, with a small
-  // "scan to verify" caption beneath it.
+  // "scan to verify" caption beneath it. Once per document — on the last
+  // signed page — however many pages carry the signature.
   if (opts.qrPng) {
     const qr = await doc.embedPng(dataUrlToBytes(opts.qrPng))
     const qrSize = Math.max(48, Math.min(96, w * 0.5))

@@ -70,7 +70,9 @@ export default function SignatureStudio() {
               {MODES.map((m) => (
                 <button
                   key={m.id}
+                  type="button"
                   onClick={() => setMode(m.id)}
+                  aria-pressed={mode === m.id}
                   className={`rounded px-3 py-1 text-xs font-semibold ${mode === m.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
                 >
                   {m.label}

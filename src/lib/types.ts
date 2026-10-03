@@ -1,5 +1,12 @@
 export type SignatureMode = 'draw' | 'type'
 
+/**
+ * Sign a PDF's `pageIndex` value that stamps the signature on every page. Kept
+ * here rather than in lib/pdf so the UI can use it without pulling pdf-lib
+ * into the first-load bundle.
+ */
+export const ALL_PAGES = -2
+
 // The create-signature tab. 'phone' is a capture method (draw on your phone via
 // a QR handoff) that yields a drawn image — once received the studio drops back
 // to 'draw', so a saved signature's `style` is only ever 'draw' | 'type'.

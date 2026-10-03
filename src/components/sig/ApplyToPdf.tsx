@@ -1,8 +1,9 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { DropAnywhere, DropRing, useFileDrop, useUniversal, useUser, type SigningAuditFields } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import type { Anchor, PlacePoint } from '../../lib/pdf'
-import { sha256Bytes } from '../../lib/signature'
+import { sha256Bytes, trimToInk } from '../../lib/signature'
+import { ALL_PAGES } from '../../lib/types'
 import { recordSigningEvent } from '../../lib/cloud'
 import DropWatermark from './DropWatermark'
 
@@ -15,10 +16,10 @@ const PositionPicker = lazy(() => import('./PositionPicker'))
 const loadPdf = () => import('../../lib/pdf')
 const loadQr = () => import('../../lib/qr')
 
-const ANCHORS: Anchor[] = [
-  'top-left', 'top-center', 'top-right',
-  'mid-left', 'mid-center', 'mid-right',
-  'bottom-left', 'bottom-center', 'bottom-right',
+const ANCHORS: { id: Anchor; label: string }[] = [
+  { id: 'top-left', label: 'Top left' }, { id: 'top-center', label: 'Top centre' }, { id: 'top-right', label: 'Top right' },
+  { id: 'mid-left', label: 'Middle left' }, { id: 'mid-center', label: 'Centre' }, { id: 'mid-right', label: 'Middle right' },
+  { id: 'bottom-left', label: 'Bottom left' }, { id: 'bottom-center', label: 'Bottom centre' }, { id: 'bottom-right', label: 'Bottom right' },
 ]
 
 const SIGNUP_URL = 'https://app.unisim.co.uk/login'
@@ -27,10 +28,24 @@ export default function ApplyToPdf() {
   const composedImage = useSigStore((s) => s.currentImage())
   const baseImage = useSigStore((s) => s.baseImage())
   const hasExtras = useSigStore((s) => s.hasExtras())
-  const [applyExtras, setApplyExtras] = useState(true)
-  // What actually gets stamped: with name/date when the user keeps them applied
-  // for this document, otherwise the raw signature.
-  const currentImage = hasExtras && applyExtras ? composedImage : baseImage
+  // Unticked by default (suite rule), so the box is worded as the exception:
+  // the name/date/time chosen on the left go on unless you leave them off.
+  const [omitExtras, setOmitExtras] = useState(false)
+  // What actually gets stamped: with name/date unless left off for this
+  // document, otherwise the raw signature.
+  const currentImage = hasExtras && !omitExtras ? composedImage : baseImage
+  // …cropped to its ink, so the size slider sizes the signature and a corner
+  // position puts the ink in the corner (see trimToInk).
+  const [trimmed, setTrimmed] = useState<{ src: string; png: string } | null>(null)
+  const stampImage = currentImage && trimmed?.src === currentImage ? trimmed.png : null
+  useEffect(() => {
+    if (!currentImage) return
+    let cancelled = false
+    trimToInk(currentImage)
+      .then((png) => { if (!cancelled) setTrimmed({ src: currentImage, png }) })
+      .catch(() => { if (!cancelled) setTrimmed({ src: currentImage, png: currentImage }) })
+    return () => { cancelled = true }
+  }, [currentImage])
   const { supabase, session, activeOrgId } = useUniversal()
   const { user } = useUser()
   const signedIn = !!session?.user && session.user.is_anonymous !== true
@@ -46,6 +61,8 @@ export default function ApplyToPdf() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [verifyUrl, setVerifyUrl] = useState<string | null>(null)
+  // The file name of the last download, for the "Signed" confirmation.
+  const [savedAs, setSavedAs] = useState<string | null>(null)
 
   // Not while the position picker is up (it would swap the document behind a
   // modal still showing the old one), and not mid-signing.
@@ -72,6 +89,7 @@ export default function ApplyToPdf() {
   async function onFile(f: File) {
     setError(null)
     setVerifyUrl(null)
+    setSavedAs(null)
     // A page-wide target takes whatever is dropped on the margin, including the
     // font file the "Type" panel wants. Say which thing was wrong rather than
     // letting it fail later as an unreadable PDF.
@@ -86,8 +104,12 @@ export default function ApplyToPdf() {
       setPages(n)
       setPageIndex(0)
       setPos(null)
-    } catch {
-      setError('Could not read that PDF.')
+    } catch (err) {
+      setError(
+        err instanceof Error && err.name === 'EncryptedPdfError'
+          ? `${f.name} is password-protected, so it can't be signed here. Remove its password first, then try again.`
+          : `Could not read ${f.name}. It may be damaged, or not really a PDF.`,
+      )
       setFile(null)
       setPages(0)
     }
@@ -98,6 +120,7 @@ export default function ApplyToPdf() {
     setBusy(true)
     setError(null)
     setVerifyUrl(null)
+    setSavedAs(null)
     try {
       const buf = await file.arrayBuffer()
 
@@ -145,14 +168,19 @@ export default function ApplyToPdf() {
       }
 
       const { signPdf } = await loadPdf()
-      const bytes = await signPdf(buf, currentImage, { pageIndex, anchor, widthPct, pos: pos ?? undefined, qrPng, audit })
+      const sigPng = stampImage ?? await trimToInk(currentImage)
+      const bytes = await signPdf(buf, sigPng, { pageIndex, anchor, widthPct, pos: pos ?? undefined, qrPng, audit })
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = file.name.replace(/\.pdf$/i, '') + '-signed.pdf'
+      const name = file.name.replace(/\.pdf$/i, '') + '-signed.pdf'
+      a.download = name
       document.body.appendChild(a); a.click(); a.remove()
-      URL.revokeObjectURL(url)
+      // Revoked on the next tick: some browsers start the download after
+      // click() returns, and a URL revoked synchronously can cancel it.
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+      setSavedAs(name)
     } catch {
       setError('Could not sign the PDF.')
     } finally {
@@ -235,30 +263,35 @@ export default function ApplyToPdf() {
       {file && (
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
-            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Page</div>
+            <label htmlFor="sig-page" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Page</label>
             <select
+              id="sig-page"
               value={pageIndex}
               onChange={(e) => setPageIndex(Number(e.target.value))}
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm bg-white outline-none"
             >
               {Array.from({ length: pages }).map((_, i) => (
-                <option key={i} value={i}>Page {i + 1}{i === pages - 1 ? ' (last)' : ''}</option>
+                <option key={i} value={i}>Page {i + 1}{i === pages - 1 && pages > 1 ? ' (last)' : ''}</option>
               ))}
+              {pages > 1 && <option value={ALL_PAGES}>Every page ({pages})</option>}
             </select>
-            <div className="mt-3 mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Size ({widthPct}%)</div>
-            <input type="range" min={8} max={50} value={widthPct} onChange={(e) => setWidthPct(Number(e.target.value))} className="w-full accent-orange-600" />
+            <label htmlFor="sig-size" className="mt-3 mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Size ({widthPct}%)</label>
+            <input id="sig-size" type="range" min={8} max={50} value={widthPct} onChange={(e) => setWidthPct(Number(e.target.value))} className="w-full accent-orange-600" />
           </div>
           <div>
             <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Position</div>
-            <div className={`grid grid-cols-3 gap-1.5 transition ${pos ? 'opacity-40' : ''}`}>
+            <div role="group" aria-label="Position on the page" className={`grid grid-cols-3 gap-1.5 transition ${pos ? 'opacity-40' : ''}`}>
               {ANCHORS.map((a) => (
                 <button
-                  key={a}
-                  onClick={() => { setPos(null); setAnchor(a) }}
-                  aria-label={a}
-                  className={`h-9 rounded-md ring-1 transition ${!pos && anchor === a ? 'bg-orange-600 ring-orange-600' : 'bg-white ring-slate-200 hover:bg-slate-50'}`}
+                  key={a.id}
+                  type="button"
+                  onClick={() => { setPos(null); setAnchor(a.id) }}
+                  aria-label={a.label}
+                  aria-pressed={!pos && anchor === a.id}
+                  title={a.label}
+                  className={`h-9 rounded-md ring-1 transition ${!pos && anchor === a.id ? 'bg-orange-600 ring-orange-600' : 'bg-white ring-slate-200 hover:bg-slate-50'}`}
                 >
-                  <span className={`mx-auto block h-2 w-2 rounded-full ${!pos && anchor === a ? 'bg-white' : 'bg-slate-300'}`} />
+                  <span className={`mx-auto block h-2 w-2 rounded-full ${!pos && anchor === a.id ? 'bg-white' : 'bg-slate-300'}`} />
                 </button>
               ))}
             </div>
@@ -290,8 +323,8 @@ export default function ApplyToPdf() {
         <Suspense fallback={null}>
         <PositionPicker
           file={file}
-          pageIndex={pageIndex}
-          sigPng={currentImage}
+          pageIndex={pageIndex === ALL_PAGES ? 0 : pageIndex}
+          sigPng={stampImage ?? currentImage}
           widthPct={widthPct}
           onWidthChange={setWidthPct}
           initialPos={pos}
@@ -305,13 +338,13 @@ export default function ApplyToPdf() {
         <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
           <input
             type="checkbox"
-            checked={applyExtras}
-            onChange={(e) => setApplyExtras(e.target.checked)}
+            checked={omitExtras}
+            onChange={(e) => setOmitExtras(e.target.checked)}
             className="mt-0.5 h-4 w-4 accent-orange-600"
           />
           <span className="text-xs text-slate-600">
-            <span className="font-semibold text-slate-800">Add name, date &amp; time</span> — stamp the name/date/time you added in
-            "Create your signature" beneath the signature on this document.
+            <span className="font-semibold text-slate-800">Leave off the name, date &amp; time</span> — sign this document with the
+            signature alone, without what you added in "Create your signature".
           </span>
         </label>
       )}
@@ -340,7 +373,7 @@ export default function ApplyToPdf() {
         </div>
       )}
 
-      {error && <p className="mt-3 text-sm text-rose-600">{error}</p>}
+      {error && <p role="alert" className="mt-3 text-sm text-rose-700">{error}</p>}
 
       <button
         onClick={onSign}
@@ -349,6 +382,11 @@ export default function ApplyToPdf() {
       >
         {busy ? 'Signing…' : !currentImage ? 'Create a signature first' : 'Sign & download PDF'}
       </button>
+
+      {/* Always in the tree (not empty:hidden) so screen readers announce it. */}
+      <div role="status" className="text-center text-xs text-emerald-700">
+        {savedAs && !busy && <p className="mt-2">✓ Signed — downloaded as {savedAs}</p>}
+      </div>
 
       {verifyUrl && (
         <div className="mt-3 rounded-lg bg-emerald-50 p-3">
