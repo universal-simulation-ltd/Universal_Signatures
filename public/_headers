@@ -3,3 +3,12 @@
 # "Always Use HTTPS" setting.
 /*
   Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# The embeddable badge is loaded by other sites: a short cache so a fix reaches
+# them within the hour, and the image may be hot-linked from anywhere.
+/badge.js
+  Cache-Control: public, max-age=3600
+  Access-Control-Allow-Origin: *
+/badge.svg
+  Cache-Control: public, max-age=86400
+  Access-Control-Allow-Origin: *

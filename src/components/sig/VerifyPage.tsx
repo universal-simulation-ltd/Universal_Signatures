@@ -3,6 +3,7 @@ import { useUniversal } from '@unisim/sdk'
 import { verifyAny } from '../../lib/cloud'
 import { sha256Bytes } from '../../lib/signature'
 import type { AnyVerifyResult } from '../../lib/types'
+import BadgeEmbed from './BadgeEmbed'
 
 // Public certificate verification: anyone with a cert link (typically by
 // scanning the QR on a signed PDF) can confirm the record is genuine, via a
@@ -61,6 +62,7 @@ export default function VerifyPage({ certId }: { certId: string }) {
                 : <>The hash above fingerprints the <strong>original</strong> document, before the signature was added.</>}
             </p>
             <CheckPdf original={result.data.document_hash} signed={result.data.signed_hash} />
+            <BadgeEmbed certId={certId.toLowerCase()} />
           </div>
         ) : result?.kind === 'signature' ? (
           <div className="mt-6">
@@ -74,6 +76,7 @@ export default function VerifyPage({ certId }: { certId: string }) {
               <Row k="Saved" v={fmt(result.data.created_at)} />
               <Row k="Signature hash (SHA-256)" v={result.data.signature_hash} mono />
             </dl>
+            <BadgeEmbed certId={certId.toLowerCase()} />
           </div>
         ) : failed ? (
           <div role="alert" className="mt-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">

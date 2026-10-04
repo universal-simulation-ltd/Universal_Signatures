@@ -19,6 +19,10 @@
 /signatures/unisim-icon.png      /unisim-icon.png      200
 /signatures/og-image.png         /og-image.png         200
 
+# Embeddable verification badge (script + image), linked from other sites.
+/signatures/badge.js             /badge.js             200
+/signatures/badge.svg            /badge.svg            200
+
 # SEO crawler files.
 /signatures/robots.txt           /robots.txt           200
 /signatures/sitemap.xml          /sitemap.xml          200
