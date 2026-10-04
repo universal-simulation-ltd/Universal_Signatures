@@ -53,9 +53,24 @@ export interface SigningEventResult {
   verified: boolean
 }
 
-// The verify page resolves a cert id to either kind of record.
+// A "Send to be signed" request's public certificate (verify_pdf_sign_cert,
+// platform 0058) — shared with Universal PDF's send-to-sign.
+export interface RequestCertResult {
+  cert_id: string
+  doc_name: string
+  status: 'pending' | 'signed' | 'partially_signed' | 'completed'
+  created_at: string
+  original_sha256: string | null
+  latest_sha256: string | null
+  bytes_available: boolean
+  parties: { role: string; email: string | null; status: string; signed_at: string | null }[]
+  events: { action: string; actor_email: string | null; occurred_at: string; ip_country: string | null }[]
+}
+
+// The verify page resolves a cert id to any of the three kinds of record.
 export type AnyVerifyResult =
   | { kind: 'signing'; data: SigningEventResult }
+  | { kind: 'request'; data: RequestCertResult }
   | { kind: 'signature'; data: VerifyResult }
 
 // Why the cloud-save action is or isn't available for the current visitor.

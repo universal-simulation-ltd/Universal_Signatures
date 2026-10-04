@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+import { PDFDocument, PDFHexString, PDFName, PDFString, StandardFonts, rgb, type PDFDict } from 'pdf-lib'
 import { appendSigningAuditPage, type SigningAuditFields } from '@unisim/sdk'
 import { dataUrlToBytes } from './signature'
 import { ALL_PAGES, INITIAL_PAGES } from './types'
@@ -64,10 +64,55 @@ export async function pageCount(pdfBytes: ArrayBuffer): Promise<number> {
   return (await load(pdfBytes)).getPageCount()
 }
 
+// ── Where a signer signs (Send to be signed) ────────────────────────────────
+// The signing field travels INSIDE the PDF that is stored for the signer — a
+// private entry in the document information dictionary — so the request needs
+// no column of its own and the field can't drift from the document it
+// describes. signPdf removes it again, so no signed copy carries it.
+const SIGN_FIELD_KEY = 'UnisimSignField'
+
+// pdf-lib's own accessor for the information dictionary (it creates one when
+// the file has none) — public in behaviour, private in its typings.
+const infoDict = (doc: PDFDocument): PDFDict => (doc as unknown as { getInfoDict(): PDFDict }).getInfoDict()
+
+export interface StoredSignField {
+  page: number
+  xPct: number
+  yPct: number
+  widthPct: number
+}
+
+export async function withSignField(pdfBytes: ArrayBuffer, field: StoredSignField): Promise<Uint8Array> {
+  const doc = await load(pdfBytes)
+  infoDict(doc).set(PDFName.of(SIGN_FIELD_KEY), PDFString.of(JSON.stringify(field)))
+  return doc.save()
+}
+
+/** The field written by withSignField, or null (no field, or not a valid one). */
+export async function readSignField(pdfBytes: ArrayBuffer): Promise<{ field: StoredSignField | null; pages: number }> {
+  const doc = await load(pdfBytes)
+  const raw = infoDict(doc).get(PDFName.of(SIGN_FIELD_KEY))
+  let field: StoredSignField | null = null
+  if (raw instanceof PDFString || raw instanceof PDFHexString) {
+    try {
+      const f = JSON.parse(raw.decodeText()) as Partial<StoredSignField>
+      const num = (v: unknown, lo: number, hi: number) => typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi
+      if (Number.isInteger(f.page) && num(f.page, -1, 10_000) && num(f.xPct, 0, 1) && num(f.yPct, 0, 1) && num(f.widthPct, 5, 60)) {
+        field = f as StoredSignField
+      }
+    } catch {
+      field = null
+    }
+  }
+  return { field, pages: doc.getPageCount() }
+}
+
 // Embed a signature PNG onto one page of the PDF (or every page) and return the
 // signed bytes.
 export async function signPdf(pdfBytes: ArrayBuffer, sigPng: string, opts: PlaceOpts): Promise<Uint8Array> {
   const doc = await load(pdfBytes)
+  // A Send-to-be-signed copy's field marker has done its job once signed.
+  infoDict(doc).delete(PDFName.of(SIGN_FIELD_KEY))
   const pages = doc.getPages()
   const targets = opts.pageIndex === ALL_PAGES
     ? pages

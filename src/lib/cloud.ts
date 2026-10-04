@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useUniversal, useOrg, useSubscription, useCredits, useProjects, useAppFreeToken } from '@unisim/sdk'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { sha256Hex } from './signature'
-import type { AnyVerifyResult, CloudGate, SavedSignature, SignatureMode, VerifyResult } from './types'
+import type { AnyVerifyResult, CloudGate, RequestCertResult, SavedSignature, SignatureMode, VerifyResult } from './types'
 
 // ── The gate ────────────────────────────────────────────────────────────────
 // Saving a verified signature to the cloud costs us hosting, so it's gated on
@@ -296,6 +296,26 @@ export async function verifyAny(supabase: SupabaseClient, certId: string): Promi
         signed_hash: signedHash,
         created_at: row.created_at ?? '',
         verified: true,
+      },
+    }
+  }
+  // A document sent to be signed (this app's or Universal PDF's).
+  const req = await supabase.rpc('verify_pdf_sign_cert', { p_cert: certId })
+  if (req.error) throw new Error(req.error.message)
+  const r = req.data as Partial<RequestCertResult> & { ok?: boolean } | null
+  if (r?.ok) {
+    return {
+      kind: 'request',
+      data: {
+        cert_id: certId,
+        doc_name: r.doc_name ?? 'document.pdf',
+        status: r.status ?? 'pending',
+        created_at: r.created_at ?? '',
+        original_sha256: r.original_sha256 ?? null,
+        latest_sha256: r.latest_sha256 ?? null,
+        bytes_available: !!r.bytes_available,
+        parties: Array.isArray(r.parties) ? r.parties : [],
+        events: Array.isArray(r.events) ? r.events : [],
       },
     }
   }

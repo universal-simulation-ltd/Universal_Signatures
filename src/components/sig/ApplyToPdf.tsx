@@ -7,6 +7,7 @@ import { ALL_PAGES, INITIAL_PAGES } from '../../lib/types'
 import { recordSignedCopyHash, recordSigningEvent } from '../../lib/cloud'
 import DropWatermark from './DropWatermark'
 import InitialsPanel, { type InitialsChoice } from './InitialsPanel'
+import SendForSigning from './SendForSigning'
 
 // pdf-lib (~500 kB), pdf.js (+ its 1.3 MB worker) and the QR encoder are only
 // needed once a PDF is in play, so they load on demand rather than in the
@@ -51,6 +52,8 @@ export default function ApplyToPdf() {
   const { user } = useUser()
   const signedIn = !!session?.user && session.user.is_anonymous !== true
 
+  // Sign it yourself, or send it to someone else to sign.
+  const [mode, setMode] = useState<'self' | 'send'>('self')
   const [file, setFile] = useState<File | null>(null)
   const [pages, setPages] = useState(0)
   const [pageIndex, setPageIndex] = useState(0)
@@ -209,8 +212,27 @@ export default function ApplyToPdf() {
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5">
-      <h2 className="text-sm font-bold text-slate-900">Sign a PDF</h2>
-      <p className="mt-1 text-xs text-slate-500">Add your signature to a document — it's processed in your browser and never uploaded.</p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-sm font-bold text-slate-900">Sign a PDF</h2>
+        <div className="inline-flex rounded-md bg-slate-100 p-0.5" role="group" aria-label="Who signs">
+          {([['self', 'Sign it myself'], ['send', 'Send to be signed']] as const).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setMode(id)}
+              aria-pressed={mode === id}
+              className={`rounded px-3 py-1 text-xs font-semibold ${mode === id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <p className="mt-1 text-xs text-slate-500">
+        {mode === 'self'
+          ? 'Add your signature to a document — it\'s processed in your browser and never uploaded.'
+          : 'Ask someone else to sign a document. They sign in their browser with no account, and you both get a certificate.'}
+      </p>
 
       {/* The suite's shared drop circle (`DropRing` + `useFileDrop` from
           @unisim/sdk), not a dashed rectangle of this app's own: Universal PDF,
@@ -269,7 +291,9 @@ export default function ApplyToPdf() {
                 <span className="text-[15px] font-bold text-slate-900">
                   {over ? 'Drop to open' : 'Drop a PDF here'}
                 </span>
-                <span className="text-[11.5px] leading-relaxed text-slate-500">it stays on your device</span>
+                <span className="text-[11.5px] leading-relaxed text-slate-500">
+                  {mode === 'self' ? 'it stays on your device' : 'uploaded only when you send it'}
+                </span>
                 <span className="mt-1 text-[11px] text-slate-400">or click to browse</span>
               </>
             )}
@@ -279,6 +303,12 @@ export default function ApplyToPdf() {
         <input {...drop.inputProps} className="hidden" />
       </div>
 
+      {/* The drop circle's own errors (not a PDF, password-protected) belong
+          to both modes; the rest of this card's are the sign-it-myself ones. */}
+      {mode === 'send' && error && <p role="alert" className="mt-3 text-sm text-rose-700">{error}</p>}
+      {mode === 'send' && <SendForSigning file={file} pages={pages} />}
+
+      {mode === 'self' && (<>
       {file && (
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
@@ -433,6 +463,8 @@ export default function ApplyToPdf() {
           )}
         </div>
       )}
+
+      </>)}
 
       {/* From `pageOver`, not `over`: over the ring itself the ring answers. */}
       <DropAnywhere

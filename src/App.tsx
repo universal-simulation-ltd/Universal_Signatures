@@ -9,22 +9,27 @@ import SignatureStudio from './components/sig/SignatureStudio'
 import { CONTAINER } from './lib/layout'
 import SignMobilePage from './components/sig/SignMobilePage'
 import VerifyPage from './components/sig/VerifyPage'
+import SignRequestPage from './components/sig/SignRequestPage'
 import { parseExpiry } from './lib/mobileSign'
 import { KNOWLEDGE_BASE } from './knowledge'
 
 const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatures'
 
 // Tiny path router: /signatures/verify/<cert> → verify page; `?sign=<token>` →
-// the phone signing page (opened from the desktop QR); everything else → the
-// studio. These links are opened fresh, so a load-time check is enough (no
+// the phone signing page (opened from the desktop QR); `?signdoc=<token>` → the
+// page for someone asked to sign a document; everything else → the studio. These links are opened fresh, so a load-time check is enough (no
 // client-router dependency).
 function route():
   | { name: 'verify'; certId: string }
   | { name: 'signMobile'; token: string; expiresAt: number | null }
+  | { name: 'signRequest'; token: string }
   | { name: 'studio' } {
   const params = new URLSearchParams(window.location.search)
   const token = params.get('sign')
   if (token) return { name: 'signMobile', token, expiresAt: parseExpiry(params.get('exp')) }
+  // A "Send to be signed" link, opened by the person asked to sign.
+  const signdoc = params.get('signdoc')
+  if (signdoc) return { name: 'signRequest', token: signdoc }
 
   const base = import.meta.env.BASE_URL
   const path = window.location.pathname
@@ -51,7 +56,7 @@ export default function App() {
           repo:    REPO_URL,
           proof:   `${REPO_URL}/blob/main/PRIVACY.md`,
           subject: 'Your signature',
-          except:  'saving one to the cloud, or signing on your phone',
+          except:  'saving one to the cloud, signing on your phone, or sending a document to be signed',
           version: __APP_VERSION__,
           credits,
           noticesHref: `${REPO_URL}/blob/main/THIRD-PARTY-NOTICES.md`,
@@ -81,7 +86,11 @@ export default function App() {
       </div>
 
       <main className="flex-1">
-        {r.name === 'verify' ? <VerifyPage certId={r.certId} /> : <SignatureStudio />}
+        {r.name === 'verify'
+          ? <VerifyPage certId={r.certId} />
+          : r.name === 'signRequest'
+            ? <SignRequestPage token={r.token} />
+            : <SignatureStudio />}
       </main>
 
       <footer className="border-t border-slate-200 bg-white">

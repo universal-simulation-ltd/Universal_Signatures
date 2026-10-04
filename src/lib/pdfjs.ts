@@ -47,3 +47,39 @@ export async function renderPageToCanvas(
     doc.destroy()
   }
 }
+
+/**
+ * Render the first `limit` pages as images, for reading a document before
+ * signing it. One parse for all of them. `maxWidth` caps each page's width.
+ */
+export async function renderPages(
+  data: ArrayBuffer,
+  maxWidth: number,
+  limit: number,
+): Promise<{ pages: { src: string; width: number; height: number }[]; total: number }> {
+  const doc = await pdfjsLib.getDocument({
+    data: data.slice(0),
+    isEvalSupported: false,
+    disableAutoFetch: true,
+    disableStream: true,
+  }).promise
+  try {
+    const out: { src: string; width: number; height: number }[] = []
+    const n = Math.min(doc.numPages, limit)
+    for (let i = 1; i <= n; i++) {
+      const page = await doc.getPage(i)
+      const base = page.getViewport({ scale: 1 })
+      const scale = Math.min(maxWidth / base.width, 2)
+      const viewport = page.getViewport({ scale })
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.ceil(viewport.width)
+      canvas.height = Math.ceil(viewport.height)
+      await page.render({ canvasContext: canvas.getContext('2d')!, viewport }).promise
+      out.push({ src: canvas.toDataURL('image/jpeg', 0.9), width: canvas.width, height: canvas.height })
+      page.cleanup()
+    }
+    return { pages: out, total: doc.numPages }
+  } finally {
+    doc.destroy()
+  }
+}

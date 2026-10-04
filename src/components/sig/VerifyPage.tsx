@@ -4,6 +4,8 @@ import { verifyAny } from '../../lib/cloud'
 import { sha256Bytes } from '../../lib/signature'
 import type { AnyVerifyResult } from '../../lib/types'
 import BadgeEmbed from './BadgeEmbed'
+import RequestCertificate from './RequestCertificate'
+import Row from './Row'
 
 // Public certificate verification: anyone with a cert link (typically by
 // scanning the QR on a signed PDF) can confirm the record is genuine, via a
@@ -64,6 +66,8 @@ export default function VerifyPage({ certId }: { certId: string }) {
             <CheckPdf original={result.data.document_hash} signed={result.data.signed_hash} />
             <BadgeEmbed certId={certId.toLowerCase()} />
           </div>
+        ) : result?.kind === 'request' ? (
+          <RequestCertificate data={result.data} fmt={fmt} checkPdf={(o, sg) => <CheckPdf original={o} signed={sg} />} />
         ) : result?.kind === 'signature' ? (
           <div className="mt-6">
             <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-3">
@@ -104,14 +108,6 @@ export default function VerifyPage({ certId }: { certId: string }) {
   )
 }
 
-function Row({ k, v, mono = false }: { k: string; v: string; mono?: boolean }) {
-  return (
-    <div className="flex justify-between gap-4 py-2">
-      <dt className="text-slate-500">{k}</dt>
-      <dd className={`text-right text-slate-900 ${mono ? 'font-mono text-xs break-all' : ''}`}>{v}</dd>
-    </div>
-  )
-}
 
 // "Is this the document that was signed?" — hash a PDF in the browser and
 // compare it with the record, which can hold two fingerprints: the ORIGINAL

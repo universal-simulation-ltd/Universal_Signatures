@@ -7,9 +7,11 @@ go and read it.
 
 The short version: **your signature is drawn, and your PDF is signed, by your
 own browser.** The PDF you sign is never uploaded — not to be rendered, not to
-be stamped, not at all. There are three things in this app that *can* send
-something out, all of them optional, and this page names all three, because
+be stamped, not at all. There are four things in this app that *can* send
+something out, all of them optional, and this page names all four, because
 this is an app about trust and a vague privacy page would be self-defeating.
+The fourth — sending a document to **someone else** to sign — is the only one
+that uploads a PDF, because the other person has to be able to open it.
 
 ---
 
@@ -22,9 +24,9 @@ this is an app about trust and a vague privacy page would be self-defeating.
 | Stamping the signature onto the page | your browser, via pdf-lib | [`src/lib/pdf.ts`](src/lib/pdf.ts), [`src/components/sig/ApplyToPdf.tsx`](src/components/sig/ApplyToPdf.tsx) |
 | Saving the signed PDF | your browser's download | [`src/lib/pdf.ts`](src/lib/pdf.ts) |
 
-**The PDF you sign never leaves your device, in any of the flows below.** Even
-when you make a verifiable record (see below), what is sent is a fingerprint of
-the document, never the document.
+**A PDF you sign yourself never leaves your device, in any of the flows below.**
+Even when you make a verifiable record (see below), what is sent is a fingerprint
+of the document, never the document.
 
 **Signatures saved "on this device" really are.** They live in your browser's
 localStorage and no account is involved — see
@@ -33,7 +35,7 @@ browser data deletes them.
 
 ---
 
-## The three things that *can* send something — all optional
+## The four things that *can* send something — all optional
 
 ### 1. "Save to the cloud"
 
@@ -74,18 +76,21 @@ each other.
 If you are signed in and tick this, the app creates a record that your
 Universal ID signed a particular document at a particular time.
 
-What the hash covers, precisely: it is a SHA-256 of the **unsigned original**
-PDF, taken in your browser before the signature, QR code and certificate page
-are added. So the record lets anyone holding **that original file** confirm it
-is the document you signed, by hashing it and comparing. It does **not** cover
-the signed copy you download: the signed PDF's own hash will never match the
-record, and the record cannot tell you whether the signed copy has been edited
-since. Keep the unsigned original if you may need to prove this later.
+What the hashes cover, precisely: the record holds two SHA-256 fingerprints,
+both taken in your browser.
+
+- The **unsigned original**, taken before the signature, QR code and
+  certificate page are added. Anyone holding **that original file** can confirm
+  it is the document you signed.
+- The **signed copy**, exactly as it downloads (records made since October 2026).
+  Anyone you send the signed PDF to can confirm on the certificate page that it
+  is byte for byte the copy that was produced — and if it doesn't match, that it
+  has been changed since (even re-saving or printing it to PDF changes it).
 
 - The code: [`src/components/sig/ApplyToPdf.tsx`](src/components/sig/ApplyToPdf.tsx)
   and the shared [`signingAudit.ts`](https://github.com/universal-simulation-ltd/universal-platform/blob/main/packages/sdk/src/signingAudit.ts)
-- What travels: **a SHA-256 hash of the unsigned original**, the **original filename**,
-  and the **email address on your Universal ID**. A hash is a fingerprint — it
+- What travels: **SHA-256 hashes of the unsigned original and of the signed
+  copy**, the **original filename**, and the **email address on your Universal ID**. A hash is a fingerprint — it
   cannot be turned back into the document, which is the entire point: it proves
   a file matches without anyone needing to hold the file.
 - ⚠️ **The filename is real information and we are not going to pretend
@@ -97,6 +102,36 @@ since. Keep the unsigned original if you may need to prove this later.
   email) from facts your own machine reported (its clock, its timezone), and
   says so on the page, because presenting the second kind with the authority of
   the first would be a lie of layout. There is no geolocation.
+
+### 4. "Send to be signed"
+
+If you are signed in (with a confirmed email address) and choose to send a PDF
+to somebody else to sign, **the PDF is uploaded** — there is no other way for
+them to open it. This is the only flow in the app that uploads a document.
+
+- The code: [`src/lib/signRequests.ts`](src/lib/signRequests.ts),
+  [`src/components/sig/SendForSigning.tsx`](src/components/sig/SendForSigning.tsx)
+  (yours), [`src/components/sig/SignRequestPage.tsx`](src/components/sig/SignRequestPage.tsx)
+  (theirs), and the platform's `send-sign-request` and `pdf-sign-request` functions.
+- What travels and is kept: **the PDF**, with where to sign written into it,
+  stored privately (not public; the signer opens it through a short-lived link
+  their signing link unlocks); **the signer's email address** and **yours**;
+  the email we send them (with the PDF attached, unless you asked for their
+  address to be confirmed first); and, when they sign, **the signed copy**.
+- About the signer, the server logs when they opened and signed it, **their IP
+  address, its country and their browser**. The public certificate page shows
+  the country only.
+- The link is the key, like a password in a URL: whoever holds it can open the
+  document. "Ask them to confirm their email address before it opens" closes
+  that gap — the document then only opens for someone who can read a code sent
+  to that address, and the PDF is not attached to the email.
+- **Withdrawing** a request that hasn't been signed deletes the stored copy. A
+  signed one is kept, because it is the proof behind its certificate page.
+
+The **verification badge** you can put on a website looks its certificate up
+from the browser of whoever views that page, the same way the certificate page
+does. It sends the certificate number and nothing else, and shows no email or
+document name. See [`public/badge.js`](public/badge.js).
 
 ---
 
@@ -125,11 +160,12 @@ script.**
 1. Open the app, then open your browser's developer tools (F12) on the
    **Network** tab.
 2. Drop a PDF in, draw a signature, place it, and export the signed file —
-   without touching cloud save, phone signing or the verifiable record.
+   without touching cloud save, phone signing, the verifiable record or
+   sending it to be signed.
 3. Watch the list. Your PDF is never in it.
 
 Or, more conclusively: **turn off your Wi-Fi and sign a PDF.** It works. Only
-the three optional features above need a connection, and each of them tells you
+the four optional features above need a connection, and each of them tells you
 so by failing rather than by silently doing nothing.
 
 ---
