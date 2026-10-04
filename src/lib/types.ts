@@ -46,6 +46,9 @@ export interface SigningEventResult {
   org_name: string | null
   original_filename: string
   document_hash: string
+  /** SHA-256 of the signed copy as it was produced (platform 0242); null for
+   *  records made before that, or whose signer's browser couldn't store it. */
+  signed_hash: string | null
   created_at: string
   verified: boolean
 }

@@ -52,12 +52,15 @@ export default function VerifyPage({ certId }: { certId: string }) {
               <Row k="Organisation" v={result.data.org_name ?? '—'} />
               <Row k="Document" v={result.data.original_filename} />
               <Row k="Signed" v={fmt(result.data.created_at)} />
-              <Row k="Document hash (SHA-256)" v={result.data.document_hash} mono />
+              <Row k="Original document hash (SHA-256)" v={result.data.document_hash} mono />
+              {result.data.signed_hash && <Row k="Signed copy hash (SHA-256)" v={result.data.signed_hash} mono />}
             </dl>
             <p className="mt-4 text-xs text-slate-500">
-              The hash above fingerprints the <strong>original</strong> document, before the signature was added.
+              {result.data.signed_hash
+                ? <>The first hash fingerprints the <strong>original</strong> document, before it was signed; the second, the <strong>signed copy</strong> exactly as it was produced.</>
+                : <>The hash above fingerprints the <strong>original</strong> document, before the signature was added.</>}
             </p>
-            <CheckOriginal expected={result.data.document_hash} />
+            <CheckPdf original={result.data.document_hash} signed={result.data.signed_hash} />
           </div>
         ) : result?.kind === 'signature' ? (
           <div className="mt-6">
@@ -108,21 +111,26 @@ function Row({ k, v, mono = false }: { k: string; v: string; mono?: boolean }) {
 }
 
 // "Is this the document that was signed?" — hash a PDF in the browser and
-// compare it with the record. The record holds the hash of the ORIGINAL, so it
-// is the unsigned original that matches; a signed copy (with the signature
-// stamped on) is a different file and says so.
-function CheckOriginal({ expected }: { expected: string }) {
+// compare it with the record, which can hold two fingerprints: the ORIGINAL
+// (before anything was stamped on) and, for records made since platform 0242,
+// the SIGNED COPY as it was produced. Each match says which one it is — they
+// prove different things — and a file that matches neither says so.
+function CheckPdf({ original, signed }: { original: string; signed: string | null }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [state, setState] = useState<
-    { kind: 'idle' } | { kind: 'busy' } | { kind: 'done'; name: string; match: boolean } | { kind: 'error' }
+    | { kind: 'idle' }
+    | { kind: 'busy' }
+    | { kind: 'done'; name: string; match: 'signed' | 'original' | 'none' }
+    | { kind: 'error' }
   >({ kind: 'idle' })
 
   async function onPick(file: File | undefined) {
     if (!file) return
     setState({ kind: 'busy' })
     try {
-      const hash = await sha256Bytes(await file.arrayBuffer())
-      setState({ kind: 'done', name: file.name, match: hash.toLowerCase() === expected.toLowerCase() })
+      const hash = (await sha256Bytes(await file.arrayBuffer())).toLowerCase()
+      const match = signed && hash === signed.toLowerCase() ? 'signed' : hash === original.toLowerCase() ? 'original' : 'none'
+      setState({ kind: 'done', name: file.name, match })
     } catch {
       setState({ kind: 'error' })
     } finally {
@@ -133,7 +141,9 @@ function CheckOriginal({ expected }: { expected: string }) {
   return (
     <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
       <p className="text-xs text-slate-600">
-        Have the original PDF? Check it against this record — it’s fingerprinted in your browser and never uploaded.
+        {signed
+          ? 'Have the signed copy, or the original? Check it against this record — it’s fingerprinted in your browser and never uploaded.'
+          : 'Have the original PDF? Check it against this record — it’s fingerprinted in your browser and never uploaded.'}
       </p>
       <button
         type="button"
@@ -150,14 +160,23 @@ function CheckOriginal({ expected }: { expected: string }) {
         className="hidden"
         onChange={(e) => void onPick(e.target.files?.[0])}
       />
-      <div role="status" className="text-xs [&>p]:mt-2">
-        {state.kind === 'done' && state.match && (
-          <p className="font-semibold text-emerald-700">✓ {state.name} is the document this record was made for.</p>
+      <div role="status" className="text-xs [&>p]:mt-2" data-testid="check-result">
+        {state.kind === 'done' && state.match === 'signed' && (
+          <p className="font-semibold text-emerald-700">
+            ✓ {state.name} is the signed copy, byte for byte, exactly as it was produced. Nothing in it has changed since.
+          </p>
         )}
-        {state.kind === 'done' && !state.match && (
+        {state.kind === 'done' && state.match === 'original' && (
+          <p className="font-semibold text-emerald-700">
+            ✓ {state.name} is the original document this record was made for, as it was before it was signed.
+          </p>
+        )}
+        {state.kind === 'done' && state.match === 'none' && (
           <p className="text-rose-700">
-            ✗ {state.name} doesn’t match this record. A signed copy won’t match either — the record fingerprints the
-            original before the signature went on — so check the unsigned original.
+            {signed
+              ? <>✗ {state.name} is neither the signed copy nor the original. If it’s meant to be the signed copy, it has been changed since it was signed — even re-saving or printing it to PDF counts.</>
+              : <>✗ {state.name} doesn’t match this record. A signed copy won’t match either — the record fingerprints the
+                original before the signature went on — so check the unsigned original.</>}
           </p>
         )}
         {state.kind === 'error' && <p className="text-rose-700">Couldn’t read that file.</p>}

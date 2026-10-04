@@ -4,7 +4,7 @@ import { useSigStore } from '../../stores/sigStore'
 import type { Anchor, PlacePoint } from '../../lib/pdf'
 import { sha256Bytes, trimToInk } from '../../lib/signature'
 import { ALL_PAGES, INITIAL_PAGES } from '../../lib/types'
-import { recordSigningEvent } from '../../lib/cloud'
+import { recordSignedCopyHash, recordSigningEvent } from '../../lib/cloud'
 import DropWatermark from './DropWatermark'
 import InitialsPanel, { type InitialsChoice } from './InitialsPanel'
 
@@ -66,6 +66,8 @@ export default function ApplyToPdf() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [verifyUrl, setVerifyUrl] = useState<string | null>(null)
+  // Whether the signed copy's own fingerprint made it onto the record.
+  const [copyRecorded, setCopyRecorded] = useState(false)
   // The file name of the last download, for the "Signed" confirmation.
   const [savedAs, setSavedAs] = useState<string | null>(null)
 
@@ -125,6 +127,7 @@ export default function ApplyToPdf() {
     setBusy(true)
     setError(null)
     setVerifyUrl(null)
+    setCopyRecorded(false)
     setSavedAs(null)
     try {
       const buf = await file.arrayBuffer()
@@ -134,6 +137,7 @@ export default function ApplyToPdf() {
       // append the certificate page describing it.
       let qrPng: string | undefined
       let audit: SigningAuditFields | undefined
+      let certId: string | null = null
       if (makeRecord && signedIn) {
         if (!user?.email) {
           setError('Your Universal ID has no email on file, so a verifiable record can\'t be created.')
@@ -151,6 +155,7 @@ export default function ApplyToPdf() {
           setBusy(false)
           return
         }
+        certId = res.certId
         const url = `${location.origin}${import.meta.env.BASE_URL}verify/${res.certId}`
         qrPng = await (await loadQr()).makeQrPng(url)
         setVerifyUrl(url)
@@ -180,6 +185,10 @@ export default function ApplyToPdf() {
           ? { png: initials.png, anchor: initials.anchor, widthPct: initials.widthPct, includeLast: initials.includeLast }
           : undefined,
       })
+      // The signed copy's own fingerprint, so whoever receives it can check it
+      // is byte for byte what was produced (the record's document hash is of
+      // the unsigned original). Taken from the exact bytes about to download.
+      if (certId) setCopyRecorded(await recordSignedCopyHash(supabase, certId, await sha256Bytes(bytes.slice().buffer as ArrayBuffer)))
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -417,6 +426,11 @@ export default function ApplyToPdf() {
               Copy
             </button>
           </div>
+          {copyRecorded && (
+            <p className="mt-2 text-[11px] text-emerald-700">
+              The signed copy’s fingerprint is on the record too, so anyone you send it to can check on that page that it hasn’t been changed.
+            </p>
+          )}
         </div>
       )}
 

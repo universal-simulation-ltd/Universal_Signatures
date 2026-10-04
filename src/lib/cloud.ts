@@ -237,6 +237,17 @@ export async function recordSigningEvent(
   return { ok: true, certId: row.cert_id, recordedAt: row.created_at }
 }
 
+/**
+ * Store the SHA-256 of the signed copy against its record (platform 0242), so
+ * the verify page can confirm a copy someone was sent is byte for byte the one
+ * that was produced. Write-once, owner only — the server enforces both. Best
+ * effort: a failure just leaves the record without it.
+ */
+export async function recordSignedCopyHash(supabase: SupabaseClient, certId: string, signedHash: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('record_signing_event_signed_hash', { p_cert: certId, p_hash: signedHash })
+  return !error && data === true
+}
+
 // ── Verify (public) ──────────────────────────────────────────────────────────
 // Reads minimal public fields via SECURITY DEFINER RPCs so a cert can be
 // verified by anyone holding the (unguessable) cert id, without opening RLS.
@@ -269,6 +280,11 @@ export async function verifyAny(supabase: SupabaseClient, certId: string): Promi
   if (error) throw new Error(error.message)
   const row = Array.isArray(data) ? data[0] : data
   if (row) {
+    // The signed copy's hash comes from a second, newer function (0242). Its
+    // failure is not the record's: without it the page still verifies, and
+    // only the byte-for-byte check of a signed copy is unavailable.
+    const signed = await supabase.rpc('verify_signing_event_signed_hash', { p_cert: certId })
+    const signedHash = !signed.error && typeof signed.data === 'string' ? signed.data : null
     return {
       kind: 'signing',
       data: {
@@ -277,6 +293,7 @@ export async function verifyAny(supabase: SupabaseClient, certId: string): Promi
         org_name: row.org_name ?? null,
         original_filename: row.original_filename ?? '',
         document_hash: row.document_hash ?? '',
+        signed_hash: signedHash,
         created_at: row.created_at ?? '',
         verified: true,
       },
