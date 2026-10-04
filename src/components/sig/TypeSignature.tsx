@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useFileDrop } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
-import { SIG_FONTS, fontById, fontFamilyCss, type SigFont } from '../../lib/fonts'
+import { SIG_FONTS, fontById, fontFamilyCss, fontLabel, type SigFont } from '../../lib/fonts'
 import { rasterizeTyped } from '../../lib/signature'
+import { useT } from '../../i18n'
 
 // Preview label for a font button: the first 5 characters of the typed name
 // (with an ellipsis when longer), or the font's own label before anything's typed.
@@ -13,6 +14,7 @@ function previewText(name: string, label: string): string {
 }
 
 export default function TypeSignature() {
+  const t = useT()
   const signerName = useSigStore((s) => s.signerName)
   const fontId = useSigStore((s) => s.fontId)
   const importedFonts = useSigStore((s) => s.importedFonts)
@@ -74,12 +76,12 @@ export default function TypeSignature() {
       const face = new FontFace(family, buf)
       await face.load()
       ;(document as Document & { fonts: FontFaceSet }).fonts.add(face)
-      const label = file.name.replace(/\.[^.]+$/, '').slice(0, 16) || 'Imported'
+      const label = file.name.replace(/\.[^.]+$/, '').slice(0, 16) || t('create.type_imported_font')
       const imported: SigFont = { id: `imp_${family}`, label, family, imported: true }
       addImportedFont(imported)
       setFontId(imported.id)
     } catch {
-      setImportError('Could not load that font. Use a .woff2, .woff, .ttf or .otf file.')
+      setImportError(t('create.type_import_error'))
     }
   }
 
@@ -88,7 +90,7 @@ export default function TypeSignature() {
       <input
         value={signerName}
         onChange={(e) => setSignerName(e.target.value)}
-        placeholder="Type your name"
+        placeholder={t('create.type_placeholder')}
         className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
       />
       <div className="flex flex-wrap gap-2">
@@ -100,21 +102,21 @@ export default function TypeSignature() {
             className={`rounded-md px-3 py-1.5 text-base ring-1 transition ${
               fontId === f.id ? 'bg-orange-700 text-white ring-orange-600' : 'bg-white text-slate-700 ring-slate-200 hover:bg-slate-50'
             }`}
-            title={f.label}
+            title={fontLabel(f, t)}
           >
-            {previewText(signerName, f.label)}
+            {previewText(signerName, fontLabel(f, t))}
           </button>
         ))}
         {/* Import a custom font from the user's device. */}
         <button
           onClick={fontPicker.open}
           className="inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:border-orange-400 hover:text-orange-700"
-          title="Import a font file"
+          title={t('create.type_import_title')}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M12 5v14M5 12h14" />
           </svg>
-          Import font
+          {t('create.type_import')}
         </button>
         <input {...fontPicker.inputProps} className="hidden" />
       </div>
@@ -123,7 +125,7 @@ export default function TypeSignature() {
         {signerName.trim() ? (
           <span ref={previewTextRef} style={{ fontFamily: fontFamilyCss(font) }} className="whitespace-nowrap leading-tight text-slate-900">{signerName}</span>
         ) : (
-          <span className="text-sm text-slate-300">Your typed signature previews here</span>
+          <span className="text-sm text-slate-300">{t('create.type_preview_empty')}</span>
         )}
       </div>
     </div>

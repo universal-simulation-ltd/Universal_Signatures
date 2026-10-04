@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { useUniversal } from '@unisim/sdk'
 import LocalSavePanel from './LocalSavePanel'
 import CloudSavePanel from './CloudSavePanel'
+import { useT } from '../../i18n'
 
 type Tab = 'local' | 'online'
 
@@ -10,6 +11,7 @@ type Tab = 'local' | 'online'
 // copy to the cloud against a Universal ID. Defaults to Online when signed in,
 // Local otherwise.
 export default function SaveTabs() {
+  const t = useT()
   const { session, loading } = useUniversal()
   const signedIn = !!session?.user && session.user.is_anonymous !== true
 
@@ -25,11 +27,11 @@ export default function SaveTabs() {
     setTab(signedIn ? 'online' : 'local')
   }, [loading, signedIn])
 
-  const choose = (t: Tab) => { touched.current = true; setTab(t) }
+  const choose = (next: Tab) => { touched.current = true; setTab(next) }
 
   const TABS: { id: Tab; label: string }[] = [
-    { id: 'local', label: 'Local (temporary)' },
-    { id: 'online', label: 'Online' },
+    { id: 'local', label: t('save.tabs_local') },
+    { id: 'online', label: t('save.tabs_online') },
   ]
 
   return (
@@ -42,7 +44,7 @@ export default function SaveTabs() {
           aria-controls={panelId}
           className="-m-1 flex items-center gap-1.5 rounded p-1 text-sm font-bold text-slate-900"
         >
-          Save your signature
+          {t('save.tabs_title')}
           <svg
             width="14"
             height="14"
@@ -60,15 +62,15 @@ export default function SaveTabs() {
         </button>
         {open && (
           <div className="inline-flex rounded-md bg-slate-100 p-0.5">
-            {TABS.map((t) => (
+            {TABS.map((item) => (
               <button
-                key={t.id}
+                key={item.id}
                 type="button"
-                onClick={() => choose(t.id)}
-                aria-pressed={tab === t.id}
-                className={`rounded px-3 py-1 text-xs font-semibold ${tab === t.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                onClick={() => choose(item.id)}
+                aria-pressed={tab === item.id}
+                className={`rounded px-3 py-1 text-xs font-semibold ${tab === item.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
               >
-                {t.label}
+                {item.label}
               </button>
             ))}
           </div>

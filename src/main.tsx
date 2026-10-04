@@ -4,6 +4,7 @@ import { UniversalProvider } from '@unisim/sdk'
 import type { ProductCode } from '@unisim/sdk'
 import App from './App'
 import { UsageTracker } from '@unisim/sdk'
+import { I18nRoot } from './i18n'
 import './index.css'
 
 console.log(`build: ${import.meta.env.VITE_BUILD_SHA}`)
@@ -37,7 +38,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <UniversalProvider config={universalConfig}>
       <UsageTracker />
-      <App />
+      {/* The app's own strings follow the SDK's language — see src/i18n. */}
+      <I18nRoot>
+        <App />
+      </I18nRoot>
     </UniversalProvider>
   </React.StrictMode>
 )

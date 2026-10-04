@@ -1,5 +1,6 @@
 // Pure signature helpers: hashing (for the tamper-evident cert), typed-text
 // rasterisation, and data-URL ↔ bytes conversion. No React, no network.
+import { getT, intlLocale } from '../i18n/runtime'
 
 export async function sha256Hex(input: string): Promise<string> {
   const bytes = new TextEncoder().encode(input)
@@ -62,16 +63,23 @@ export function initialsFrom(name: string): string {
     .join('')
 }
 
+// The locale the stamped date and time are written in: the active language,
+// except that plain English keeps the British day-month-year form.
+function stampLocale(): string {
+  const lang = getT().lang
+  return lang === 'en' ? 'en-GB' : intlLocale(lang)
+}
+
 // Today's date formatted for stamping beneath a signature (e.g. "14 Jul 2026").
 export function formatSigningDate(d = new Date()): string {
-  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString(stampLocale(), { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 // Local time formatted for stamping beneath a signature (e.g. "14:32"). This is
 // the machine's local time at the moment of signing — see the signing-provenance
 // scope-out for why local time is one of the few purely client-side signals.
 export function formatSigningTime(d = new Date()): string {
-  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleTimeString(stampLocale(), { hour: '2-digit', minute: '2-digit' })
 }
 
 // Load an image data URL to an <img> element.

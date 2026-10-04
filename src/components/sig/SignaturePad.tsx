@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { useSigStore } from '../../stores/sigStore'
 import { useInkCanvas } from '../../lib/useInkCanvas'
+import { useT } from '../../i18n'
 
 // A pointer-driven drawing pad. Emits a transparent PNG data URL to the store
 // at the end of every stroke (and on undo/clear). Handles mouse, touch and
 // stylus via Pointer Events; the drawing itself lives in useInkCanvas.
 export default function SignaturePad() {
+  const t = useT()
   const setDrawn = useSigStore((s) => s.setDrawn)
   const setMode = useSigStore((s) => s.setMode)
   const drawnDataUrl = useSigStore((s) => s.drawnDataUrl)
@@ -38,13 +40,13 @@ export default function SignaturePad() {
         <canvas
           ref={ink.canvasRef}
           role="img"
-          aria-label="Signature pad. Draw your signature with a mouse, finger or stylus. To use the keyboard instead, choose Type."
+          aria-label={t('create.pad_aria')}
           className="sig-pad block h-44 w-full rounded-lg"
           {...ink.handlers}
         />
         {!ink.hasInk && (
           <span className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 text-[11px] text-slate-400">
-            Sign above
+            {t('create.pad_hint')}
           </span>
         )}
       </div>
@@ -54,7 +56,7 @@ export default function SignaturePad() {
           onClick={() => setMode('type')}
           className="rounded-md px-2 py-1.5 text-xs font-medium text-slate-500 hover:text-orange-700"
         >
-          Rather type it?
+          {t('create.pad_rather_type')}
         </button>
         <div className="flex items-center gap-1">
           <button
@@ -63,7 +65,7 @@ export default function SignaturePad() {
             disabled={!ink.canUndo}
             className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent"
           >
-            Undo
+            {t('create.pad_undo')}
           </button>
           <button
             type="button"
@@ -71,7 +73,7 @@ export default function SignaturePad() {
             disabled={!ink.hasInk}
             className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-rose-700 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-600"
           >
-            Clear
+            {t('create.pad_clear')}
           </button>
         </div>
       </div>

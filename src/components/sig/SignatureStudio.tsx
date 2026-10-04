@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
-import { PrivacyNote } from '@unisim/sdk'
+import { PrivacyNote, type LocalizedSubject, type LocalizedText } from '@unisim/sdk'
+import { useT, type MessageKey } from '../../i18n'
+import { en } from '../../i18n/en'
 import { useSigStore } from '../../stores/sigStore'
 import type { StudioMode } from '../../lib/types'
 import { composeSignatureWithLabels, formatSigningDate, formatSigningTime } from '../../lib/signature'
@@ -13,13 +15,20 @@ import MainSignatureBar from './MainSignatureBar'
 import { useMainSignature } from '../../lib/cloud'
 import { CONTAINER } from '../../lib/layout'
 
-const MODES: { id: StudioMode; label: string }[] = [
-  { id: 'draw', label: 'Draw' },
-  { id: 'type', label: 'Type' },
-  { id: 'phone', label: 'Sign on phone' },
+const MODES: { id: StudioMode; label: MessageKey }[] = [
+  { id: 'draw', label: 'create.mode_draw' },
+  { id: 'type', label: 'create.mode_type' },
+  { id: 'phone', label: 'create.mode_phone' },
 ]
 
+const ALIGN_LABELS: Record<LabelAlign, MessageKey> = {
+  left: 'create.align_left',
+  center: 'create.align_center',
+  right: 'create.align_right',
+}
+
 export default function SignatureStudio() {
+  const t = useT()
   const mode = useSigStore((s) => s.mode)
   const setMode = useSigStore((s) => s.setMode)
 
@@ -55,7 +64,8 @@ export default function SignatureStudio() {
     if (!base || labels.length === 0) { setComposed(null); return }
     composeSignatureWithLabels(base, labels, { align: labelAlign }).then((url) => { if (!cancelled) setComposed(url) })
     return () => { cancelled = true }
-  }, [base, includeName, includeDate, includeTime, labelAlign, signerName, setComposed])
+    // t.lang: the stamped date and time are written in the active language.
+  }, [base, includeName, includeDate, includeTime, labelAlign, signerName, setComposed, t.lang])
 
   return (
     <div className={`${CONTAINER} py-6`}>
@@ -65,7 +75,7 @@ export default function SignatureStudio() {
         <div className="space-y-6">
         <section className="rounded-xl border border-slate-200 bg-white p-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-900">Create your signature</h2>
+            <h2 className="text-sm font-bold text-slate-900">{t('create.studio_title')}</h2>
             <div className="inline-flex rounded-md bg-slate-100 p-0.5">
               {MODES.map((m) => (
                 <button
@@ -75,7 +85,7 @@ export default function SignatureStudio() {
                   aria-pressed={mode === m.id}
                   className={`rounded px-3 py-1 text-xs font-semibold ${mode === m.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
                 >
-                  {m.label}
+                  {t(m.label)}
                 </button>
               ))}
             </div>
@@ -87,30 +97,30 @@ export default function SignatureStudio() {
 
           {/* Optional name / date / time stamped beneath the signature. */}
           <div className="mt-4 space-y-2 border-t border-slate-100 pt-3">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Add name, date &amp; time</div>
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('create.labels_heading')}</div>
             <label className="flex items-center gap-2 text-sm text-slate-700">
               <input type="checkbox" checked={includeName} onChange={(e) => setIncludeName(e.target.checked)} className="h-4 w-4 accent-orange-600" />
-              Add your name
+              {t('create.labels_add_name')}
             </label>
             {includeName && (
               <input
                 value={signerName}
                 onChange={(e) => setSignerName(e.target.value)}
-                placeholder="Your name"
+                placeholder={t('create.labels_name_placeholder')}
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
               />
             )}
             <label className="flex items-center gap-2 text-sm text-slate-700">
               <input type="checkbox" checked={includeDate} onChange={(e) => setIncludeDate(e.target.checked)} className="h-4 w-4 accent-orange-600" />
-              Add today's date <span className="text-slate-400">({formatSigningDate()})</span>
+              <span>{t.rich('create.labels_add_date', { date: <span className="text-slate-400">({formatSigningDate()})</span> })}</span>
             </label>
             <label className="flex items-center gap-2 text-sm text-slate-700">
               <input type="checkbox" checked={includeTime} onChange={(e) => setIncludeTime(e.target.checked)} className="h-4 w-4 accent-orange-600" />
-              Add the time <span className="text-slate-400">({formatSigningTime()})</span>
+              <span>{t.rich('create.labels_add_time', { time: <span className="text-slate-400">({formatSigningTime()})</span> })}</span>
             </label>
             {hasLabels && (
               <div className="flex items-center gap-2 pt-0.5">
-                <span className="text-[11px] font-medium text-slate-500">Align</span>
+                <span className="text-[11px] font-medium text-slate-500">{t('create.labels_align')}</span>
                 <div className="inline-flex rounded-md bg-slate-100 p-0.5">
                   {(['left', 'center', 'right'] as LabelAlign[]).map((a) => (
                     <button
@@ -118,9 +128,9 @@ export default function SignatureStudio() {
                       type="button"
                       onClick={() => setLabelAlign(a)}
                       aria-pressed={labelAlign === a}
-                      className={`rounded px-2.5 py-1 text-xs font-semibold capitalize ${labelAlign === a ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                      className={`rounded px-2.5 py-1 text-xs font-semibold ${labelAlign === a ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
                     >
-                      {a}
+                      {t(ALIGN_LABELS[a])}
                     </button>
                   ))}
                 </div>
@@ -130,17 +140,17 @@ export default function SignatureStudio() {
                 image used for saving and signing. */}
             {hasLabels && (
               <div className="pt-1">
-                <div className="mb-1 text-[11px] font-medium text-slate-500">Preview</div>
+                <div className="mb-1 text-[11px] font-medium text-slate-500">{t('create.labels_preview')}</div>
                 <div className="flex min-h-[76px] items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 p-3">
                   {composedDataUrl ? (
                     <img
                       src={composedDataUrl}
-                      alt="Your signature with the name, date and time stamped beneath it"
+                      alt={t('create.labels_preview_alt')}
                       className="max-h-24 max-w-full object-contain"
                     />
                   ) : (
                     <span className="text-center text-[11px] text-slate-400">
-                      {base ? 'Building preview…' : 'Add your signature above to see the preview.'}
+                      {base ? t('create.labels_preview_building') : t('create.labels_preview_empty')}
                     </span>
                   )}
                 </div>
@@ -148,14 +158,13 @@ export default function SignatureStudio() {
             )}
             {hasLabels && (
               <p className="text-[11px] text-slate-400">
-                Appears beneath your signature. When signing a PDF you can choose whether to include it.
+                {t('create.labels_note')}
               </p>
             )}
           </div>
 
           <p className="mt-3 text-xs text-slate-500">
-            Everything here runs in your browser. Use your signature to sign a PDF on the right — for free, no account
-            needed.
+            {t('create.studio_footer')}
           </p>
         </section>
 
@@ -178,8 +187,8 @@ export default function SignatureStudio() {
           <PrivacyNote
             repo="https://github.com/universal-simulation-ltd/Universal_Signatures"
             proof="https://github.com/universal-simulation-ltd/Universal_Signatures/blob/main/PRIVACY.md"
-            subject="Your signature"
-            except="saving one to the cloud, signing on your phone, or sending a document to be signed"
+            subject={{ en: en.create.privacy_subject, [t.lang]: t('create.privacy_subject') } as LocalizedSubject}
+            except={{ en: en.create.privacy_except, [t.lang]: t('create.privacy_except') } as LocalizedText}
           />
         </div>
       </div>

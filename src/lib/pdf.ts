@@ -1,7 +1,9 @@
-import { PDFDocument, PDFHexString, PDFName, PDFString, StandardFonts, rgb, type PDFDict } from 'pdf-lib'
+import { PDFDocument, PDFHexString, PDFName, PDFString, StandardFonts, rgb, type PDFDict, type PDFFont } from 'pdf-lib'
 import { appendSigningAuditPage, type SigningAuditFields } from '@unisim/sdk'
 import { dataUrlToBytes } from './signature'
 import { ALL_PAGES, INITIAL_PAGES } from './types'
+import { getT } from '../i18n'
+import { en } from '../i18n/en'
 
 export type Anchor =
   | 'top-left' | 'top-center' | 'top-right'
@@ -201,8 +203,10 @@ export async function signPdf(pdfBytes: ArrayBuffer, sigPng: string, opts: Place
   if (opts.qrPng) {
     const qr = await doc.embedPng(dataUrlToBytes(opts.qrPng))
     const qrSize = Math.max(48, Math.min(96, w * 0.5))
-    const caption = 'Scan to verify · Universal Signatures'
     const font = await doc.embedFont(StandardFonts.Helvetica)
+    // In the reader's language when Helvetica can draw it, otherwise English.
+    const translated = getT()('sign.qr_caption')
+    const caption = canEncode(font, translated) ? translated : en.sign.qr_caption
     const fontSize = 6
     const capH = fontSize + 2
     const gap = 6
@@ -229,6 +233,17 @@ export async function signPdf(pdfBytes: ArrayBuffer, sigPng: string, opts: Place
   }
 
   return doc.save()
+}
+
+// The standard fonts only cover WinAnsi (Western European), so a caption with,
+// say, Turkish ğ or ı would throw when drawn.
+function canEncode(font: PDFFont, text: string): boolean {
+  try {
+    font.encodeText(text)
+    return true
+  } catch {
+    return false
+  }
 }
 
 function anchorParts(a: Anchor): ['top' | 'mid' | 'bottom', 'left' | 'center' | 'right'] {

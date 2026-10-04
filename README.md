@@ -9,13 +9,38 @@ Live at **`opensource.unisim.co.uk/signatures`**.
 
 ## Features
 
-- **Create a signature** — draw with mouse/touch/stylus, or type your name in a
-  cursive font (rasterised to PNG).
-- **Sign a PDF** — upload a PDF, pick the page, position and size, and download
-  the signed copy. 100% client-side via `pdf-lib`; the document is never uploaded.
+- **Create a signature** — draw with mouse/touch/stylus (a pen that reports
+  pressure draws a thinner or thicker line), type your name in a cursive font,
+  or **draw it on your phone** by scanning a QR code (a 6-digit PIN, and the code
+  expires after 5 minutes).
+- **Sign a PDF** — pick the page (or every page), position and size, and download
+  the signed copy. Or **initial each page and sign the last**. 100% client-side
+  via `pdf-lib`; the document is never uploaded.
+- **Signing certificate** *(optional, free with a Universal ID)* — a QR and a
+  certificate page on the PDF, and a public record holding fingerprints of the
+  original and of the signed copy, so anyone can check a copy byte for byte.
+- **Send to be signed** — ask someone else to sign a PDF. They sign in their
+  browser with no account (optionally after confirming their email address with
+  a code); you both get the certificate. This is the one flow that uploads a PDF
+  — see [PRIVACY.md](PRIVACY.md).
+- **Verification badge** — put "✓ Signed and verified" on any website: a link
+  plus `badge.js`, which checks the certificate live, or a picture + link for
+  email and Markdown.
 - **Save a verified signature to the cloud** *(optional, gated)* — store your
   signature against your Universal ID with a SHA-256 hash + a public certificate
   link anyone can verify.
+- **Eight languages** — English, French, Spanish, Italian, German, Portuguese
+  (Brazil and Portugal) and Turkish, following the suite's language setting.
+
+### Embedding a badge
+
+```html
+<a class="unisim-sig-badge" data-cert="CERTIFICATE_ID"
+   href="https://opensource.unisim.co.uk/signatures/verify/CERTIFICATE_ID">Verify this signature</a>
+<script async src="https://opensource.unisim.co.uk/signatures/badge.js"></script>
+```
+
+The certificate page's "Show it on a website" fills the ID in for you.
 
 ## Free vs. cloud
 

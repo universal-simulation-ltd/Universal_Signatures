@@ -12,6 +12,7 @@ import VerifyPage from './components/sig/VerifyPage'
 import SignRequestPage from './components/sig/SignRequestPage'
 import { parseExpiry } from './lib/mobileSign'
 import { KNOWLEDGE_BASE } from './knowledge'
+import { useT } from './i18n'
 
 const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatures'
 
@@ -40,6 +41,7 @@ function route():
 }
 
 export default function App() {
+  const t = useT()
   const r = route()
 
   // The phone signing page is a standalone full-screen view — no navbar/footer.
@@ -55,8 +57,8 @@ export default function App() {
         about={{
           repo:    REPO_URL,
           proof:   `${REPO_URL}/blob/main/PRIVACY.md`,
-          subject: 'Your signature',
-          except:  'saving one to the cloud, signing on your phone, or sending a document to be signed',
+          subject: t('app.about_subject'),
+          except:  t('app.about_except'),
           version: __APP_VERSION__,
           credits,
           noticesHref: `${REPO_URL}/blob/main/THIRD-PARTY-NOTICES.md`,
@@ -96,19 +98,25 @@ export default function App() {
       <footer className="border-t border-slate-200 bg-white">
         <div className={`${CONTAINER} py-4 flex flex-row items-center gap-3 text-xs text-slate-500`}>
           <span>
-            With{' '}
-            <span aria-hidden="true" className="text-orange-600">&hearts;</span>
-            <span className="sr-only">love</span>{' '}
-            from{' '}
-            <a href="https://www.unisim.co.uk" target="_blank" rel="noreferrer" className="text-slate-700 hover:text-orange-700 underline-offset-2 hover:underline">
-              UNISIM.co.uk
-            </a>
+            {t.rich('app.footer_with_love', {
+              heart: (
+                <>
+                  <span aria-hidden="true" className="text-orange-600">&hearts;</span>
+                  <span className="sr-only">{t('app.footer_love_sr')}</span>
+                </>
+              ),
+              link: (
+                <a href="https://www.unisim.co.uk" target="_blank" rel="noreferrer" className="text-slate-700 hover:text-orange-700 underline-offset-2 hover:underline">
+                  UNISIM.co.uk
+                </a>
+              ),
+            })}
           </span>
           <a
             href={REPO_URL}
             target="_blank"
             rel="noreferrer"
-            aria-label="Universal Signatures on GitHub"
+            aria-label={t('app.github_aria')}
             className="ml-auto shrink-0 inline-flex items-center gap-1.5 text-slate-600 hover:text-slate-900 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5" aria-hidden="true">

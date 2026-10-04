@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useUniversal, useOrg, useSubscription, useCredits, useProjects, useAppFreeToken } from '@unisim/sdk'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { sha256Hex } from './signature'
+import { getT } from '../i18n'
 import type { AnyVerifyResult, CloudGate, RequestCertResult, SavedSignature, SignatureMode, VerifyResult } from './types'
 
 // ── The gate ────────────────────────────────────────────────────────────────
@@ -111,7 +112,7 @@ export function useStoredSignatures(orgId: string | null | undefined, signedIn: 
       .then(({ data, error: err }) => {
         if (cancelled) return
         setRows(err ? [] : ((data ?? []) as StoredSignature[]))
-        setError(err ? 'Could not load your stored signatures.' : null)
+        setError(err ? getT()('save.stored_error_load') : null)
         setLoading(false)
       })
     return () => {
@@ -137,7 +138,7 @@ export async function saveSignature(
   userId: string | null,
   input: SaveInput,
 ): Promise<{ ok: boolean; certId?: string; error?: string }> {
-  if (!orgId || !userId) return { ok: false, error: 'Sign in with your Universal ID to save.' }
+  if (!orgId || !userId) return { ok: false, error: getT()('save.error_sign_in_to_save') }
   const signature_hash = await sha256Hex(input.imageDataUrl)
   const { data, error } = await supabase
     .from('signatures')
@@ -166,7 +167,7 @@ export function friendlyTokenError(msg: string): string {
   // Only reached at the limit, so this is the one place the allowance is
   // mentioned — number-free, as the free limits are set to change.
   if (msg.includes('token_in_use') || msg.includes('no_credits')) {
-    return 'You’ve used your free signature storage. Remove a stored signature to make room.'
+    return getT()('save.error_storage_full')
   }
   return msg
 }
@@ -214,9 +215,9 @@ export async function recordSigningEvent(
   userId: string | null,
   input: SigningRecordInput,
 ): Promise<{ ok: boolean; certId?: string; recordedAt?: string; error?: string }> {
-  if (!userId) return { ok: false, error: 'Sign in with your Universal ID to create a verifiable record.' }
+  if (!userId) return { ok: false, error: getT()('save.error_sign_in_to_record') }
   // Signed in with no company: records are kept per company (signing_events.org_id).
-  if (!orgId) return { ok: false, error: 'Set up a company on your Universal ID (it’s free) at app.unisim.co.uk to create a verifiable record.' }
+  if (!orgId) return { ok: false, error: getT()('save.error_no_company_record') }
   const { data, error } = await supabase
     .from('signing_events')
     .insert({
@@ -394,7 +395,7 @@ export async function saveMainSignature(
   if (error) return { ok: false, error: error.message }
   const d = data as { ok: boolean; cert_id?: string; error?: string } | null
   if (!d?.ok || !d.cert_id) {
-    return { ok: false, error: d?.error === 'too_large' ? 'That signature image is too large to store.' : 'Could not save your main signature.' }
+    return { ok: false, error: d?.error === 'too_large' ? getT()('save.main_error_too_large') : getT()('save.main_error_save') }
   }
   window.dispatchEvent(new Event(MAIN_CHANGED))
   return { ok: true, certId: d.cert_id }

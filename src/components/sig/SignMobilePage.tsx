@@ -4,6 +4,7 @@ import { useUniversal } from '@unisim/sdk'
 import { mobileSignChannel, type MobileSignResult } from '../../lib/mobileSign'
 import { randomHex } from '../../lib/signature'
 import { useInkCanvas } from '../../lib/useInkCanvas'
+import { useT, type MessageKey } from '../../i18n'
 
 type Status = 'idle' | 'sending' | 'sent' | 'unconfirmed' | 'invalid' | 'wrongPin' | 'refused' | 'error' | 'expired'
 
@@ -12,11 +13,11 @@ const REPLY_TIMEOUT_MS = 6000
 // How long to wait to join the channel before calling it a connection problem.
 const JOIN_TIMEOUT_MS = 10000
 
-const MESSAGES: Partial<Record<Status, string>> = {
-  invalid: 'Draw a signature and enter the 6-digit PIN shown on your computer.',
-  wrongPin: 'That PIN doesn’t match. Check the 6 digits on your computer and send again.',
-  refused: 'Your computer couldn’t use that drawing. Clear it, draw again and send.',
-  error: 'Couldn’t reach your computer. Check your connection and try again.',
+const MESSAGES: Partial<Record<Status, MessageKey>> = {
+  invalid: 'create.mobile_invalid',
+  wrongPin: 'create.mobile_wrong_pin',
+  refused: 'create.mobile_refused',
+  error: 'create.mobile_error',
 }
 
 /**
@@ -27,6 +28,7 @@ const MESSAGES: Partial<Record<Status, string>> = {
  * active signature. Mirrors Universal PDF's SignMobilePage.
  */
 export default function SignMobilePage({ token, expiresAt = null }: { token: string; expiresAt?: number | null }) {
+  const t = useT()
   const { supabase } = useUniversal()
   // Transparent canvas (dark ink), matching the desktop draw pad so the phone
   // signature places identically. The white look comes from the CSS background.
@@ -110,9 +112,9 @@ export default function SignMobilePage({ token, expiresAt = null }: { token: str
     return (
       <main className="flex min-h-svh flex-col items-center justify-center gap-3 bg-slate-900 p-6 text-center text-white">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-500/20 text-3xl" aria-hidden="true">⏱</div>
-        <h1 className="text-lg font-semibold">This code has expired</h1>
+        <h1 className="text-lg font-semibold">{t('create.mobile_expired_title')}</h1>
         <p className="text-sm text-slate-400">
-          On your computer, press “Get a new code”, then scan the new code with your phone.
+          {t('create.mobile_expired_body')}
         </p>
       </main>
     )
@@ -122,11 +124,11 @@ export default function SignMobilePage({ token, expiresAt = null }: { token: str
     return (
       <main className="flex min-h-svh flex-col items-center justify-center gap-3 bg-slate-900 p-6 text-center text-white">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-600/20 text-3xl">✓</div>
-        <h1 className="text-lg font-semibold">Signature sent</h1>
+        <h1 className="text-lg font-semibold">{t('create.mobile_sent_title')}</h1>
         <p className="text-sm text-slate-400">
           {status === 'sent'
-            ? 'Go back to the page you scanned the code from — your signature is ready there.'
-            : 'Go back to the page you scanned the code from. If your signature isn’t there, check the code is still showing and scan it again.'}
+            ? t('create.mobile_sent_body')
+            : t('create.mobile_unconfirmed_body')}
         </p>
       </main>
     )
@@ -135,25 +137,25 @@ export default function SignMobilePage({ token, expiresAt = null }: { token: str
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-4 bg-slate-900 p-5 text-white">
       <div>
-        <h1 className="text-lg font-semibold">Sign on your phone</h1>
-        <p className="mt-1 text-sm text-slate-400">Draw your signature, enter the PIN shown on your computer, then send.</p>
+        <h1 className="text-lg font-semibold">{t('create.mobile_title')}</h1>
+        <p className="mt-1 text-sm text-slate-400">{t('create.mobile_intro')}</p>
       </div>
 
       <canvas
         ref={ink.canvasRef}
         role="img"
-        aria-label="Signature pad. Draw your signature with your finger or a stylus."
+        aria-label={t('create.mobile_pad_aria')}
         className="h-56 w-full touch-none rounded-lg bg-white"
         {...ink.handlers}
       />
 
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center">
-          <button type="button" onClick={ink.undo} disabled={!ink.canUndo} className="rounded-lg px-3 py-2 text-sm text-slate-400 hover:text-white disabled:opacity-40">Undo</button>
-          <button type="button" onClick={ink.clear} disabled={!ink.hasInk} className="rounded-lg px-3 py-2 text-sm text-slate-400 hover:text-white disabled:opacity-40">Clear</button>
+          <button type="button" onClick={ink.undo} disabled={!ink.canUndo} className="rounded-lg px-3 py-2 text-sm text-slate-400 hover:text-white disabled:opacity-40">{t('create.mobile_undo')}</button>
+          <button type="button" onClick={ink.clear} disabled={!ink.hasInk} className="rounded-lg px-3 py-2 text-sm text-slate-400 hover:text-white disabled:opacity-40">{t('create.mobile_clear')}</button>
         </div>
         <label className="flex items-center gap-2 text-sm">
-          <span className="text-slate-400">PIN</span>
+          <span className="text-slate-400">{t('create.mobile_pin')}</span>
           <input
             inputMode="numeric"
             value={pin}
@@ -165,7 +167,7 @@ export default function SignMobilePage({ token, expiresAt = null }: { token: str
       </div>
 
       {MESSAGES[status] && (
-        <p role="alert" className="text-sm text-rose-400">{MESSAGES[status]}</p>
+        <p role="alert" className="text-sm text-rose-400">{t(MESSAGES[status])}</p>
       )}
 
       <button
@@ -174,7 +176,7 @@ export default function SignMobilePage({ token, expiresAt = null }: { token: str
         disabled={status === 'sending'}
         className="mt-1 rounded-xl bg-orange-700 py-3 text-sm font-semibold hover:bg-orange-800 disabled:opacity-60"
       >
-        {status === 'sending' ? 'Sending…' : 'Send signature to my computer'}
+        {status === 'sending' ? t('create.mobile_sending') : t('create.mobile_send')}
       </button>
     </main>
   )

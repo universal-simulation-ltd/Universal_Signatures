@@ -8,11 +8,13 @@ import {
   renameLocalSignature,
   type LocalSignature,
 } from '../../lib/localSignatures'
+import { useT } from '../../i18n'
 
 // Free, no-account "Save on this device" — the local-first counterpart to the
 // cloud save. Guests can keep a few signatures in this browser and reuse them
 // without a Universal ID. Sits above the cloud panel so the free option leads.
 export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
+  const t = useT()
   const mode = useSigStore((s) => s.mode)
   const fontId = useSigStore((s) => s.fontId)
   const signerName = useSigStore((s) => s.signerName)
@@ -80,7 +82,7 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
   // Display name for a saved entry: its label, else the signer name, else a
   // style default.
   function displayName(sig: LocalSignature): string {
-    return sig.label || sig.signerName || (sig.style === 'type' ? 'Typed signature' : 'Drawn signature')
+    return sig.label || sig.signerName || (sig.style === 'type' ? t('save.typed_signature') : t('save.drawn_signature'))
   }
 
   function onUse(sig: LocalSignature) {
@@ -103,19 +105,19 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
     <>
       {!bare && (
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold text-slate-900">Save on this device</h2>
-          <Chip size="sm">No account</Chip>
+          <h2 className="text-sm font-bold text-slate-900">{t('save.local_title')}</h2>
+          <Chip size="sm">{t('save.local_no_account')}</Chip>
         </div>
       )}
       <p className={`text-xs text-slate-500 ${bare ? '' : 'mt-1'}`}>
-        Keep your signature in this browser and reuse it later — free, no sign-in. It stays on this device and never leaves it.
+        {t('save.local_intro')}
       </p>
 
       <div className="mt-4 space-y-2">
         <input
           value={saveName}
           onChange={(e) => setSaveName(e.target.value)}
-          placeholder="Name this signature (optional)"
+          placeholder={t('save.local_name_placeholder')}
           className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
         />
         <button
@@ -123,7 +125,7 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
           disabled={!currentImage}
           className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
         >
-          {justSaved ? '✓ Saved to this device' : !currentImage ? 'Create a signature first' : 'Save to this device'}
+          {justSaved ? t('save.local_saved') : !currentImage ? t('save.create_first') : t('save.local_save')}
         </button>
       </div>
 
@@ -135,7 +137,7 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
               className={`flex items-center gap-3 rounded-lg border p-2 ${sig.id === inUseId ? 'border-orange-300 bg-orange-50/60 ring-1 ring-orange-200' : 'border-slate-200 bg-slate-50'}`}
             >
               <span className="flex h-12 w-24 shrink-0 items-center justify-center overflow-hidden rounded bg-white ring-1 ring-slate-200">
-                <img src={sig.imageDataUrl} alt="Saved signature" className="max-h-11 max-w-[5.5rem] object-contain" />
+                <img src={sig.imageDataUrl} alt={t('save.local_saved_alt')} className="max-h-11 max-w-[5.5rem] object-contain" />
               </span>
               <span className="min-w-0 flex-1">
                 {renamingId === sig.id ? (
@@ -148,38 +150,38 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
                       else if (e.key === 'Escape') cancelRename()
                     }}
                     onBlur={() => saveRename(sig.id)}
-                    placeholder="Signature name"
+                    placeholder={t('save.local_rename_placeholder')}
                     className="w-full rounded-md border border-slate-300 px-2 py-1 text-xs focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
                 ) : (
                   <button
                     onClick={() => startRename(sig)}
                     className="block max-w-full truncate text-left text-xs font-medium text-slate-700 hover:text-orange-700"
-                    title="Rename"
+                    title={t('save.local_rename')}
                   >
                     {displayName(sig)}
                   </button>
                 )}
-                <span className="text-[10px] uppercase tracking-wide text-slate-400">{sig.style}</span>
+                <span className="text-[10px] uppercase tracking-wide text-slate-400">{sig.style === 'type' ? t('save.style_type') : t('save.style_draw')}</span>
               </span>
               {sig.id === inUseId ? (
                 <span className="shrink-0 rounded-md bg-orange-100 px-3 py-1.5 text-xs font-semibold text-orange-700">
-                  In use ✓
+                  {t('save.local_in_use')}
                 </span>
               ) : (
                 <button
                   onClick={() => onUse(sig)}
                   className="shrink-0 rounded-md bg-orange-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-800"
                 >
-                  Use
+                  {t('save.local_use')}
                 </button>
               )}
               <button
                 onClick={() => onRemove(sig.id)}
-                aria-label="Remove saved signature"
+                aria-label={t('save.local_remove_aria')}
                 className="shrink-0 rounded-md px-2 py-1.5 text-xs font-medium text-slate-400 hover:text-rose-600"
               >
-                Remove
+                {t('save.remove')}
               </button>
             </li>
           ))}

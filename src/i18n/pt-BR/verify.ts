@@ -1,0 +1,78 @@
+import type { Messages } from '../en'
+const verify: Messages['verify'] = {
+  // The certificate page (opened from the QR on a signed PDF)
+  'title': 'Certificado de assinatura',
+  'certificate_id': 'Certificado {id}',
+  'verifying': 'Verificando…',
+  'verified_signing': 'Verificado — este documento foi assinado pelo Universal Signatures',
+  'verified_signature': 'Verificado — esta é uma assinatura salva autêntica',
+  'verified_request': 'Verificado — este documento foi assinado por todos a quem foi enviado',
+  'request_waiting': 'Enviado e ainda aguardando assinatura',
+  'lookup_failed': 'Não foi possível conectar ao serviço de verificação, então este certificado ainda não foi conferido. Verifique sua conexão e tente novamente.',
+  'try_again': 'Tentar novamente',
+  'not_found': '✗ Nenhum registro encontrado para este certificado. O link pode estar errado, ou o registro foi removido.',
+  'back_home': '← Universal Signatures',
+
+  // Row labels (label on the left, value on the right)
+  'row_signed_by': 'Assinado por',
+  'row_waiting_for': 'Aguardando',
+  'row_organisation': 'Organização',
+  'row_document': 'Documento',
+  'row_signed': 'Assinado em',
+  'row_saved': 'Salvo em',
+  'row_sent': 'Enviado em',
+  'row_signer': 'Signatário',
+  'row_original_hash': 'Hash do documento original (SHA-256)',
+  'row_signed_hash': 'Hash da cópia assinada (SHA-256)',
+  'row_sent_hash': 'Documento como enviado (SHA-256)',
+  'row_signature_hash': 'Hash da assinatura (SHA-256)',
+
+  'hash_note_both': 'O primeiro hash é a impressão digital do documento {original}, antes de ser assinado; o segundo, da {signed} exatamente como foi gerada.',
+  'hash_note_original_only': 'O hash acima é a impressão digital do documento {original}, antes de a assinatura ser adicionada.',
+  'hash_note_original': 'original',
+  'hash_note_signed': 'cópia assinada',
+
+  // "Is this the document that was signed?" — checking a PDF against the record
+  'check_intro_both': 'Tem a cópia assinada ou o original? Confira com este registro — a impressão digital é calculada no seu navegador e o arquivo nunca é enviado.',
+  'check_intro_original': 'Tem o PDF original? Confira com este registro — a impressão digital é calculada no seu navegador e o arquivo nunca é enviado.',
+  'check_busy': 'Verificando…',
+  'check_button': 'Conferir um PDF',
+  'check_match_signed': '✓ {name} é a cópia assinada, byte por byte, exatamente como foi gerada. Nada nele mudou desde então.',
+  'check_match_original': '✓ {name} é o documento original para o qual este registro foi feito, como era antes de ser assinado.',
+  'check_no_match_both': '✗ {name} não é nem a cópia assinada nem o original. Se deveria ser a cópia assinada, ele foi alterado depois de assinado — até salvá-lo de novo ou imprimi-lo em PDF conta.',
+  'check_no_match_original': '✗ {name} não confere com este registro. Uma cópia assinada também não vai conferir — o registro guarda a impressão digital do original antes de a assinatura entrar —, então confira o original não assinado.',
+  'check_read_error': 'Não foi possível ler esse arquivo.',
+
+  // A document sent to be signed: activity log and download
+  'activity': 'Atividade',
+  'action_opened': 'Abriu',
+  'action_verified': 'Confirmou o endereço de e-mail',
+  'action_signature': 'Assinou',
+  'action_annotation': 'Adicionou marcações',
+  'action_highlight': 'Destacou',
+  'action_text': 'Adicionou texto',
+  'action_other': 'Fez outras alterações',
+  'action_completed': 'Concluído',
+  'download_busy': 'Buscando…',
+  'download_button': 'Baixar a cópia assinada',
+  'download_deleted': 'A cópia armazenada foi removida.',
+  'download_failed': 'Não foi possível buscar a cópia assinada. Tente novamente daqui a pouco.',
+
+  // "Show it on a website" — the embeddable badge
+  'badge_summary': 'Mostrar em um site',
+  'badge_summary_hint': 'Incorpore um selo com link para este certificado.',
+  'badge_format_aria': 'Formato do selo',
+  'badge_tab_live': 'Selo ao vivo',
+  'badge_tab_image': 'Imagem + link',
+  'badge_tab_markdown': 'Markdown',
+  'badge_desc_live': 'Confere este certificado toda vez que a página é vista e só então mostra “✓ Assinado e verificado”. Precisa de uma página que permita scripts.',
+  'badge_desc_image': 'Para e-mails e sites que não permitem scripts. A imagem não consegue conferir nada sozinha, por isso diz “clique para verificar” — a verificação acontece nesta página.',
+  'badge_desc_markdown': 'Para um README ou qualquer outro lugar que aceite Markdown. Uma imagem fixa, como a versão em imagem.',
+  'badge_preview_aria': 'Visualização',
+  'badge_link_text': 'Verificar esta assinatura',
+  'badge_image_alt': 'Assinado com o Universal Signatures — clique para verificar',
+  'badge_paste_label': 'Cole isto na sua página',
+  'badge_copy': 'Copiar',
+  'badge_copied': 'Copiado ✓',
+}
+export default verify

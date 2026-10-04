@@ -16,6 +16,7 @@ import SignaturePad from './SignaturePad'
 import TypeSignature from './TypeSignature'
 import PhoneSignPanel from './PhoneSignPanel'
 import { CONTAINER } from '../../lib/layout'
+import { getT, useT, type MessageKey } from '../../i18n'
 
 const loadPdf = () => import('../../lib/pdf')
 const loadPdfjs = () => import('../../lib/pdfjs')
@@ -43,10 +44,10 @@ interface Doc {
   pages: { src: string; width: number; height: number }[]
 }
 
-const MODES: { id: StudioMode; label: string }[] = [
-  { id: 'draw', label: 'Draw' },
-  { id: 'type', label: 'Type' },
-  { id: 'phone', label: 'Sign on phone' },
+const MODES: { id: StudioMode; label: MessageKey }[] = [
+  { id: 'draw', label: 'send.mode_draw' },
+  { id: 'type', label: 'send.mode_type' },
+  { id: 'phone', label: 'send.mode_phone' },
 ]
 
 // Where to sign when a request carries no field (one minted by another app):
@@ -54,15 +55,16 @@ const MODES: { id: StudioMode; label: string }[] = [
 const DEFAULT_FIELD: StoredSignField = { page: -1, xPct: 0.75, yPct: 0.88, widthPct: 25 }
 
 function messageFor(code: string | undefined, fallback?: string): string {
+  const t = getT()
   switch (code) {
-    case 'invalid_token': return 'This signing link isn’t valid. Check you have the whole link from the email.'
-    case 'expired': return 'This signing link has expired. Ask the sender to send the document again.'
-    case 'deleted': return 'The sender has withdrawn this document.'
-    case 'completed': return 'This document has already been signed.'
-    case 'already_signed': return 'You’ve already signed this document.'
-    case 'network': return 'Couldn’t reach the signing service. Check your connection and try again.'
-    case 'verification_expired': return 'Your confirmation has expired. Confirm your email address again.'
-    default: return fallback || 'Something went wrong opening this document.'
+    case 'invalid_token': return t('send.req_invalid_token')
+    case 'expired': return t('send.req_expired')
+    case 'deleted': return t('send.req_deleted')
+    case 'completed': return t('send.req_completed')
+    case 'already_signed': return t('send.req_already_signed')
+    case 'network': return t('send.req_network')
+    case 'verification_expired': return t('send.req_verification_expired')
+    default: return fallback || t('send.req_generic')
   }
 }
 
@@ -74,6 +76,7 @@ function messageFor(code: string | undefined, fallback?: string): string {
  * verification code on it, to the certificate both of them can open.
  */
 export default function SignRequestPage({ token }: { token: string }) {
+  const t = useT()
   const { supabase } = useUniversal()
   const [phase, setPhase] = useState<Phase>({ kind: 'starting' })
   const [session, setSession] = useState<string | undefined>(undefined)
@@ -123,7 +126,7 @@ export default function SignRequestPage({ token }: { token: string }) {
         setDoc({ name: l.docName ?? 'document.pdf', bytes, field: field ?? DEFAULT_FIELD, pageCount, certId: l.certId ?? null, pages })
         setPhase({ kind: 'ready' })
       } catch {
-        if (!cancelled) setPhase({ kind: 'failed', message: 'Couldn’t open the document.', retry: true })
+        if (!cancelled) setPhase({ kind: 'failed', message: getT()('send.req_open_failed'), retry: true })
       }
     })()
     return () => { cancelled = true }
@@ -135,20 +138,20 @@ export default function SignRequestPage({ token }: { token: string }) {
         {phase.kind === 'starting' || phase.kind === 'loading' ? (
           <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-orange-500" />
-            {phase.kind === 'starting' ? 'Opening the signing link…' : 'Opening the document…'}
+            {phase.kind === 'starting' ? t('send.req_opening_link') : t('send.req_opening_doc')}
           </div>
         ) : phase.kind === 'failed' ? (
           <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-800">
             {phase.message}
             {phase.retry && (
               <button type="button" onClick={() => setAttempt((n) => n + 1)} className="mt-3 block rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-rose-900 ring-1 ring-rose-200 hover:bg-rose-100">
-                Try again
+                {t('send.req_try_again')}
               </button>
             )}
           </div>
         ) : phase.kind === 'done-before' ? (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6 text-sm text-emerald-800">
-            ✓ This document has already been signed. There’s nothing more to do here.
+            {t('send.req_done_before')}
           </div>
         ) : phase.kind === 'verify' ? (
           <VerifyGate
@@ -189,6 +192,7 @@ function download(bytes: Uint8Array, name: string) {
 
 // ── Confirm the address first (when the sender asked) ───────────────────────
 function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedEmail: string | null; onVerified: (session: string) => void }) {
+  const t = useT()
   const { supabase } = useUniversal()
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
@@ -203,12 +207,12 @@ function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedE
     setBusy(false)
     if (!r.ok) {
       setError(r.code === 'email_mismatch'
-        ? 'That isn’t the address this document was sent to.'
+        ? t('send.gate_err_mismatch')
         : r.code === 'too_soon'
-          ? `Please wait ${r.retryAfter ?? 60} seconds before asking for another code.`
+          ? t.plural('send.gate_err_too_soon', r.retryAfter ?? 60)
           : r.code === 'too_many_sends'
-            ? 'Too many codes have been sent for this link. Ask the sender to send it again.'
-            : r.error ?? 'Couldn’t send a code.')
+            ? t('send.gate_err_too_many_sends')
+            : r.error ?? t('send.gate_err_send'))
       return
     }
     setSentTo(r.maskedEmail ?? email.trim())
@@ -221,12 +225,12 @@ function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedE
     setBusy(false)
     if (!r.ok || !r.session) {
       setError(r.code === 'bad_credentials'
-        ? (r.triesLeft ? `That code doesn’t match. ${r.triesLeft} ${r.triesLeft === 1 ? 'try' : 'tries'} left.` : 'That code doesn’t match. Ask for a new one.')
+        ? (r.triesLeft ? t.plural('send.gate_err_tries_left', r.triesLeft) : t('send.gate_err_no_match'))
         : r.code === 'code_expired'
-          ? 'That code has expired. Ask for a new one.'
+          ? t('send.gate_err_code_expired')
           : r.code === 'too_many_attempts'
-            ? 'Too many wrong tries. Ask for a new code.'
-            : r.error ?? 'Couldn’t check that code.')
+            ? t('send.gate_err_too_many_attempts')
+            : r.error ?? t('send.gate_err_check'))
       return
     }
     onVerified(r.session)
@@ -234,14 +238,15 @@ function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedE
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6" data-testid="verify-gate">
-      <h1 className="text-lg font-bold text-slate-900">Confirm it’s you</h1>
+      <h1 className="text-lg font-bold text-slate-900">{t('send.gate_title')}</h1>
       <p className="mt-1 text-sm text-slate-600">
-        The sender asked for this document to open only for the person it was sent to
-        {maskedEmail ? <> (<span className="font-mono">{maskedEmail}</span>)</> : null}. Enter that email address and we’ll send it a code.
+        {maskedEmail
+          ? t.rich('send.gate_intro_masked', { email: <span className="font-mono">{maskedEmail}</span> })
+          : t('send.gate_intro')}
       </p>
       {!sentTo ? (
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-          <label htmlFor="gate-email" className="sr-only">Your email address</label>
+          <label htmlFor="gate-email" className="sr-only">{t('send.gate_email_label')}</label>
           <input
             id="gate-email"
             type="email"
@@ -250,18 +255,18 @@ function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedE
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') void sendCode() }}
-            placeholder="name@example.com"
+            placeholder={t('send.gate_email_placeholder')}
             className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
           />
           <button type="button" onClick={sendCode} disabled={busy || !email.trim()} className="rounded-md bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800 disabled:opacity-50">
-            {busy ? 'Sending…' : 'Email me a code'}
+            {busy ? t('send.gate_sending') : t('send.gate_send_code')}
           </button>
         </div>
       ) : (
         <div className="mt-4">
-          <p className="text-sm text-slate-700">We’ve emailed a 6-digit code to <span className="font-mono">{sentTo}</span>.</p>
+          <p className="text-sm text-slate-700">{t.rich('send.gate_code_sent', { email: <span className="font-mono">{sentTo}</span> })}</p>
           <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-            <label htmlFor="gate-code" className="sr-only">The code from the email</label>
+            <label htmlFor="gate-code" className="sr-only">{t('send.gate_code_label')}</label>
             <input
               id="gate-code"
               inputMode="numeric"
@@ -273,11 +278,11 @@ function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedE
               className="w-40 rounded-md border border-slate-300 px-3 py-2 text-sm tracking-widest outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
             />
             <button type="button" onClick={checkCode} disabled={busy || code.length < 6} className="rounded-md bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800 disabled:opacity-50">
-              {busy ? 'Checking…' : 'Open the document'}
+              {busy ? t('send.gate_checking') : t('send.gate_open')}
             </button>
           </div>
           <button type="button" onClick={() => { setSentTo(null); setCode('') }} className="mt-2 text-xs font-medium text-slate-500 hover:text-orange-700">
-            Send another code
+            {t('send.gate_send_another')}
           </button>
         </div>
       )}
@@ -288,6 +293,7 @@ function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedE
 
 // ── Read and sign ───────────────────────────────────────────────────────────
 function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Array, page: number) => Promise<string | null> }) {
+  const t = useT()
   const mode = useSigStore((s) => s.mode)
   const setMode = useSigStore((s) => s.setMode)
   const sig = useSigStore((s) => s.baseImage())
@@ -324,7 +330,7 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
       const problem = await onSigned(bytes, fieldPage)
       if (problem) setError(problem)
     } catch {
-      setError('Couldn’t sign the document.')
+      setError(t('send.doc_err_sign'))
     } finally {
       setBusy(false)
     }
@@ -333,26 +339,29 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
   return (
     <div className="space-y-5">
       <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <h1 className="text-lg font-bold text-slate-900">Sign {doc.name}</h1>
+        <h1 className="text-lg font-bold text-slate-900">{t('send.doc_title', { name: doc.name })}</h1>
         <p className="mt-1 text-sm text-slate-600">
-          You’ve been asked to sign this document. Read it, then add your signature below — it goes on{' '}
-          <button type="button" onClick={() => fieldRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="font-semibold text-orange-700 hover:underline">
-            page {fieldPage + 1}, where it’s marked
-          </button>.
+          {t.rich('send.doc_intro', {
+            link: (
+              <button type="button" onClick={() => fieldRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="font-semibold text-orange-700 hover:underline">
+                {t('send.doc_intro_link', { page: fieldPage + 1 })}
+              </button>
+            ),
+          })}
         </p>
         <button
           type="button"
           onClick={() => download(new Uint8Array(doc.bytes), doc.name)}
           className="mt-2 text-xs font-medium text-slate-500 hover:text-orange-700"
         >
-          Download it to read in your own PDF viewer
+          {t('send.doc_download')}
         </button>
       </div>
 
-      <div className="space-y-4" aria-label="The document">
+      <div className="space-y-4" aria-label={t('send.doc_aria')}>
         {doc.pages.map((p, i) => (
           <div key={i} className="relative mx-auto overflow-hidden rounded-lg bg-white shadow ring-1 ring-slate-200" style={{ maxWidth: p.width }}>
-            <img src={p.src} alt={`Page ${i + 1} of ${doc.pageCount}`} className="block w-full" draggable={false} />
+            <img src={p.src} alt={t('send.doc_page_alt', { n: i + 1, total: doc.pageCount })} className="block w-full" draggable={false} />
             {i === fieldPage && (
               <div
                 ref={fieldRef}
@@ -367,9 +376,9 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
                 }}
               >
                 {stamp ? (
-                  <img src={stamp} alt="Your signature, where it will go" className="max-h-full max-w-full object-contain" />
+                  <img src={stamp} alt={t('send.doc_stamp_alt')} className="max-h-full max-w-full object-contain" />
                 ) : (
-                  <span className="text-[11px] font-bold text-orange-800">Sign here</span>
+                  <span className="text-[11px] font-bold text-orange-800">{t('send.sign_here')}</span>
                 )}
               </div>
             )}
@@ -377,17 +386,17 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
         ))}
         {doc.pageCount > doc.pages.length && (
           <p className="text-center text-xs text-slate-500">
-            Showing the first {doc.pages.length} of {doc.pageCount} pages. Download it to read the rest.
+            {t('send.doc_showing_first', { shown: doc.pages.length, total: doc.pageCount })}
           </p>
         )}
         {!fieldShown && (
-          <p className="text-center text-xs text-slate-500">Your signature goes on page {fieldPage + 1}.</p>
+          <p className="text-center text-xs text-slate-500">{t('send.doc_field_page', { page: fieldPage + 1 })}</p>
         )}
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-900">Your signature</h2>
+          <h2 className="text-sm font-bold text-slate-900">{t('send.doc_your_signature')}</h2>
           <div className="inline-flex rounded-md bg-slate-100 p-0.5">
             {MODES.map((m) => (
               <button
@@ -397,7 +406,7 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
                 aria-pressed={mode === m.id}
                 className={`rounded px-3 py-1 text-xs font-semibold ${mode === m.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
               >
-                {m.label}
+                {t(m.label)}
               </button>
             ))}
           </div>
@@ -409,7 +418,7 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
         <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
           <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 h-4 w-4 accent-orange-600" />
           <span className="text-xs text-slate-700">
-            I’ve read this document, and I’m signing it with the signature above.
+            {t('send.doc_agree')}
           </span>
         </label>
 
@@ -421,11 +430,10 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
           disabled={!sig || !agree || busy}
           className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
         >
-          {busy ? 'Signing…' : !sig ? 'Add your signature first' : !agree ? 'Tick the box to sign' : 'Sign and send back'}
+          {busy ? t('send.doc_btn_signing') : !sig ? t('send.doc_btn_add_first') : !agree ? t('send.doc_btn_tick') : t('send.doc_btn_sign')}
         </button>
         <p className="mt-2 text-[11px] text-slate-500">
-          The signed copy goes back to the sender and downloads to you. Its certificate records your email address, when you signed and a
-          fingerprint of the signed copy. Your IP address and browser are logged with it; the public certificate shows only the country.
+          {t('send.doc_privacy')}
         </p>
       </div>
     </div>
@@ -433,17 +441,18 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
 }
 
 function Signed({ phase }: { phase: { certId: string | null; completed: boolean } }) {
+  const t = useT()
   return (
     <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6" data-testid="signed">
-      <h1 className="text-lg font-bold text-emerald-900">✓ Signed and sent back</h1>
+      <h1 className="text-lg font-bold text-emerald-900">{t('send.signed_title')}</h1>
       <p className="mt-1 text-sm text-emerald-800">
         {phase.completed
-          ? 'The sender has been told, and your signed copy has downloaded.'
-          : 'Your signed copy has downloaded.'}
+          ? t('send.signed_completed')
+          : t('send.signed_partial')}
       </p>
       {phase.certId && (
         <a href={certificateLink(phase.certId)} className="mt-3 inline-flex rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">
-          Open the certificate →
+          {t('send.signed_open_cert')}
         </a>
       )}
     </div>

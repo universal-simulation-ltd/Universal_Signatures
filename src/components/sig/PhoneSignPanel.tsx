@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { QrLightbox, UnisimQr, useUniversal } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
+import { useT } from '../../i18n'
 import {
   CODE_TTL_MS,
   MAX_WRONG_PINS,
@@ -20,6 +21,7 @@ import {
 // on this panel — showing the received signature inline — so the name/date/time
 // options below still apply. (Mirrors the equivalent Universal PDF flow.)
 export default function PhoneSignPanel() {
+  const t = useT()
   const { supabase } = useUniversal()
   const setDrawn = useSigStore((s) => s.setDrawn)
   const drawnDataUrl = useSigStore((s) => s.drawnDataUrl)
@@ -133,15 +135,15 @@ export default function PhoneSignPanel() {
   if (status === 'received' && drawnDataUrl) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-lg border-2 border-dashed border-emerald-300 bg-emerald-50/40 p-4 text-center">
-        <img src={drawnDataUrl} alt="Signature received from your phone" className="h-32 w-full rounded-lg bg-white object-contain p-2 ring-1 ring-slate-200" />
-        <p className="text-xs font-semibold text-emerald-700">Signature received ✓</p>
-        <p className="text-[11px] text-slate-500">Add your name, the date or the time below, then use it to sign a PDF.</p>
+        <img src={drawnDataUrl} alt={t('create.phone_received_alt')} className="h-32 w-full rounded-lg bg-white object-contain p-2 ring-1 ring-slate-200" />
+        <p className="text-xs font-semibold text-emerald-700">{t('create.phone_received')}</p>
+        <p className="text-[11px] text-slate-500">{t('create.phone_received_hint')}</p>
         <button
           type="button"
           onClick={signAgain}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-orange-400 hover:bg-orange-50/40"
         >
-          Sign again on phone
+          {t('create.phone_sign_again')}
         </button>
       </div>
     )
@@ -158,17 +160,17 @@ export default function PhoneSignPanel() {
           <svg viewBox="0 0 24 24" className="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 2.5" /><path d="M9 2h6" />
           </svg>
-          <p className="px-3 text-xs font-semibold text-slate-700">This code has expired</p>
+          <p className="px-3 text-xs font-semibold text-slate-700">{t('create.phone_expired')}</p>
         </div>
         <p role="status" className="text-xs text-slate-500">
-          Codes last {Math.round(CODE_TTL_MS / 60000)} minutes. Get a new one, then scan it with your phone.
+          {t.plural('create.phone_codes_last', Math.round(CODE_TTL_MS / 60000))}
         </p>
         <button
           type="button"
           onClick={refresh}
           className="rounded-md bg-orange-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-800"
         >
-          Get a new code
+          {t('create.phone_get_new_code')}
         </button>
       </div>
     )
@@ -185,43 +187,43 @@ export default function PhoneSignPanel() {
           type="button"
           onClick={() => setEnlarged(true)}
           className="group relative rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
-          aria-label="Enlarge the QR code"
+          aria-label={t('create.phone_enlarge_aria')}
         >
           <UnisimQr
             value={url}
             size={176}
             enlargeable={false}
-            label="signing on your phone"
+            label={t('create.phone_qr_label')}
             className="rounded-lg"
           />
           <span className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-lg bg-slate-900/70 py-0.5 text-[10px] font-medium text-white opacity-0 transition group-hover:opacity-100">
-            Tap to enlarge
+            {t('create.phone_tap_to_enlarge')}
           </span>
         </button>
-        <p className="text-xs text-slate-600">Scan with your phone camera, then enter this PIN:</p>
+        <p className="text-xs text-slate-600">{t('create.phone_scan_then_pin')}</p>
         <p className="text-2xl font-bold tracking-[0.3em] text-slate-900">{pin}</p>
         {/* The countdown ticks every second, so it is NOT a live region — a
             screen reader would read it out sixty times a minute. The expired
             state above is the one that announces itself. */}
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <span data-testid="code-countdown">
-            Code expires in <span className="font-semibold tabular-nums text-slate-700">{left}</span>
+            {t.rich('create.phone_expires_in', { time: <span className="font-semibold tabular-nums text-slate-700">{left}</span> })}
           </span>
           <span aria-hidden="true">·</span>
           <button type="button" onClick={refresh} className="font-semibold text-orange-700 hover:underline">
-            New code
+            {t('create.phone_new_code')}
           </button>
         </div>
         {replaced && (
           <p className="text-xs text-amber-700" role="status">
-            Too many wrong PINs, so this is a new code. Scan it again.
+            {t('create.phone_too_many_pins')}
           </p>
         )}
         {canRealtime ? (
-          <p className="text-xs text-slate-500">Waiting for your phone…</p>
+          <p className="text-xs text-slate-500">{t('create.phone_waiting')}</p>
         ) : (
           <p className="text-xs text-amber-600">
-            Offline demo — connect a real session (VITE_REAL_AUTH=1) or use the deployed app to receive from your phone.
+            {t('create.phone_offline_demo')}
           </p>
         )}
       </div>
@@ -229,13 +231,13 @@ export default function PhoneSignPanel() {
       {enlarged && (
         <QrLightbox
           value={url}
-          label="signing on your phone"
-          title="Point your phone's camera at this code"
+          label={t('create.phone_qr_label')}
+          title={t('create.phone_lightbox_title')}
           hint={
             <>
-              Then enter this PIN on your phone:
+              {t('create.phone_lightbox_hint')}
               <span className="mt-1 block text-2xl font-bold tracking-[0.3em] text-white">{pin}</span>
-              <span className="mt-1 block text-xs tabular-nums">Code expires in {left}</span>
+              <span className="mt-1 block text-xs tabular-nums">{t('create.phone_expires_in', { time: left })}</span>
             </>
           }
           onClose={() => setEnlarged(false)}

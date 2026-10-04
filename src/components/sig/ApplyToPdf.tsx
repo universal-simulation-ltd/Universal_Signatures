@@ -5,6 +5,7 @@ import type { Anchor, PlacePoint } from '../../lib/pdf'
 import { sha256Bytes, trimToInk } from '../../lib/signature'
 import { ALL_PAGES, INITIAL_PAGES } from '../../lib/types'
 import { recordSignedCopyHash, recordSigningEvent } from '../../lib/cloud'
+import { useT, type MessageKey } from '../../i18n'
 import DropWatermark from './DropWatermark'
 import InitialsPanel, { type InitialsChoice } from './InitialsPanel'
 import SendForSigning from './SendForSigning'
@@ -18,15 +19,16 @@ const PositionPicker = lazy(() => import('./PositionPicker'))
 const loadPdf = () => import('../../lib/pdf')
 const loadQr = () => import('../../lib/qr')
 
-const ANCHORS: { id: Anchor; label: string }[] = [
-  { id: 'top-left', label: 'Top left' }, { id: 'top-center', label: 'Top centre' }, { id: 'top-right', label: 'Top right' },
-  { id: 'mid-left', label: 'Middle left' }, { id: 'mid-center', label: 'Centre' }, { id: 'mid-right', label: 'Middle right' },
-  { id: 'bottom-left', label: 'Bottom left' }, { id: 'bottom-center', label: 'Bottom centre' }, { id: 'bottom-right', label: 'Bottom right' },
+const ANCHORS: { id: Anchor; label: MessageKey }[] = [
+  { id: 'top-left', label: 'sign.anchor_top_left' }, { id: 'top-center', label: 'sign.anchor_top_center' }, { id: 'top-right', label: 'sign.anchor_top_right' },
+  { id: 'mid-left', label: 'sign.anchor_mid_left' }, { id: 'mid-center', label: 'sign.anchor_mid_center' }, { id: 'mid-right', label: 'sign.anchor_mid_right' },
+  { id: 'bottom-left', label: 'sign.anchor_bottom_left' }, { id: 'bottom-center', label: 'sign.anchor_bottom_center' }, { id: 'bottom-right', label: 'sign.anchor_bottom_right' },
 ]
 
 const SIGNUP_URL = 'https://app.unisim.co.uk/login'
 
 export default function ApplyToPdf() {
+  const t = useT()
   const composedImage = useSigStore((s) => s.currentImage())
   const baseImage = useSigStore((s) => s.baseImage())
   const hasExtras = useSigStore((s) => s.hasExtras())
@@ -88,7 +90,7 @@ export default function ApplyToPdf() {
     multiple: false,
     pageWide: true,
     disabled: !accepting,
-    label: file ? 'Drop another PDF here, or click to choose one' : 'Drop a PDF here, or click to choose one',
+    label: file ? t('sign.drop_label_another') : t('sign.drop_label'),
   })
   // ⚠️ `over`/`pageOver` go true for a page drag whether or not this zone is
   // disabled — the hook lights every page-wide zone and only checks `disabled`
@@ -104,7 +106,7 @@ export default function ApplyToPdf() {
     // font file the "Type" panel wants. Say which thing was wrong rather than
     // letting it fail later as an unreadable PDF.
     if (f.type !== 'application/pdf' && !/\.pdf$/i.test(f.name)) {
-      setError(`${f.name} isn't a PDF.`)
+      setError(t('sign.error_not_pdf', { name: f.name }))
       return
     }
     setFile(f)
@@ -117,8 +119,8 @@ export default function ApplyToPdf() {
     } catch (err) {
       setError(
         err instanceof Error && err.name === 'EncryptedPdfError'
-          ? `${f.name} is password-protected, so it can't be signed here. Remove its password first, then try again.`
-          : `Could not read ${f.name}. It may be damaged, or not really a PDF.`,
+          ? t('sign.error_encrypted', { name: f.name })
+          : t('sign.error_unreadable', { name: f.name }),
       )
       setFile(null)
       setPages(0)
@@ -143,7 +145,7 @@ export default function ApplyToPdf() {
       let certId: string | null = null
       if (makeRecord && signedIn) {
         if (!user?.email) {
-          setError('Your Universal ID has no email on file, so a verifiable record can\'t be created.')
+          setError(t('sign.error_no_email'))
           setBusy(false)
           return
         }
@@ -154,7 +156,7 @@ export default function ApplyToPdf() {
           documentHash,
         })
         if (!res.ok || !res.certId) {
-          setError(res.error ?? 'Could not create the verifiable record.')
+          setError(res.error ?? t('sign.error_record'))
           setBusy(false)
           return
         }
@@ -204,7 +206,7 @@ export default function ApplyToPdf() {
       window.setTimeout(() => URL.revokeObjectURL(url), 1000)
       setSavedAs(name)
     } catch {
-      setError('Could not sign the PDF.')
+      setError(t('sign.error_sign'))
     } finally {
       setBusy(false)
     }
@@ -213,9 +215,9 @@ export default function ApplyToPdf() {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-bold text-slate-900">Sign a PDF</h2>
-        <div className="inline-flex rounded-md bg-slate-100 p-0.5" role="group" aria-label="Who signs">
-          {([['self', 'Sign it myself'], ['send', 'Send to be signed']] as const).map(([id, label]) => (
+        <h2 className="text-sm font-bold text-slate-900">{t('sign.title')}</h2>
+        <div className="inline-flex rounded-md bg-slate-100 p-0.5" role="group" aria-label={t('sign.mode_group_label')}>
+          {([['self', t('sign.mode_self')], ['send', t('sign.mode_send')]] as const).map(([id, label]) => (
             <button
               key={id}
               type="button"
@@ -230,8 +232,8 @@ export default function ApplyToPdf() {
       </div>
       <p className="mt-1 text-xs text-slate-500">
         {mode === 'self'
-          ? 'Add your signature to a document — it\'s processed in your browser and never uploaded.'
-          : 'Ask someone else to sign a document. They sign in their browser with no account, and you both get a certificate.'}
+          ? t('sign.intro_self')
+          : t('sign.intro_send')}
       </p>
 
       {/* The suite's shared drop circle (`DropRing` + `useFileDrop` from
@@ -263,10 +265,10 @@ export default function ApplyToPdf() {
                   {file.name}
                 </span>
                 <span className="text-[11.5px] tabular-nums text-slate-500">
-                  {pages} page{pages === 1 ? '' : 's'}
+                  {t.plural('sign.drop_pages', pages)}
                 </span>
                 <span className="mt-1 text-[11px] text-slate-400">
-                  {busy ? 'Signing…' : 'drop another, or click to change'}
+                  {busy ? t('sign.signing') : t('sign.drop_change')}
                 </span>
               </>
             ) : (
@@ -289,12 +291,12 @@ export default function ApplyToPdf() {
                   <path d="M9 17h4" />
                 </svg>
                 <span className="text-[15px] font-bold text-slate-900">
-                  {over ? 'Drop to open' : 'Drop a PDF here'}
+                  {over ? t('sign.drop_over') : t('sign.drop_here')}
                 </span>
                 <span className="text-[11.5px] leading-relaxed text-slate-500">
-                  {mode === 'self' ? 'it stays on your device' : 'uploaded only when you send it'}
+                  {mode === 'self' ? t('sign.drop_stays_local') : t('sign.drop_uploaded_on_send')}
                 </span>
-                <span className="mt-1 text-[11px] text-slate-400">or click to browse</span>
+                <span className="mt-1 text-[11px] text-slate-400">{t('sign.drop_browse')}</span>
               </>
             )}
           </DropRing>
@@ -312,7 +314,7 @@ export default function ApplyToPdf() {
       {file && (
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="sig-page" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Page</label>
+            <label htmlFor="sig-page" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.page_label')}</label>
             <select
               id="sig-page"
               value={pageIndex}
@@ -320,27 +322,27 @@ export default function ApplyToPdf() {
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm bg-white outline-none"
             >
               {Array.from({ length: pages }).map((_, i) => (
-                <option key={i} value={i}>Page {i + 1}{i === pages - 1 && pages > 1 ? ' (last)' : ''}</option>
+                <option key={i} value={i}>{t(i === pages - 1 && pages > 1 ? 'sign.page_option_last' : 'sign.page_option', { n: i + 1 })}</option>
               ))}
-              {pages > 1 && <option value={ALL_PAGES}>Every page ({pages})</option>}
-              {pages > 1 && <option value={INITIAL_PAGES}>Initial each page, sign the last</option>}
+              {pages > 1 && <option value={ALL_PAGES}>{t('sign.page_every', { count: pages })}</option>}
+              {pages > 1 && <option value={INITIAL_PAGES}>{t('sign.page_initial_each')}</option>}
             </select>
-            <label htmlFor="sig-size" className="mt-3 mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Size ({widthPct}%)</label>
+            <label htmlFor="sig-size" className="mt-3 mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.size_label', { pct: widthPct })}</label>
             <input id="sig-size" type="range" min={8} max={50} value={widthPct} onChange={(e) => setWidthPct(Number(e.target.value))} className="w-full accent-orange-600" />
           </div>
           <div>
             <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              {initialling ? 'Signature position (last page)' : 'Position'}
+              {initialling ? t('sign.position_label_initials') : t('sign.position_label')}
             </div>
-            <div role="group" aria-label="Position on the page" className={`grid grid-cols-3 gap-1.5 transition ${pos ? 'opacity-40' : ''}`}>
+            <div role="group" aria-label={t('sign.position_group_label')} className={`grid grid-cols-3 gap-1.5 transition ${pos ? 'opacity-40' : ''}`}>
               {ANCHORS.map((a) => (
                 <button
                   key={a.id}
                   type="button"
                   onClick={() => { setPos(null); setAnchor(a.id) }}
-                  aria-label={a.label}
+                  aria-label={t(a.label)}
                   aria-pressed={!pos && anchor === a.id}
-                  title={a.label}
+                  title={t(a.label)}
                   className={`h-9 rounded-md ring-1 transition ${!pos && anchor === a.id ? 'bg-orange-600 ring-orange-600' : 'bg-white ring-slate-200 hover:bg-slate-50'}`}
                 >
                   <span className={`mx-auto block h-2 w-2 rounded-full ${!pos && anchor === a.id ? 'bg-white' : 'bg-slate-300'}`} />
@@ -356,16 +358,16 @@ export default function ApplyToPdf() {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" />
               </svg>
-              {pos ? 'Custom position' : 'Choose position…'}
+              {pos ? t('sign.position_custom') : t('sign.position_choose')}
             </button>
             {pos && (
               <div className="mt-1.5 flex items-center justify-between text-[11px] text-emerald-700">
-                <span>✓ Custom position set</span>
-                <button type="button" onClick={() => setPos(null)} className="font-medium text-slate-500 hover:text-rose-600">Use grid</button>
+                <span>{t('sign.position_custom_set')}</span>
+                <button type="button" onClick={() => setPos(null)} className="font-medium text-slate-500 hover:text-rose-600">{t('sign.position_use_grid')}</button>
               </div>
             )}
             {!currentImage && (
-              <p className="mt-1 text-[11px] text-slate-400">Create a signature to preview placement.</p>
+              <p className="mt-1 text-[11px] text-slate-400">{t('sign.position_needs_signature')}</p>
             )}
           </div>
         </div>
@@ -398,8 +400,7 @@ export default function ApplyToPdf() {
             className="mt-0.5 h-4 w-4 accent-orange-600"
           />
           <span className="text-xs text-slate-600">
-            <span className="font-semibold text-slate-800">Leave off the name, date &amp; time</span> — sign this document with the
-            signature alone, without what you added in "Create your signature".
+            {t.rich('sign.omit_extras', { bold: <span className="font-semibold text-slate-800">{t('sign.omit_extras_bold')}</span> })}
           </span>
         </label>
       )}
@@ -415,14 +416,12 @@ export default function ApplyToPdf() {
               className="mt-0.5 h-4 w-4 accent-orange-600"
             />
             <span className="text-xs text-slate-600">
-              <span className="font-semibold text-slate-800">Add a signing certificate</span> — appends a certificate page and a
-              QR to the PDF, and saves a free, verifiable record (your email, the file name, a hash of the unsigned original and the time). The page also
-              shows your device's clock and timezone, marked as self-reported. The document itself is never uploaded.
+              {t.rich('sign.certificate', { bold: <span className="font-semibold text-slate-800">{t('sign.certificate_bold')}</span> })}
             </span>
           </label>
           {!signedIn && (
             <p className="mt-2 pl-6 text-[11px] text-slate-500">
-              <a href={SIGNUP_URL} className="font-medium text-orange-700 hover:underline">Sign in with a free Universal ID</a> to enable verifiable records.
+              {t.rich('sign.certificate_sign_in', { link: <a href={SIGNUP_URL} className="font-medium text-orange-700 hover:underline">{t('sign.certificate_sign_in_link')}</a> })}
             </p>
           )}
         </div>
@@ -435,30 +434,30 @@ export default function ApplyToPdf() {
         disabled={!file || !currentImage || needsInitials || busy}
         className="mt-4 w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
       >
-        {busy ? 'Signing…' : !currentImage ? 'Create a signature first' : needsInitials ? 'Add your initials first' : 'Sign & download PDF'}
+        {busy ? t('sign.signing') : !currentImage ? t('sign.button_needs_signature') : needsInitials ? t('sign.button_needs_initials') : t('sign.button_sign')}
       </button>
 
       {/* Always in the tree (not empty:hidden) so screen readers announce it. */}
       <div role="status" className="text-center text-xs text-emerald-700">
-        {savedAs && !busy && <p className="mt-2">✓ Signed — downloaded as {savedAs}</p>}
+        {savedAs && !busy && <p className="mt-2">{t('sign.signed_as', { name: savedAs })}</p>}
       </div>
 
       {verifyUrl && (
         <div className="mt-3 rounded-lg bg-emerald-50 p-3">
-          <p className="text-xs font-semibold text-emerald-800">✓ Verifiable record created</p>
-          <p className="mt-1 text-[11px] text-emerald-700">The signed PDF carries a QR linking here:</p>
+          <p className="text-xs font-semibold text-emerald-800">{t('sign.record_created')}</p>
+          <p className="mt-1 text-[11px] text-emerald-700">{t('sign.record_qr_links_here')}</p>
           <div className="mt-2 flex items-center gap-2">
             <input readOnly value={verifyUrl} className="flex-1 rounded-md border border-emerald-200 bg-white px-2 py-1.5 text-[11px] text-slate-700" />
             <button
               onClick={() => navigator.clipboard?.writeText(verifyUrl)}
               className="shrink-0 rounded-md bg-emerald-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-700"
             >
-              Copy
+              {t('sign.record_copy')}
             </button>
           </div>
           {copyRecorded && (
             <p className="mt-2 text-[11px] text-emerald-700">
-              The signed copy’s fingerprint is on the record too, so anyone you send it to can check on that page that it hasn’t been changed.
+              {t('sign.record_copy_hash')}
             </p>
           )}
         </div>
@@ -469,8 +468,8 @@ export default function ApplyToPdf() {
       {/* From `pageOver`, not `over`: over the ring itself the ring answers. */}
       <DropAnywhere
         show={drop.pageOver && accepting}
-        title="Drop it anywhere"
-        hint="A PDF — it's signed in this browser and never uploaded"
+        title={t('sign.drop_anywhere_title')}
+        hint={t('sign.drop_anywhere_hint')}
       />
     </div>
   )
