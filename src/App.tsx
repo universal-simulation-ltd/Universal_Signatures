@@ -9,6 +9,7 @@ import SignatureStudio from './components/sig/SignatureStudio'
 import { CONTAINER } from './lib/layout'
 import SignMobilePage from './components/sig/SignMobilePage'
 import VerifyPage from './components/sig/VerifyPage'
+import { parseExpiry } from './lib/mobileSign'
 import { KNOWLEDGE_BASE } from './knowledge'
 
 const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatures'
@@ -19,10 +20,11 @@ const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatur
 // client-router dependency).
 function route():
   | { name: 'verify'; certId: string }
-  | { name: 'signMobile'; token: string }
+  | { name: 'signMobile'; token: string; expiresAt: number | null }
   | { name: 'studio' } {
-  const token = new URLSearchParams(window.location.search).get('sign')
-  if (token) return { name: 'signMobile', token }
+  const params = new URLSearchParams(window.location.search)
+  const token = params.get('sign')
+  if (token) return { name: 'signMobile', token, expiresAt: parseExpiry(params.get('exp')) }
 
   const base = import.meta.env.BASE_URL
   const path = window.location.pathname
@@ -36,7 +38,7 @@ export default function App() {
   const r = route()
 
   // The phone signing page is a standalone full-screen view — no navbar/footer.
-  if (r.name === 'signMobile') return <SignMobilePage token={r.token} />
+  if (r.name === 'signMobile') return <SignMobilePage token={r.token} expiresAt={r.expiresAt} />
   return (
     <div className="flex flex-col min-h-screen bg-slate-100">
       <UniversalAppsNavBar

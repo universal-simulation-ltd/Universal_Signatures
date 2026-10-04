@@ -5,7 +5,7 @@ import { mobileSignChannel, type MobileSignResult } from '../../lib/mobileSign'
 import { randomHex } from '../../lib/signature'
 import { useInkCanvas } from '../../lib/useInkCanvas'
 
-type Status = 'idle' | 'sending' | 'sent' | 'unconfirmed' | 'invalid' | 'wrongPin' | 'refused' | 'error'
+type Status = 'idle' | 'sending' | 'sent' | 'unconfirmed' | 'invalid' | 'wrongPin' | 'refused' | 'error' | 'expired'
 
 // How long to wait for the computer to say it took the signature.
 const REPLY_TIMEOUT_MS = 6000
@@ -26,13 +26,15 @@ const MESSAGES: Partial<Record<Status, string>> = {
  * channel back to the desktop — which validates the PIN and loads it as the
  * active signature. Mirrors Universal PDF's SignMobilePage.
  */
-export default function SignMobilePage({ token }: { token: string }) {
+export default function SignMobilePage({ token, expiresAt = null }: { token: string; expiresAt?: number | null }) {
   const { supabase } = useUniversal()
   // Transparent canvas (dark ink), matching the desktop draw pad so the phone
   // signature places identically. The white look comes from the CSS background.
   const ink = useInkCanvas()
   const [pin, setPin] = useState('')
-  const [status, setStatus] = useState<Status>('idle')
+  // A code past its expiry: the computer has stopped listening, so say so
+  // before anyone draws, rather than after they press Send.
+  const [status, setStatus] = useState<Status>(() => (expiresAt !== null && Date.now() >= expiresAt ? 'expired' : 'idle'))
 
   // One channel for the life of the page, joined on the first send. A fresh
   // channel per send re-joined the same topic while the last one was still
@@ -80,6 +82,7 @@ export default function SignMobilePage({ token }: { token: string }) {
   async function submit() {
     const signature = ink.toDataUrl()
     if (!signature || pin.length !== 6) { setStatus('invalid'); return }
+    if (expiresAt !== null && Date.now() >= expiresAt) { setStatus('expired'); return }
     setStatus('sending')
     const nonce = randomHex(8)
     try {
@@ -101,6 +104,18 @@ export default function SignMobilePage({ token }: { token: string }) {
     } catch {
       setStatus('error')
     }
+  }
+
+  if (status === 'expired') {
+    return (
+      <main className="flex min-h-svh flex-col items-center justify-center gap-3 bg-slate-900 p-6 text-center text-white">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-500/20 text-3xl" aria-hidden="true">⏱</div>
+        <h1 className="text-lg font-semibold">This code has expired</h1>
+        <p className="text-sm text-slate-400">
+          On your computer, press “Get a new code”, then scan the new code with your phone.
+        </p>
+      </main>
+    )
   }
 
   if (status === 'sent' || status === 'unconfirmed') {
