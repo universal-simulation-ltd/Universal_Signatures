@@ -12,22 +12,65 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 //  • Smooth lines — each stroke is drawn as quadratic curves through the
 //    midpoints between samples rather than straight segments, so a fast curve
 //    doesn't come out as a polygon.
+//  • Pressure — with a stylus that reports it, the line is thinner where the
+//    pen is light and thicker where it presses. Mouse and finger strokes are
+//    drawn as before.
 //
 // The backing store is at least 2× the CSS size even on a 1× screen: the PNG
 // is what gets stamped onto the PDF, and a PDF is zoomed far more often than a
 // web page is.
 
-type Pt = { x: number; y: number }
+// `p` is the pen's pressure (0–1) at that sample. It is only recorded for a
+// stylus (`pointerType === 'pen'`) that reports one: a mouse reports a constant
+// 0.5 while a button is down and most touch screens report 0 or 1, so for them
+// `p` stays undefined and the stroke is drawn exactly as it always was — one
+// path at LINE_WIDTH.
+type Pt = { x: number; y: number; p?: number }
 type Stroke = Pt[]
 
 const LINE_WIDTH = 2.5
 const INK = '#0f172a'
 
+// Width for a pressure: a light touch draws at 0.4x, a firm press at 1.6x, and
+// a half press (0.5 — the value a mouse reports) at exactly LINE_WIDTH, so the
+// two kinds of stroke look alike at an ordinary grip.
+function widthFor(p: number | undefined): number {
+  return p === undefined ? LINE_WIDTH : LINE_WIDTH * (0.4 + 1.2 * p)
+}
+
+/** The pressure to record for this event, or undefined when it isn't a pen's. */
+function penPressure(e: React.PointerEvent): number | undefined {
+  return e.pointerType === 'pen' && e.pressure > 0 ? Math.min(1, e.pressure) : undefined
+}
+
 function strokePath(ctx: CanvasRenderingContext2D, s: Stroke, k: number) {
   if (s.length === 1) {
     ctx.beginPath()
-    ctx.arc(s[0].x * k, s[0].y * k, (LINE_WIDTH * k) / 2, 0, Math.PI * 2)
+    ctx.arc(s[0].x * k, s[0].y * k, (widthFor(s[0].p) * k) / 2, 0, Math.PI * 2)
     ctx.fill()
+    return
+  }
+  // A pen stroke changes width along its length, so it is drawn piece by piece
+  // — each curve from one midpoint, through a sample, to the next midpoint,
+  // at that sample's width. Round caps hide the joins.
+  if (s[0].p !== undefined) {
+    let from = s[0]
+    for (let i = 1; i < s.length - 1; i++) {
+      const mid = { x: (s[i].x + s[i + 1].x) / 2, y: (s[i].y + s[i + 1].y) / 2 }
+      ctx.lineWidth = widthFor(s[i].p)
+      ctx.beginPath()
+      ctx.moveTo(from.x * k, from.y * k)
+      ctx.quadraticCurveTo(s[i].x * k, s[i].y * k, mid.x * k, mid.y * k)
+      ctx.stroke()
+      from = mid
+    }
+    const end = s[s.length - 1]
+    ctx.lineWidth = widthFor(end.p)
+    ctx.beginPath()
+    ctx.moveTo(from.x * k, from.y * k)
+    ctx.lineTo(end.x * k, end.y * k)
+    ctx.stroke()
+    ctx.lineWidth = LINE_WIDTH
     return
   }
   ctx.beginPath()
@@ -131,13 +174,18 @@ export function useInkCanvas(onChange?: (dataUrl: string | null) => void): InkCa
 
   const emit = () => onChangeRef.current?.(toDataUrl())
 
-  const pointAt = (e: React.PointerEvent<HTMLCanvasElement>): Pt => {
+  const pointAt = (e: React.PointerEvent<HTMLCanvasElement>, prev?: Pt): Pt => {
     const rect = canvasRef.current!.getBoundingClientRect()
     const at = drawnAt.current
     // Strokes are stored in the coordinates of the size they were first drawn
     // at; a stroke added after a resize is mapped back into that space.
     const k = at ? Math.min(rect.width / at.w, rect.height / at.h) : 1
-    return { x: (e.clientX - rect.left) / k, y: (e.clientY - rect.top) / k }
+    const pt: Pt = { x: (e.clientX - rect.left) / k, y: (e.clientY - rect.top) / k }
+    const raw = penPressure(e)
+    // Eased towards the last sample: pen pressure jitters from one event to the
+    // next, and an unsmoothed width makes the line look beaded.
+    if (raw !== undefined) pt.p = prev?.p !== undefined ? prev.p * 0.6 + raw * 0.4 : raw
+    return pt
   }
 
   const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -159,8 +207,13 @@ export function useInkCanvas(onChange?: (dataUrl: string | null) => void): InkCa
     const canvas = canvasRef.current
     if (!s || !canvas) return
     e.preventDefault()
-    const p = pointAt(e)
     const prev = s[s.length - 1]
+    const p = pointAt(e, prev)
+    // A stroke keeps the kind it started as: a pen that stops reporting
+    // pressure mid-stroke carries on at its last width rather than switching
+    // the whole stroke to the other renderer.
+    if (s[0].p !== undefined && p.p === undefined) p.p = prev.p
+    if (s[0].p === undefined) delete p.p
     if (Math.hypot(p.x - prev.x, p.y - prev.y) < 0.5) return
     s.push(p)
     // Draw only the newest piece: from the previous midpoint, curving through
@@ -171,6 +224,7 @@ export function useInkCanvas(onChange?: (dataUrl: string | null) => void): InkCa
     const a = s.length >= 3 ? s[s.length - 3] : prev
     const from = s.length >= 3 ? { x: (a.x + prev.x) / 2, y: (a.y + prev.y) / 2 } : prev
     const to = { x: (prev.x + p.x) / 2, y: (prev.y + p.y) / 2 }
+    if (prev.p !== undefined) ctx.lineWidth = widthFor(prev.p)
     ctx.beginPath()
     ctx.moveTo(from.x * k, from.y * k)
     ctx.quadraticCurveTo(prev.x * k, prev.y * k, to.x * k, to.y * k)
