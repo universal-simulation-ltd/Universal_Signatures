@@ -3,9 +3,10 @@ import { DropAnywhere, DropRing, useFileDrop, useUniversal, useUser, type Signin
 import { useSigStore } from '../../stores/sigStore'
 import type { Anchor, PlacePoint } from '../../lib/pdf'
 import { sha256Bytes, trimToInk } from '../../lib/signature'
-import { ALL_PAGES } from '../../lib/types'
+import { ALL_PAGES, INITIAL_PAGES } from '../../lib/types'
 import { recordSigningEvent } from '../../lib/cloud'
 import DropWatermark from './DropWatermark'
+import InitialsPanel, { type InitialsChoice } from './InitialsPanel'
 
 // pdf-lib (~500 kB), pdf.js (+ its 1.3 MB worker) and the QR encoder are only
 // needed once a PDF is in play, so they load on demand rather than in the
@@ -57,6 +58,10 @@ export default function ApplyToPdf() {
   const [pos, setPos] = useState<PlacePoint | null>(null)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [widthPct, setWidthPct] = useState(25)
+  // For "initials on every page, signature on the last".
+  const [initials, setInitials] = useState<InitialsChoice>({ png: null, anchor: 'bottom-right', widthPct: 10, includeLast: false })
+  const initialling = pageIndex === INITIAL_PAGES
+  const needsInitials = initialling && !initials.png
   const [makeRecord, setMakeRecord] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -116,7 +121,7 @@ export default function ApplyToPdf() {
   }
 
   async function onSign() {
-    if (!file || !currentImage) return
+    if (!file || !currentImage || needsInitials) return
     setBusy(true)
     setError(null)
     setVerifyUrl(null)
@@ -169,7 +174,12 @@ export default function ApplyToPdf() {
 
       const { signPdf } = await loadPdf()
       const sigPng = stampImage ?? await trimToInk(currentImage)
-      const bytes = await signPdf(buf, sigPng, { pageIndex, anchor, widthPct, pos: pos ?? undefined, qrPng, audit })
+      const bytes = await signPdf(buf, sigPng, {
+        pageIndex, anchor, widthPct, pos: pos ?? undefined, qrPng, audit,
+        initials: initialling && initials.png
+          ? { png: initials.png, anchor: initials.anchor, widthPct: initials.widthPct, includeLast: initials.includeLast }
+          : undefined,
+      })
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -274,12 +284,15 @@ export default function ApplyToPdf() {
                 <option key={i} value={i}>Page {i + 1}{i === pages - 1 && pages > 1 ? ' (last)' : ''}</option>
               ))}
               {pages > 1 && <option value={ALL_PAGES}>Every page ({pages})</option>}
+              {pages > 1 && <option value={INITIAL_PAGES}>Initial each page, sign the last</option>}
             </select>
             <label htmlFor="sig-size" className="mt-3 mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Size ({widthPct}%)</label>
             <input id="sig-size" type="range" min={8} max={50} value={widthPct} onChange={(e) => setWidthPct(Number(e.target.value))} className="w-full accent-orange-600" />
           </div>
           <div>
-            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Position</div>
+            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {initialling ? 'Signature position (last page)' : 'Position'}
+            </div>
             <div role="group" aria-label="Position on the page" className={`grid grid-cols-3 gap-1.5 transition ${pos ? 'opacity-40' : ''}`}>
               {ANCHORS.map((a) => (
                 <button
@@ -319,11 +332,14 @@ export default function ApplyToPdf() {
         </div>
       )}
 
+      {file && initialling && <InitialsPanel value={initials} onChange={setInitials} />}
+
       {pickerOpen && file && currentImage && (
         <Suspense fallback={null}>
         <PositionPicker
           file={file}
-          pageIndex={pageIndex === ALL_PAGES ? 0 : pageIndex}
+          // Every page: preview the first. Initials mode: the signature goes on the last.
+          pageIndex={pageIndex === ALL_PAGES ? 0 : pageIndex === INITIAL_PAGES ? -1 : pageIndex}
           sigPng={stampImage ?? currentImage}
           widthPct={widthPct}
           onWidthChange={setWidthPct}
@@ -377,10 +393,10 @@ export default function ApplyToPdf() {
 
       <button
         onClick={onSign}
-        disabled={!file || !currentImage || busy}
+        disabled={!file || !currentImage || needsInitials || busy}
         className="mt-4 w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
       >
-        {busy ? 'Signing…' : !currentImage ? 'Create a signature first' : 'Sign & download PDF'}
+        {busy ? 'Signing…' : !currentImage ? 'Create a signature first' : needsInitials ? 'Add your initials first' : 'Sign & download PDF'}
       </button>
 
       {/* Always in the tree (not empty:hidden) so screen readers announce it. */}

@@ -47,6 +47,21 @@ export function rasterizeTyped(text: string, fontFamily: string, color = '#0f172
   return canvas.toDataURL('image/png')
 }
 
+/**
+ * Initials from a name: the first letter of each word (hyphenated parts
+ * count as words), upper-cased, at most three — "Mary-Jane Smith" gives
+ * "MJS". Only a starting point: the field stays editable. Empty for no name.
+ */
+export function initialsFrom(name: string): string {
+  return name
+    .trim()
+    .split(/[\s-]+/)
+    .filter(Boolean)
+    .map((w) => [...w][0]!.toLocaleUpperCase())
+    .slice(0, 3)
+    .join('')
+}
+
 // Today's date formatted for stamping beneath a signature (e.g. "14 Jul 2026").
 export function formatSigningDate(d = new Date()): string {
   return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })

@@ -7,6 +7,12 @@ export type SignatureMode = 'draw' | 'type'
  */
 export const ALL_PAGES = -2
 
+/**
+ * Sign a PDF's `pageIndex` value for "initials on every page, the full
+ * signature on the last" — the way a multi-page contract is usually signed.
+ */
+export const INITIAL_PAGES = -3
+
 // The create-signature tab. 'phone' is a capture method (draw on your phone via
 // a QR handoff) that yields a drawn image — once received the studio drops back
 // to 'draw', so a saved signature's `style` is only ever 'draw' | 'type'.

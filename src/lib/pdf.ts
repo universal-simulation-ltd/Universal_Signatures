@@ -1,7 +1,7 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import { appendSigningAuditPage, type SigningAuditFields } from '@unisim/sdk'
 import { dataUrlToBytes } from './signature'
-import { ALL_PAGES } from './types'
+import { ALL_PAGES, INITIAL_PAGES } from './types'
 
 export type Anchor =
   | 'top-left' | 'top-center' | 'top-right'
@@ -16,8 +16,18 @@ export interface PlacePoint {
   yPct: number
 }
 
+/** Initials for INITIAL_PAGES: stamped at a corner/grid anchor of each page. */
+export interface InitialsOpts {
+  png: string
+  anchor: Anchor
+  widthPct: number    // initials width as % of page width
+  includeLast: boolean // also initial the last page (the one carrying the signature)
+}
+
 export interface PlaceOpts {
-  pageIndex: number   // 0-based; -1 = last page; ALL_PAGES = every page
+  pageIndex: number   // 0-based; -1 = last page; ALL_PAGES = every page; INITIAL_PAGES = initials + signature on the last
+  // Required with INITIAL_PAGES, ignored otherwise.
+  initials?: InitialsOpts
   anchor: Anchor
   widthPct: number    // signature width as % of page width (5–60)
   // When set (from the "Choose position" picker), the signature is centred on
@@ -61,7 +71,9 @@ export async function signPdf(pdfBytes: ArrayBuffer, sigPng: string, opts: Place
   const pages = doc.getPages()
   const targets = opts.pageIndex === ALL_PAGES
     ? pages
-    : [pages[opts.pageIndex < 0 ? pages.length - 1 : Math.min(opts.pageIndex, pages.length - 1)]]
+    : opts.pageIndex === INITIAL_PAGES
+      ? [pages[pages.length - 1]]
+      : [pages[opts.pageIndex < 0 ? pages.length - 1 : Math.min(opts.pageIndex, pages.length - 1)]]
 
   const png = await doc.embedPng(dataUrlToBytes(sigPng))
   const margin = 24
@@ -90,6 +102,39 @@ export async function signPdf(pdfBytes: ArrayBuffer, sigPng: string, opts: Place
       else if (vert === 'top') y = ph - h - margin
     }
     return { x, y, w, h }
+  }
+
+  // Initials first, so on a last page that carries both the signature is drawn
+  // over them rather than under. One embedded image however many pages.
+  if (opts.pageIndex === INITIAL_PAGES && opts.initials) {
+    const ini = opts.initials
+    const iniPng = await doc.embedPng(dataUrlToBytes(ini.png))
+    const lastPage = pages[pages.length - 1]
+    const initialled = ini.includeLast ? pages : pages.slice(0, -1)
+    for (const page of initialled) {
+      const { width: pw, height: ph } = page.getSize()
+      const w = (Math.max(3, Math.min(30, ini.widthPct)) / 100) * pw
+      const h = (iniPng.height / iniPng.width) * w
+      const [vert, horiz] = anchorParts(ini.anchor)
+      let x = margin
+      if (horiz === 'center') x = (pw - w) / 2
+      else if (horiz === 'right') x = pw - w - margin
+      let y = margin
+      if (vert === 'mid') y = (ph - h) / 2
+      else if (vert === 'top') y = ph - h - margin
+      // On the signed page, initials that would sit under the signature (both
+      // in the same corner, say) go just above it instead — or below, if
+      // there's no room above.
+      if (page === lastPage) {
+        const sig = place(pw, ph)
+        const overlaps = x < sig.x + sig.w && x + w > sig.x && y < sig.y + sig.h && y + h > sig.y
+        if (overlaps) {
+          const gap = 6
+          y = sig.y + sig.h + gap + h <= ph ? sig.y + sig.h + gap : Math.max(0, sig.y - gap - h)
+        }
+      }
+      page.drawImage(iniPng, { x, y, width: w, height: h })
+    }
   }
 
   // The same embedded image on each page: one copy in the file however many
