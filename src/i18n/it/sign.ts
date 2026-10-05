@@ -7,7 +7,7 @@ const sign: Messages['sign'] = {
   'mode_self': 'Lo firmo io',
   'mode_send': 'Invia per la firma',
   'intro_self': 'Aggiungi la tua firma a un documento: viene elaborato nel tuo browser e non viene mai caricato.',
-  'intro_send': 'Chiedi a qualcun altro di firmare un documento. Firmerà nel proprio browser, senza account, e riceverete entrambi un certificato.',
+  'intro_send': 'Chiedi a qualcun altro di firmare un documento. Firmerà nel proprio browser, senza account, e riceverete entrambi un certificato. Per questo non ti serve una tua firma.',
 
   // ── The drop circle (small round area — keep these short) ────────────────
   'drop_label': 'Trascina qui un PDF o fai clic per sceglierne uno',
@@ -20,6 +20,7 @@ const sign: Messages['sign'] = {
   'drop_stays_local': 'resta sul tuo dispositivo',
   'drop_uploaded_on_send': 'caricato solo quando lo invii',
   'drop_browse': 'o fai clic per sfogliare',
+  'drop_browse_tap': 'o tocca per sfogliare',
   'drop_anywhere_title': 'Rilascialo ovunque',
   'drop_anywhere_hint': 'Un PDF: viene firmato in questo browser e non viene mai caricato',
 

@@ -7,6 +7,7 @@ import { ALL_PAGES, INITIAL_PAGES } from '../../lib/types'
 import { recordSignedCopyHash, recordSigningEvent } from '../../lib/cloud'
 import { useT, type MessageKey } from '../../i18n'
 import DropWatermark from './DropWatermark'
+import { useCoarsePointer } from '../../lib/useCoarsePointer'
 import InitialsPanel, { type InitialsChoice } from './InitialsPanel'
 import SendForSigning from './SendForSigning'
 
@@ -29,6 +30,8 @@ const SIGNUP_URL = 'https://app.unisim.co.uk/login'
 
 export default function ApplyToPdf() {
   const t = useT()
+  // "Click to browse" means nothing under a finger.
+  const touch = useCoarsePointer()
   const composedImage = useSigStore((s) => s.currentImage())
   const baseImage = useSigStore((s) => s.baseImage())
   const hasExtras = useSigStore((s) => s.hasExtras())
@@ -296,7 +299,7 @@ export default function ApplyToPdf() {
                 <span className="text-[11.5px] leading-relaxed text-slate-500">
                   {mode === 'self' ? t('sign.drop_stays_local') : t('sign.drop_uploaded_on_send')}
                 </span>
-                <span className="mt-1 text-[11px] text-slate-400">{t('sign.drop_browse')}</span>
+                <span className="mt-1 text-[11px] text-slate-400">{touch ? t('sign.drop_browse_tap') : t('sign.drop_browse')}</span>
               </>
             )}
           </DropRing>

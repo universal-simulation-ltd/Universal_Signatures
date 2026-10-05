@@ -3,6 +3,8 @@ import type { Messages } from '../en'
 const create: Messages['create'] = {
   // Signature studio (left column, "Create your signature")
   'studio_title': 'İmzanızı oluşturun',
+  'page_headline': 'İmzanız, her PDF’te',
+  'page_lead': 'İmzanızı çizin ya da yazın, ardından onunla bir PDF imzalayın — ücretsiz, bu tarayıcıda, hesap gerekmez.',
   'mode_draw': 'Çiz',
   'mode_type': 'Yaz',
   'mode_phone': 'Telefonda imzala',
@@ -20,7 +22,6 @@ const create: Messages['create'] = {
   'labels_preview_building': 'Önizleme hazırlanıyor…',
   'labels_preview_empty': 'Önizlemeyi görmek için yukarıya imzanızı ekleyin.',
   'labels_note': 'İmzanızın altında görünür. Bir PDF’i imzalarken eklenip eklenmeyeceğini seçebilirsiniz.',
-  'studio_footer': 'Buradaki her şey tarayıcınızda çalışır. İmzanızı sağdaki alanda bir PDF’i imzalamak için kullanın — ücretsiz, hesap gerekmez.',
   // Privacy note under the right column.
   'privacy_subject': 'İmzanız',
   'privacy_except': 'birini buluta kaydetmek, telefonunuzda imzalamak veya bir belgeyi imzaya göndermek',

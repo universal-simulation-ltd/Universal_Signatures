@@ -7,7 +7,7 @@ const sign: Messages['sign'] = {
   'mode_self': 'Kendim imzalayacağım',
   'mode_send': 'İmzaya gönder',
   'intro_self': 'Bir belgeye imzanızı ekleyin — tarayıcınızda işlenir ve asla karşıya yüklenmez.',
-  'intro_send': 'Bir belgeyi başka birine imzalatın. Hesap gerekmeden tarayıcısında imzalar ve ikiniz de bir sertifika alırsınız.',
+  'intro_send': 'Bir belgeyi başka birine imzalatın. Hesap gerekmeden tarayıcısında imzalar ve ikiniz de bir sertifika alırsınız. Bunun için kendi imzanız gerekmez.',
 
   // The drop circle (keep short)
   'drop_label': 'Bir PDF’i buraya bırakın veya seçmek için tıklayın',
@@ -20,6 +20,7 @@ const sign: Messages['sign'] = {
   'drop_stays_local': 'cihazınızda kalır',
   'drop_uploaded_on_send': 'yalnızca gönderdiğinizde yüklenir',
   'drop_browse': 'veya göz atmak için tıklayın',
+  'drop_browse_tap': 'veya göz atmak için dokunun',
   'drop_anywhere_title': 'Herhangi bir yere bırakın',
   'drop_anywhere_hint': 'Bir PDF — bu tarayıcıda imzalanır ve asla karşıya yüklenmez',
 

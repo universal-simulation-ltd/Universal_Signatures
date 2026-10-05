@@ -3,7 +3,7 @@
 export default {
   // ── The "Save your signature" card and its tabs ─────────────────────────────
   'tabs_title': 'Save your signature', // the collapsible card's heading button
-  'tabs_local': 'Local (temporary)', // tab: keep it in this browser, no account
+  'tabs_local': 'On this device', // tab: keep it in this browser, no account
   'tabs_online': 'Online', // tab: save it to the cloud against a Universal ID
 
   // ── Shared ───────────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ export default {
   // ── Save on this device ─────────────────────────────────────────────────────
   'local_title': 'Save on this device',
   'local_no_account': 'No account', // small chip beside the heading
-  'local_intro': 'Keep your signature in this browser and reuse it later — free, no sign-in. It stays on this device and never leaves it.',
+  'local_intro': 'Keep your signature in this browser and reuse it later — free, no sign-in. It stays on this device and never leaves it. Clearing this browser’s data removes it.',
   'local_name_placeholder': 'Name this signature (optional)',
   'local_saved': '✓ Saved to this device',
   'local_save': 'Save to this device',

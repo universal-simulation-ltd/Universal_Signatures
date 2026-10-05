@@ -7,7 +7,7 @@ const sign: Messages['sign'] = {
   'mode_self': 'Selbst unterschreiben',
   'mode_send': 'Zum Unterschreiben senden',
   'intro_self': 'Füge einem Dokument deine Unterschrift hinzu – es wird in deinem Browser verarbeitet und nie hochgeladen.',
-  'intro_send': 'Bitte jemand anderen, ein Dokument zu unterschreiben. Die Person unterschreibt ohne Konto im Browser, und ihr bekommt beide ein Zertifikat.',
+  'intro_send': 'Bitte jemand anderen, ein Dokument zu unterschreiben. Die Person unterschreibt ohne Konto im Browser, und ihr bekommt beide ein Zertifikat. Dafür brauchst du keine eigene Unterschrift.',
 
   // ── The drop circle (small round area — keep these short) ────────────────
   'drop_label': 'PDF hier ablegen oder klicken, um eins auszuwählen',
@@ -20,6 +20,7 @@ const sign: Messages['sign'] = {
   'drop_stays_local': 'es bleibt auf deinem Gerät',
   'drop_uploaded_on_send': 'erst beim Senden hochgeladen',
   'drop_browse': 'oder zum Durchsuchen klicken',
+  'drop_browse_tap': 'oder zum Durchsuchen tippen',
   'drop_anywhere_title': 'Irgendwo ablegen',
   'drop_anywhere_hint': 'Ein PDF – es wird in diesem Browser unterschrieben und nie hochgeladen',
 

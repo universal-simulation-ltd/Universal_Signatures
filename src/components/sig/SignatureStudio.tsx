@@ -14,6 +14,7 @@ import SaveTabs from './SaveTabs'
 import MainSignatureBar from './MainSignatureBar'
 import { useMainSignature } from '../../lib/cloud'
 import { CONTAINER } from '../../lib/layout'
+import { useCoarsePointer } from '../../lib/useCoarsePointer'
 
 const MODES: { id: StudioMode; label: MessageKey }[] = [
   { id: 'draw', label: 'create.mode_draw' },
@@ -29,8 +30,14 @@ const ALIGN_LABELS: Record<LabelAlign, MessageKey> = {
 
 export default function SignatureStudio() {
   const t = useT()
-  const mode = useSigStore((s) => s.mode)
+  const storedMode = useSigStore((s) => s.mode)
   const setMode = useSigStore((s) => s.setMode)
+  // "Sign on phone" hands the drawing to a phone by QR code. On a phone or a
+  // tablet you are already holding the thing you would sign on — the Draw pad
+  // takes a finger — so the tab only confused people there and is not shown.
+  const touch = useCoarsePointer()
+  const modes = touch ? MODES.filter((m) => m.id !== 'phone') : MODES
+  const mode: StudioMode = touch && storedMode === 'phone' ? 'draw' : storedMode
 
   // Name/date extras.
   const drawnDataUrl = useSigStore((s) => s.drawnDataUrl)
@@ -70,6 +77,14 @@ export default function SignatureStudio() {
   return (
     <div className={`${CONTAINER} py-6`}>
 
+      {/* What this page is for and what to do first, before the two cards —
+          a stranger otherwise lands on "Create your signature" and "Sign a
+          PDF" side by side with nothing saying which comes first. */}
+      <div className="mb-5">
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">{t('create.page_headline')}</h1>
+        <p className="mt-1.5 max-w-3xl text-sm sm:text-base text-slate-600">{t('create.page_lead')}</p>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Left column: create your signature, then save it */}
         <div className="space-y-6">
@@ -77,7 +92,7 @@ export default function SignatureStudio() {
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-900">{t('create.studio_title')}</h2>
             <div className="inline-flex rounded-md bg-slate-100 p-0.5">
-              {MODES.map((m) => (
+              {modes.map((m) => (
                 <button
                   key={m.id}
                   type="button"
@@ -163,9 +178,6 @@ export default function SignatureStudio() {
             )}
           </div>
 
-          <p className="mt-3 text-xs text-slate-500">
-            {t('create.studio_footer')}
-          </p>
         </section>
 
           <SaveTabs />

@@ -3,7 +3,7 @@ import type { Messages } from '../en'
 const save: Messages['save'] = {
   // ── The "Save your signature" card and its tabs ─────────────────────────────
   'tabs_title': 'Guarda tu firma',
-  'tabs_local': 'Local (temporal)',
+  'tabs_local': 'En este dispositivo',
   'tabs_online': 'En línea',
 
   // ── Shared ───────────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ const save: Messages['save'] = {
   // ── Save on this device ─────────────────────────────────────────────────────
   'local_title': 'Guardar en este dispositivo',
   'local_no_account': 'Sin cuenta',
-  'local_intro': 'Conserva tu firma en este navegador y vuelve a usarla más tarde: gratis y sin iniciar sesión. Se queda en este dispositivo y nunca sale de él.',
+  'local_intro': 'Conserva tu firma en este navegador y vuelve a usarla más tarde: gratis y sin iniciar sesión. Se queda en este dispositivo y nunca sale de él. Si borras los datos de este navegador, se elimina.',
   'local_name_placeholder': 'Ponle nombre a esta firma (opcional)',
   'local_saved': '✓ Guardada en este dispositivo',
   'local_save': 'Guardar en este dispositivo',

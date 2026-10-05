@@ -7,7 +7,7 @@ const sign: Messages['sign'] = {
   'mode_self': 'Assinar pessoalmente',
   'mode_send': 'Enviar para assinatura',
   'intro_self': 'Adicione a sua assinatura a um documento — é processado no navegador e nunca é carregado.',
-  'intro_send': 'Peça a outra pessoa que assine um documento. Assina no navegador, sem conta, e ambos recebem um certificado.',
+  'intro_send': 'Peça a outra pessoa que assine um documento. Assina no navegador, sem conta, e ambos recebem um certificado. Para isso, não é necessária uma assinatura própria.',
 
   // ── The drop circle (small round area — keep these short) ────────────────
   'drop_label': 'Largue um PDF aqui ou clique para escolher um',
@@ -20,6 +20,7 @@ const sign: Messages['sign'] = {
   'drop_stays_local': 'fica no seu dispositivo',
   'drop_uploaded_on_send': 'só é carregado quando o enviar',
   'drop_browse': 'ou clique para procurar',
+  'drop_browse_tap': 'ou toque para procurar',
   'drop_anywhere_title': 'Largue em qualquer lado',
   'drop_anywhere_hint': 'Um PDF — é assinado neste navegador e nunca é carregado',
 

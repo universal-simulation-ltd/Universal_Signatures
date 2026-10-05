@@ -3,6 +3,8 @@ import type { Messages } from '../en'
 const create: Messages['create'] = {
   // Signature studio (left column, "Create your signature")
   'studio_title': 'Erstelle deine Unterschrift',
+  'page_headline': 'Deine Unterschrift, auf jedem PDF',
+  'page_lead': 'Zeichne oder tippe deine Unterschrift und unterschreibe damit ein PDF – kostenlos, in diesem Browser, ohne Konto.',
   'mode_draw': 'Zeichnen',
   'mode_type': 'Tippen',
   'mode_phone': 'Auf dem Handy',
@@ -20,7 +22,6 @@ const create: Messages['create'] = {
   'labels_preview_building': 'Vorschau wird erstellt…',
   'labels_preview_empty': 'Füge oben deine Unterschrift hinzu, um die Vorschau zu sehen.',
   'labels_note': 'Steht unter deiner Unterschrift. Beim Unterschreiben eines PDFs kannst du wählen, ob es mit draufkommt.',
-  'studio_footer': 'Alles hier läuft in deinem Browser. Unterschreibe mit deiner Unterschrift rechts ein PDF – kostenlos und ohne Konto.',
   // Privacy note: completes the SDK's German sentence, which addresses the reader as „Sie“.
   'privacy_subject': 'Ihre Unterschrift',
   'privacy_except': 'eine in der Cloud speichern, auf Ihrem Handy unterschreiben oder ein Dokument zum Unterschreiben senden',

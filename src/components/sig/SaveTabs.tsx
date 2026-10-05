@@ -6,8 +6,8 @@ import { useT } from '../../i18n'
 
 type Tab = 'local' | 'online'
 
-// Save your signature — a collapsed-by-default card with two tabs. "Local
-// (temporary)" keeps it in this browser (no account); "Online" saves a verified
+// Save your signature — a collapsed-by-default card with two tabs. "On this
+// device" keeps it in this browser (no account); "Online" saves a verified
 // copy to the cloud against a Universal ID. Defaults to Online when signed in,
 // Local otherwise.
 export default function SaveTabs() {

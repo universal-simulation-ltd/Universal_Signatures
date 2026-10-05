@@ -7,7 +7,7 @@ export default {
   'mode_self': 'Sign it myself',
   'mode_send': 'Send to be signed',
   'intro_self': 'Add your signature to a document — it\'s processed in your browser and never uploaded.',
-  'intro_send': 'Ask someone else to sign a document. They sign in their browser with no account, and you both get a certificate.',
+  'intro_send': 'Ask someone else to sign a document. They sign in their browser with no account, and you both get a certificate. You don’t need a signature of your own for this.',
 
   // ── The drop circle (small round area — keep these short) ────────────────
   'drop_label': 'Drop a PDF here, or click to choose one', // accessible name of the drop circle
@@ -20,6 +20,7 @@ export default {
   'drop_stays_local': 'it stays on your device',
   'drop_uploaded_on_send': 'uploaded only when you send it',
   'drop_browse': 'or click to browse',
+  'drop_browse_tap': 'or tap to choose', // drop_browse on touch screens
   'drop_anywhere_title': 'Drop it anywhere', // full-page overlay while dragging a file
   'drop_anywhere_hint': 'A PDF — it\'s signed in this browser and never uploaded',
 

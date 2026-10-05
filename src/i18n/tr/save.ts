@@ -3,7 +3,7 @@ import type { Messages } from '../en'
 const save: Messages['save'] = {
   // The "Save your signature" card and its tabs
   'tabs_title': 'İmzanızı kaydedin',
-  'tabs_local': 'Yerel (geçici)',
+  'tabs_local': 'Bu cihazda',
   'tabs_online': 'Çevrimiçi',
 
   // Shared
@@ -20,7 +20,7 @@ const save: Messages['save'] = {
   // Save on this device
   'local_title': 'Bu cihaza kaydet',
   'local_no_account': 'Hesap gerekmez',
-  'local_intro': 'İmzanızı bu tarayıcıda saklayın ve daha sonra yeniden kullanın — ücretsiz, giriş yapmadan. Bu cihazda kalır ve asla dışarı çıkmaz.',
+  'local_intro': 'İmzanızı bu tarayıcıda saklayın ve daha sonra yeniden kullanın — ücretsiz, giriş yapmadan. Bu cihazda kalır ve asla dışarı çıkmaz. Bu tarayıcının verileri temizlenirse silinir.',
   'local_name_placeholder': 'Bu imzaya ad verin (isteğe bağlı)',
   'local_saved': '✓ Bu cihaza kaydedildi',
   'local_save': 'Bu cihaza kaydet',

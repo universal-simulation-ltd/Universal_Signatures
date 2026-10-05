@@ -3,7 +3,7 @@ import type { Messages } from '../en'
 const save: Messages['save'] = {
   // The "Save your signature" card and its tabs
   'tabs_title': 'Enregistrer votre signature',
-  'tabs_local': 'Local (temporaire)',
+  'tabs_local': 'Sur cet appareil',
   'tabs_online': 'En ligne',
 
   // Shared
@@ -20,7 +20,7 @@ const save: Messages['save'] = {
   // Save on this device
   'local_title': 'Enregistrer sur cet appareil',
   'local_no_account': 'Sans compte',
-  'local_intro': 'Conservez votre signature dans ce navigateur pour la réutiliser plus tard — gratuitement, sans connexion. Elle reste sur cet appareil et ne le quitte jamais.',
+  'local_intro': 'Conservez votre signature dans ce navigateur pour la réutiliser plus tard — gratuitement, sans connexion. Elle reste sur cet appareil et ne le quitte jamais. Effacer les données de ce navigateur la supprime.',
   'local_name_placeholder': 'Nommer cette signature (facultatif)',
   'local_saved': '✓ Enregistrée sur cet appareil',
   'local_save': 'Enregistrer sur cet appareil',

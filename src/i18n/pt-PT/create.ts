@@ -3,6 +3,8 @@ import type { Messages } from '../en'
 const create: Messages['create'] = {
   // Signature studio (left column, "Create your signature")
   'studio_title': 'Criar a sua assinatura',
+  'page_headline': 'A sua assinatura, em qualquer PDF',
+  'page_lead': 'Desenhe ou escreva a sua assinatura e assine um PDF com ela — gratuitamente, neste navegador, sem necessidade de conta.',
   'mode_draw': 'Desenhar',
   'mode_type': 'Escrever',
   'mode_phone': 'Assinar no telemóvel',
@@ -20,7 +22,6 @@ const create: Messages['create'] = {
   'labels_preview_building': 'A preparar a pré-visualização…',
   'labels_preview_empty': 'Adicione a sua assinatura acima para ver a pré-visualização.',
   'labels_note': 'Aparece por baixo da assinatura. Ao assinar um PDF, pode escolher se a inclui.',
-  'studio_footer': 'Tudo aqui é executado no navegador. Use a sua assinatura para assinar um PDF à direita — gratuitamente, sem necessidade de conta.',
   'privacy_subject': 'A sua assinatura',
   'privacy_except': 'guardar uma na nuvem, assinar no telemóvel ou enviar um documento para assinatura',
 

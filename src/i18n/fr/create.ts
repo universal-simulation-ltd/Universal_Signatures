@@ -3,6 +3,8 @@ import type { Messages } from '../en'
 const create: Messages['create'] = {
   // Signature studio
   'studio_title': 'Créez votre signature',
+  'page_headline': 'Votre signature, sur n’importe quel PDF',
+  'page_lead': 'Dessinez ou tapez votre signature, puis signez un PDF avec — gratuitement, dans ce navigateur, sans compte.',
   'mode_draw': 'Dessiner',
   'mode_type': 'Taper',
   'mode_phone': 'Signer sur téléphone',
@@ -20,7 +22,6 @@ const create: Messages['create'] = {
   'labels_preview_building': 'Création de l’aperçu…',
   'labels_preview_empty': 'Ajoutez votre signature ci-dessus pour voir l’aperçu.',
   'labels_note': 'Apparaît sous votre signature. Lorsque vous signez un PDF, vous pouvez choisir de l’inclure ou non.',
-  'studio_footer': 'Tout se passe dans votre navigateur. Utilisez votre signature pour signer un PDF à droite — gratuitement, sans compte.',
   'privacy_subject': 'Votre signature',
   'privacy_except': 'enregistrer une signature dans le cloud, signer sur votre téléphone ou envoyer un document à signer',
 

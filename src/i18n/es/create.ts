@@ -3,6 +3,8 @@ import type { Messages } from '../en'
 const create: Messages['create'] = {
   // Signature studio
   'studio_title': 'Crea tu firma',
+  'page_headline': 'Tu firma, en cualquier PDF',
+  'page_lead': 'Dibuja o escribe tu firma y firma un PDF con ella: gratis, en este navegador y sin cuenta.',
   'mode_draw': 'Dibujar',
   'mode_type': 'Escribir',
   'mode_phone': 'Firmar en el móvil',
@@ -20,7 +22,6 @@ const create: Messages['create'] = {
   'labels_preview_building': 'Generando la vista previa…',
   'labels_preview_empty': 'Añade tu firma arriba para ver la vista previa.',
   'labels_note': 'Aparece debajo de tu firma. Al firmar un PDF puedes elegir si incluirlo.',
-  'studio_footer': 'Todo esto funciona en tu navegador. Usa tu firma para firmar un PDF a la derecha: gratis y sin necesidad de cuenta.',
   'privacy_subject': 'Tu firma',
   'privacy_except': 'guardar una en la nube, firmar en el móvil o enviar un documento para que lo firmen',
 

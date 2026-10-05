@@ -7,7 +7,7 @@ const sign: Messages['sign'] = {
   'mode_self': 'Le signer moi-même',
   'mode_send': 'Envoyer pour signature',
   'intro_self': 'Ajoutez votre signature à un document — il est traité dans votre navigateur et n’est jamais envoyé en ligne.',
-  'intro_send': 'Demandez à quelqu’un d’autre de signer un document. Il signe dans son navigateur, sans compte, et vous recevez tous deux un certificat.',
+  'intro_send': 'Demandez à quelqu’un d’autre de signer un document. Il signe dans son navigateur, sans compte, et vous recevez tous deux un certificat. Vous n’avez pas besoin de votre propre signature pour cela.',
 
   // The drop circle (keep short)
   'drop_label': 'Déposez un PDF ici ou cliquez pour en choisir un',
@@ -20,6 +20,7 @@ const sign: Messages['sign'] = {
   'drop_stays_local': 'il reste sur votre appareil',
   'drop_uploaded_on_send': 'envoyé en ligne seulement à l’envoi',
   'drop_browse': 'ou cliquez pour parcourir',
+  'drop_browse_tap': 'ou touchez pour parcourir',
   'drop_anywhere_title': 'Déposez-le n’importe où',
   'drop_anywhere_hint': 'Un PDF — il est signé dans ce navigateur et n’est jamais envoyé en ligne',
 

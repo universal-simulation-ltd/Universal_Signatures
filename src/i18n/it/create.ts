@@ -3,6 +3,8 @@ import type { Messages } from '../en'
 const create: Messages['create'] = {
   // Signature studio (left column, "Create your signature")
   'studio_title': 'Crea la tua firma',
+  'page_headline': 'La tua firma, su qualsiasi PDF',
+  'page_lead': 'Disegna o scrivi la tua firma, poi usala per firmare un PDF: gratis, in questo browser, senza account.',
   'mode_draw': 'Disegna',
   'mode_type': 'Scrivi',
   'mode_phone': 'Firma sul telefono',
@@ -20,7 +22,6 @@ const create: Messages['create'] = {
   'labels_preview_building': 'Creazione dell’anteprima…',
   'labels_preview_empty': 'Aggiungi la tua firma qui sopra per vedere l’anteprima.',
   'labels_note': 'Compare sotto la firma. Quando firmi un PDF puoi scegliere se includerlo.',
-  'studio_footer': 'Qui tutto funziona nel tuo browser. Usa la tua firma per firmare un PDF a destra: gratis, senza account.',
   // Privacy note under the right column. Completes "… never leaves this computer, except …".
   'privacy_subject': 'La tua firma',
   'privacy_except': 'salvarne una nel cloud, firmare sul telefono o inviare un documento da firmare',

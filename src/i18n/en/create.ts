@@ -3,6 +3,8 @@
 export default {
   // Signature studio (left column, "Create your signature")
   'studio_title': 'Create your signature',
+  'page_headline': 'Your signature, on any PDF', // page heading above everything; short, one line on a phone
+  'page_lead': 'Draw or type your signature, then sign a PDF with it — free, in this browser, no account needed.', // line under page_headline: what to do first
   'mode_draw': 'Draw', // tab: draw the signature by hand
   'mode_type': 'Type', // tab: type the name in a cursive font
   'mode_phone': 'Sign on phone', // tab: draw it on a phone via a QR code
@@ -20,7 +22,6 @@ export default {
   'labels_preview_building': 'Building preview…',
   'labels_preview_empty': 'Add your signature above to see the preview.',
   'labels_note': 'Appears beneath your signature. When signing a PDF you can choose whether to include it.',
-  'studio_footer': 'Everything here runs in your browser. Use your signature to sign a PDF on the right — for free, no account needed.',
   // Privacy note under the right column. Completes "… never leaves this computer, except …".
   'privacy_subject': 'Your signature',
   'privacy_except': 'saving one to the cloud, signing on your phone, or sending a document to be signed', // must keep exactly this scope: all three ways a signature can leave the device
