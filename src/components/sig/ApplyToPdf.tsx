@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { DropAnywhere, DropRing, useFileDrop, useUniversal, useUser, type SigningAuditFields } from '@unisim/sdk'
+import { DropAnywhere, DropRing, SignInDialog, useFileDrop, useUniversal, useUser, type SigningAuditFields } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import type { Anchor, PlacePoint } from '../../lib/pdf'
 import { sha256Bytes, trimToInk } from '../../lib/signature'
@@ -26,10 +26,15 @@ const ANCHORS: { id: Anchor; label: MessageKey }[] = [
   { id: 'bottom-left', label: 'sign.anchor_bottom_left' }, { id: 'bottom-center', label: 'sign.anchor_bottom_center' }, { id: 'bottom-right', label: 'sign.anchor_bottom_right' },
 ]
 
+// Only its origin is used, by the in-app sign-in's "manage your account" link.
+// Sign-in itself happens in <SignInDialog /> right here: linking to the hub's
+// /login navigated away from the signature (and PDF) being worked on, and the
+// hub then sent a newcomer on to the Assess portal, not back here.
 const SIGNUP_URL = 'https://app.unisim.co.uk/login'
 
 export default function ApplyToPdf() {
   const t = useT()
+  const [signInOpen, setSignInOpen] = useState(false)
   // "Click to browse" means nothing under a finger.
   const touch = useCoarsePointer()
   const composedImage = useSigStore((s) => s.currentImage())
@@ -423,9 +428,12 @@ export default function ApplyToPdf() {
             </span>
           </label>
           {!signedIn && (
-            <p className="mt-2 pl-6 text-[11px] text-slate-500">
-              {t.rich('sign.certificate_sign_in', { link: <a href={SIGNUP_URL} className="font-medium text-orange-700 hover:underline">{t('sign.certificate_sign_in_link')}</a> })}
-            </p>
+            <>
+              <p className="mt-2 pl-6 text-[11px] text-slate-500">
+                {t.rich('sign.certificate_sign_in', { link: <button type="button" onClick={() => setSignInOpen(true)} className="font-medium text-orange-700 hover:underline">{t('sign.certificate_sign_in_link')}</button> })}
+              </p>
+              <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} hubLoginHref={SIGNUP_URL} />
+            </>
           )}
         </div>
       )}

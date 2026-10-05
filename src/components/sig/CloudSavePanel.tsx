@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Chip, useUniversal, useUser } from '@unisim/sdk'
+import { Chip, SignInDialog, useUniversal, useUser } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import {
   useCloudGate,
@@ -16,6 +16,10 @@ import { intlLocale, useT } from '../../i18n'
 
 const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatures'
 const SELFHOST_DOCS = 'https://github.com/universal-simulation-ltd/Universal_Signatures#self-hosting'
+// Only its origin is used, by the in-app sign-in's "manage your account" link.
+// Sign-in itself happens in <SignInDialog /> right here: linking to the hub's
+// /login navigated away from the signature (and PDF) being worked on, and the
+// hub then sent a newcomer on to the Assess portal, not back here.
 const SIGNUP_URL = 'https://app.unisim.co.uk/login'
 const NEED_MORE_URL = 'https://www.unisim.co.uk/support'
 const SET_UP_COMPANY_URL = 'https://app.unisim.co.uk/branding'
@@ -25,6 +29,7 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
   const { supabase, activeOrgId, session } = useUniversal()
   const { user } = useUser()
   const gate = useCloudGate()
+  const [signInOpen, setSignInOpen] = useState(false)
   const signedIn = !!session?.user && session.user.is_anonymous !== true
   const stored = useStoredSignatures(activeOrgId, signedIn)
   const { status: allowance, refresh: refreshAllowance } = useFreeAllowance('signatures')
@@ -140,9 +145,10 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
             <p className="text-sm text-slate-700">
               {t.rich('save.cloud_signed_out', { id: <strong>Universal ID</strong> })}
             </p>
-            <a href={SIGNUP_URL} className="mt-3 inline-flex rounded-lg bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800">
+            <button type="button" onClick={() => setSignInOpen(true)} className="mt-3 inline-flex rounded-lg bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800">
               {t('save.cloud_sign_in')}
-            </a>
+            </button>
+            <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} hubLoginHref={SIGNUP_URL} initialMode="signup" />
           </div>
         )}
 

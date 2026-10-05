@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
-import { useOrg, useSignRequests, useUniversal, useUser, type SignRequest } from '@unisim/sdk'
+import { SignInDialog, useOrg, useSignRequests, useUniversal, useUser, type SignRequest } from '@unisim/sdk'
 import ErrorBoundary from '../ErrorBoundary'
 import type { Anchor, PlacePoint } from '../../lib/pdf'
 import {
@@ -16,6 +16,10 @@ import { intlLocale, useT, type MessageKey } from '../../i18n'
 const PositionPicker = lazy(() => import('./PositionPicker'))
 const loadPdf = () => import('../../lib/pdf')
 
+// Only its origin is used, by the in-app sign-in's "manage your account" link.
+// Sign-in itself happens in <SignInDialog /> right here: linking to the hub's
+// /login navigated away from the signature (and PDF) being worked on, and the
+// hub then sent a newcomer on to the Assess portal, not back here.
 const SIGNUP_URL = 'https://app.unisim.co.uk/login'
 const HUB_URL = 'https://app.unisim.co.uk/'
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -93,6 +97,7 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
   const signHere = useMemo(() => signHereImage(signHereLabel), [signHereLabel])
   // Bumped after a send, so the list below re-reads.
   const [listVersion, setListVersion] = useState(0)
+  const [signInOpen, setSignInOpen] = useState(false)
 
   if (!signedIn) {
     return (
@@ -100,9 +105,10 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
         <p className="text-sm text-slate-700">
           {t.rich('send.signed_out_intro', { id: <strong>Universal ID</strong> })}
         </p>
-        <a href={SIGNUP_URL} className="mt-3 inline-flex rounded-lg bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800">
+        <button type="button" onClick={() => setSignInOpen(true)} className="mt-3 inline-flex rounded-lg bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800">
           {t('send.signed_out_cta')}
-        </a>
+        </button>
+        <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} hubLoginHref={SIGNUP_URL} initialMode="signup" />
       </div>
     )
   }
