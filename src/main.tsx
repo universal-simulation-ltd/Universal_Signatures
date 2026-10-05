@@ -28,7 +28,7 @@ const universalConfig = {
   cookieDomain: import.meta.env.PROD ? '.unisim.co.uk' : undefined,
   // Local dev runs against an offline "dummy account" by default so the
   // signed-in surfaces (navbar profile, cloud save, verify) work with no
-  // network — sign in as james@unisim.co.uk / KyJam91. Set VITE_REAL_AUTH=1 to
+  // network — sign in as demo@example.invalid / offline-demo. Set VITE_REAL_AUTH=1 to
   // talk to the real Supabase project instead. Never active in prod (the SDK
   // also hard-guards this off whenever cookieDomain is set).
   mockAuth: import.meta.env.DEV && import.meta.env.VITE_REAL_AUTH !== '1',

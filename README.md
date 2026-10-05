@@ -77,7 +77,7 @@ default — no network, no real Supabase. Open the profile menu → **Sign in** 
 use the demo credentials:
 
 ```
-james@unisim.co.uk / KyJam91
+demo@example.invalid / offline-demo
 ```
 
 You'll get a seeded signed-in world (owner of a demo org with one free token) so
