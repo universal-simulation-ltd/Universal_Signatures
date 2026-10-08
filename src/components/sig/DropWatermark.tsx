@@ -14,7 +14,13 @@
  * the ring's own motion for that state; this follows it.
  */
 
-const LOOP_MS = 9000
+/**
+ * How long one stroke takes to draw. It draws ONCE and stays drawn (James,
+ * 2026-10-08): the old draw-hold-fade loop every 9 s repainted these strokes
+ * on the main thread for as long as the page was open, for nobody. Same pace
+ * as the loop had. Universal PDF's ring and the SDK's default did the same.
+ */
+const DRAW_MS = 2000
 
 // pathLength={100} on every animated path, so the dash values are PERCENTAGES
 // of each stroke and survive a curve being moved.
@@ -22,15 +28,15 @@ const CSS = `
   .sw-page, .sw-fold, .sw-rule, .sw-sig {
     stroke-dasharray: 100;
     stroke-dashoffset: 100;
-    animation-duration: ${LOOP_MS}ms;
-    animation-iteration-count: infinite;
+    animation-duration: ${DRAW_MS}ms;
+    animation-iteration-count: 1;
+    animation-fill-mode: both;
     animation-timing-function: ease-in-out;
   }
   @keyframes sw-draw {
-    0%        { stroke-dashoffset: 100; opacity: 0; }
-    4%        { opacity: 1; }
-    22%, 82%  { stroke-dashoffset: 0; opacity: 1; }
-    94%, 100% { stroke-dashoffset: 0; opacity: 0; }
+    0%   { stroke-dashoffset: 100; opacity: 0; }
+    18%  { opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 1; }
   }
   .sw-page { animation-name: sw-draw; animation-delay: 0ms; }
   .sw-fold { animation-name: sw-draw; animation-delay: 500ms; }
