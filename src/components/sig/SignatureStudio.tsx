@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { PrivacyNote, useDefaultView, type LocalizedSubject, type LocalizedText } from '@unisim/sdk'
 import { useT, type MessageKey } from '../../i18n'
 import { en } from '../../i18n/en'
@@ -14,7 +14,7 @@ import SaveTabs from './SaveTabs'
 import MainSignatureBar from './MainSignatureBar'
 import { useMainSignature } from '../../lib/cloud'
 import { CONTAINER } from '../../lib/layout'
-import { useCoarsePointer } from '../../lib/useCoarsePointer'
+import { useTouchPhone } from '../../lib/useCoarsePointer'
 
 const MODES: { id: StudioMode; label: MessageKey }[] = [
   { id: 'draw', label: 'create.mode_draw' },
@@ -32,12 +32,15 @@ export default function SignatureStudio() {
   const t = useT()
   const storedMode = useSigStore((s) => s.mode)
   const setMode = useSigStore((s) => s.setMode)
-  // "Sign on phone" hands the drawing to a phone by QR code. On a phone or a
-  // tablet you are already holding the thing you would sign on — the Draw pad
-  // takes a finger — so the tab only confused people there and is not shown.
-  const touch = useCoarsePointer()
-  const modes = touch ? MODES.filter((m) => m.id !== 'phone') : MODES
-  const mode: StudioMode = touch && storedMode === 'phone' ? 'draw' : storedMode
+  // "Sign on phone" hands the drawing to a phone by QR code. On a phone you are
+  // already holding the thing you would sign on — the Draw pad takes a finger —
+  // so the tab only confused people there and is not shown, and a saved
+  // "phone" default opens on Draw instead. A tablet keeps it (James,
+  // 2026-10-09): from an iPad, signing on the phone in your pocket is a real
+  // choice. It used to go on every touch screen, iPads included.
+  const phone = useTouchPhone()
+  const modes = phone ? MODES.filter((m) => m.id !== 'phone') : MODES
+  const mode: StudioMode = phone && storedMode === 'phone' ? 'draw' : storedMode
   // Double-tap a mode to have the studio open on it (James, 2026-09-30) — Type
   // for somebody who never draws, say. The store read the same default at
   // start-up; Tune this app has the same choice.
@@ -59,6 +62,18 @@ export default function SignatureStudio() {
   const setLabelAlign = useSigStore((s) => s.setLabelAlign)
   const setComposed = useSigStore((s) => s.setComposed)
   const { main } = useMainSignature()
+
+  // "Send to be signed" needs no signature of your own, so in that mode this
+  // whole column folds to its title and the send flow leads (James,
+  // 2026-10-09). It still opens on a tap — to make one to keep, say. Folds
+  // again every time send mode is chosen. Hidden with a class rather than
+  // unmounted, so a signature drawn before the switch is still there after.
+  const applyMode = useSigStore((s) => s.applyMode)
+  const [openInSend, setOpenInSend] = useState(false)
+  useEffect(() => { if (applyMode === 'send') setOpenInSend(false) }, [applyMode])
+  const sending = applyMode === 'send'
+  const folded = sending && !openInSend
+  const bodyId = useId()
 
   const base = mode === 'type' ? typedDataUrl : drawnDataUrl
   const hasLabels = (includeName && signerName.trim().length > 0) || includeDate || includeTime
@@ -91,11 +106,31 @@ export default function SignatureStudio() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Left column: create your signature, then save it */}
-        <div className="space-y-6">
+        {/* flex + gap, not space-y: space-y puts its margin on every child but the
+            LAST, and the last is the SaveTabs wrapper, hidden while folded, so
+            the folded card kept a 24px margin under it for nothing. */}
+        <div className="flex flex-col gap-6">
         <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-900">{t('create.studio_title')}</h2>
-            <div className="inline-flex rounded-md bg-slate-100 p-0.5">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-bold text-slate-900">
+              {sending ? (
+                // `aria-expanded` + `aria-controls`: the SDK's reveal-on-expand
+                // brings the opened column into view by itself.
+                <button
+                  type="button"
+                  onClick={() => setOpenInSend((o) => !o)}
+                  aria-expanded={!folded}
+                  aria-controls={bodyId}
+                  className="inline-flex items-center gap-1.5 text-left hover:text-orange-700"
+                >
+                  {t('create.studio_title')}
+                  <svg viewBox="0 0 24 24" className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${folded ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+              ) : t('create.studio_title')}
+            </h2>
+            <div className={`${folded ? 'hidden' : 'inline-flex'} rounded-md bg-slate-100 p-0.5`}>
               {modes.map((m) => {
                 const label = t(m.label)
                 const dvProps = dv.buttonProps(m.id, label)
@@ -125,6 +160,8 @@ export default function SignatureStudio() {
               })}
             </div>
           </div>
+          {folded && <p className="mt-1 text-xs text-slate-500">{t('create.studio_folded_hint')}</p>}
+          <div id={bodyId} className={folded ? 'hidden' : undefined}>
           <div className="mt-4">
             {main && <MainSignatureBar main={main} />}
             {mode === 'type' ? <TypeSignature /> : mode === 'phone' ? <PhoneSignPanel /> : <SignaturePad />}
@@ -197,10 +234,12 @@ export default function SignatureStudio() {
               </p>
             )}
           </div>
-
+          </div>
         </section>
 
-          <SaveTabs />
+          <div className={folded ? 'hidden' : undefined}>
+            <SaveTabs />
+          </div>
         </div>
 
         {/* Right column: sign a PDF */}

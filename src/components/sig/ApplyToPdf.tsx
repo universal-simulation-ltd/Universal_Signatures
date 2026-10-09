@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { DropAnywhere, DropRing, SignInDialog, useFileDrop, useUniversal, useUser, type SigningAuditFields } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import type { Anchor, PlacePoint } from '../../lib/pdf'
@@ -62,8 +62,30 @@ export default function ApplyToPdf() {
   const { user } = useUser()
   const signedIn = !!session?.user && session.user.is_anonymous !== true
 
-  // Sign it yourself, or send it to someone else to sign.
-  const [mode, setMode] = useState<'self' | 'send'>('self')
+  // Sign it yourself, or send it to someone else to sign. In the store, because
+  // the studio beside (or, on a phone, above) this card folds away in send mode.
+  const mode = useSigStore((s) => s.applyMode)
+  const setApplyMode = useSigStore((s) => s.setApplyMode)
+  // ⚠️ On a phone the studio sits ABOVE this card, so folding it moves this
+  // switch up the page from under the finger that just tapped it. So a switch
+  // notes where the switch was on screen, and once the fold has laid out the
+  // page is scrolled by the difference: the switch stays put, the send flow
+  // arrives under it. (Side by side on a wide screen, the difference is 0.)
+  const switchRef = useRef<HTMLDivElement>(null)
+  const switchTopRef = useRef<number | null>(null)
+  function setMode(next: typeof mode) {
+    if (next === mode) return
+    switchTopRef.current = switchRef.current?.getBoundingClientRect().top ?? null
+    setApplyMode(next)
+  }
+  useLayoutEffect(() => {
+    const before = switchTopRef.current
+    switchTopRef.current = null
+    const el = switchRef.current
+    if (before === null || !el) return
+    const delta = el.getBoundingClientRect().top - before
+    if (Math.abs(delta) > 1) window.scrollBy({ top: delta, behavior: 'instant' as ScrollBehavior })
+  }, [mode])
   const [file, setFile] = useState<File | null>(null)
   const [pages, setPages] = useState(0)
   const [pageIndex, setPageIndex] = useState(0)
@@ -224,7 +246,7 @@ export default function ApplyToPdf() {
     <div className="rounded-xl border border-slate-200 bg-white p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-bold text-slate-900">{t('sign.title')}</h2>
-        <div className="inline-flex rounded-md bg-slate-100 p-0.5" role="group" aria-label={t('sign.mode_group_label')}>
+        <div ref={switchRef} className="inline-flex rounded-md bg-slate-100 p-0.5" role="group" aria-label={t('sign.mode_group_label')}>
           {([['self', t('sign.mode_self')], ['send', t('sign.mode_send')]] as const).map(([id, label]) => (
             <button
               key={id}

@@ -6,6 +6,9 @@ import { DEFAULT_FONT, type SigFont } from '../lib/fonts'
 /** Where the name/date/time labels sit relative to the signature box. */
 export type LabelAlign = 'left' | 'center' | 'right'
 
+/** Who signs the PDF in the "Sign a PDF" card. */
+export type ApplyMode = 'self' | 'send'
+
 interface SigState {
   mode: StudioMode
   signerName: string
@@ -23,6 +26,11 @@ interface SigState {
   labelAlign: LabelAlign
   composedDataUrl: string | null
 
+  // The "Sign a PDF" card's switch: sign it yourself, or send it to someone
+  // else. Here rather than in that card because the studio reads it too: in
+  // send mode it folds away, since sending needs no signature of your own.
+  applyMode: ApplyMode
+
   setMode: (m: StudioMode) => void
   setSignerName: (n: string) => void
   setFontId: (id: string) => void
@@ -34,6 +42,7 @@ interface SigState {
   setIncludeTime: (v: boolean) => void
   setLabelAlign: (a: LabelAlign) => void
   setComposed: (url: string | null) => void
+  setApplyMode: (m: ApplyMode) => void
   clear: () => void
   /** True when name/date labels should be applied (choice set + has content). */
   hasExtras: () => boolean
@@ -68,6 +77,7 @@ export const useSigStore = create<SigState>((set, get) => ({
   includeTime: false,
   labelAlign: 'center',
   composedDataUrl: null,
+  applyMode: 'self',
 
   setMode: (mode) => set({ mode }),
   setSignerName: (signerName) => set({ signerName }),
@@ -80,6 +90,7 @@ export const useSigStore = create<SigState>((set, get) => ({
   setIncludeTime: (includeTime) => set({ includeTime }),
   setLabelAlign: (labelAlign) => set({ labelAlign }),
   setComposed: (composedDataUrl) => set({ composedDataUrl }),
+  setApplyMode: (applyMode) => set({ applyMode }),
   clear: () => set({ drawnDataUrl: null, typedDataUrl: null, composedDataUrl: null }),
 
   hasExtras: () => {

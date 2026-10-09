@@ -3,6 +3,7 @@ import type { Messages } from '../en'
 const create: Messages['create'] = {
   // Signature studio (left column, "Create your signature")
   'studio_title': 'İmzanızı oluşturun',
+  'studio_folded_hint': 'Belge göndermek için gerekmez. Yine de oluşturmak için bu bölümü açın.',
   'page_headline': 'İmzanız, her PDF’te',
   'page_lead': 'İmzanızı çizin ya da yazın, ardından onunla bir PDF imzalayın — ücretsiz, bu tarayıcıda, hesap gerekmez.',
   'mode_draw': 'Çiz',

@@ -3,6 +3,7 @@ import type { Messages } from '../en'
 const create: Messages['create'] = {
   // Signature studio (left column, "Create your signature")
   'studio_title': 'Crea la tua firma',
+  'studio_folded_hint': 'Non serve per inviare un documento. Apri questa sezione per crearne una comunque.',
   'page_headline': 'La tua firma, su qualsiasi PDF',
   'page_lead': 'Disegna o scrivi la tua firma, poi usala per firmare un PDF: gratis, in questo browser, senza account.',
   'mode_draw': 'Disegna',

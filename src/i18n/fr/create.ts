@@ -3,6 +3,7 @@ import type { Messages } from '../en'
 const create: Messages['create'] = {
   // Signature studio
   'studio_title': 'Créez votre signature',
+  'studio_folded_hint': 'Inutile pour envoyer un document. Ouvrez cette section pour en créer une quand même.',
   'page_headline': 'Votre signature, sur n’importe quel PDF',
   'page_lead': 'Dessinez ou tapez votre signature, puis signez un PDF avec — gratuitement, dans ce navigateur, sans compte.',
   'mode_draw': 'Dessiner',

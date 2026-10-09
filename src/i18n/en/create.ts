@@ -3,6 +3,7 @@
 export default {
   // Signature studio (left column, "Create your signature")
   'studio_title': 'Create your signature',
+  'studio_folded_hint': 'Not needed to send a document. Open this to make one anyway.', // under the folded "Create your signature" title while "Send to be signed" is chosen; the title opens it
   'page_headline': 'Your signature, on any PDF', // page heading above everything; short, one line on a phone
   'page_lead': 'Draw or type your signature, then sign a PDF with it — free, in this browser, no account needed.', // line under page_headline: what to do first
   'mode_draw': 'Draw', // tab: draw the signature by hand
