@@ -13,6 +13,7 @@ import SignRequestPage from './components/sig/SignRequestPage'
 import { parseExpiry } from './lib/mobileSign'
 import { KNOWLEDGE_BASE } from './knowledge'
 import { useT } from './i18n'
+import { useTouchPhone } from './lib/useCoarsePointer'
 
 const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatures'
 
@@ -43,6 +44,9 @@ function route():
 export default function App() {
   const t = useT()
   const r = route()
+  // The studio has no "Sign on phone" on a phone (see SignatureStudio), so this
+  // row does not offer it there either. A tablet keeps it.
+  const phone = useTouchPhone()
 
   // The phone signing page is a standalone full-screen view — no navbar/footer.
   if (r.name === 'signMobile') return <SignMobilePage token={r.token} expiresAt={r.expiresAt} />
@@ -81,7 +85,7 @@ export default function App() {
             views={[
               { value: 'draw', label: t('create.mode_draw') },
               { value: 'type', label: t('create.mode_type') },
-              { value: 'phone', label: t('create.mode_phone') },
+              ...(phone ? [] : [{ value: 'phone' as const, label: t('create.mode_phone') }]),
             ]}
           />
         }
