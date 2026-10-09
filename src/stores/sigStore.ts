@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { readDefaultView } from '@unisim/sdk'
 import type { StudioMode } from '../lib/types'
 import { DEFAULT_FONT, type SigFont } from '../lib/fonts'
 
@@ -42,8 +43,21 @@ interface SigState {
   currentImage: () => string | null
 }
 
+/** Every way to create a signature — also what the "Opens on" default may name. */
+export const STUDIO_MODES: readonly StudioMode[] = ['draw', 'type', 'phone']
+
+/**
+ * The mode the studio opens on: Draw, unless the person double-tapped another
+ * (James, 2026-09-30: "allow the user to double click the button to set that as
+ * their default view"). The SDK owns the key and its Reset to defaults clears it.
+ */
+function openingMode(): StudioMode {
+  const stored = readDefaultView('signatures', 'mode')
+  return stored && (STUDIO_MODES as readonly string[]).includes(stored) ? (stored as StudioMode) : 'draw'
+}
+
 export const useSigStore = create<SigState>((set, get) => ({
-  mode: 'draw',
+  mode: openingMode(),
   signerName: '',
   fontId: DEFAULT_FONT.id,
   importedFonts: [],

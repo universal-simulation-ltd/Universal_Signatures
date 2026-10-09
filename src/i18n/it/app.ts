@@ -6,6 +6,7 @@ const app: Messages['app'] = {
   'github_aria': 'Universal Signatures su GitHub',
   'about_subject': 'La tua firma',
   'about_except': 'salvarne una nel cloud, firmare sul telefono o inviare un documento da firmare',
+  'pref_opens_on': 'Si apre su',
 }
 
 export default app

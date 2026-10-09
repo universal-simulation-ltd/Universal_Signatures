@@ -7,6 +7,7 @@ const app: Messages['app'] = {
   // The SDK's German privacy sentence addresses the reader as „Sie“, so these two match it.
   'about_subject': 'Ihre Unterschrift',
   'about_except': 'eine in der Cloud speichern, auf Ihrem Handy unterschreiben oder ein Dokument zum Unterschreiben senden',
+  'pref_opens_on': 'Öffnet mit',
 }
 
 export default app

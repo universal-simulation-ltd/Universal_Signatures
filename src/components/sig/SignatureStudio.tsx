@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
-import { PrivacyNote, type LocalizedSubject, type LocalizedText } from '@unisim/sdk'
+import { PrivacyNote, useDefaultView, type LocalizedSubject, type LocalizedText } from '@unisim/sdk'
 import { useT, type MessageKey } from '../../i18n'
 import { en } from '../../i18n/en'
-import { useSigStore } from '../../stores/sigStore'
+import { STUDIO_MODES, useSigStore } from '../../stores/sigStore'
 import type { StudioMode } from '../../lib/types'
 import { composeSignatureWithLabels, formatSigningDate, formatSigningTime } from '../../lib/signature'
 import type { LabelAlign } from '../../stores/sigStore'
@@ -38,6 +38,10 @@ export default function SignatureStudio() {
   const touch = useCoarsePointer()
   const modes = touch ? MODES.filter((m) => m.id !== 'phone') : MODES
   const mode: StudioMode = touch && storedMode === 'phone' ? 'draw' : storedMode
+  // Double-tap a mode to have the studio open on it (James, 2026-09-30) — Type
+  // for somebody who never draws, say. The store read the same default at
+  // start-up; Tune this app has the same choice.
+  const dv = useDefaultView<StudioMode>('mode', 'draw', { views: STUDIO_MODES })
 
   // Name/date extras.
   const drawnDataUrl = useSigStore((s) => s.drawnDataUrl)
@@ -92,17 +96,33 @@ export default function SignatureStudio() {
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-900">{t('create.studio_title')}</h2>
             <div className="inline-flex rounded-md bg-slate-100 p-0.5">
-              {modes.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setMode(m.id)}
-                  aria-pressed={mode === m.id}
-                  className={`rounded px-3 py-1 text-xs font-semibold ${mode === m.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
-                >
-                  {t(m.label)}
-                </button>
-              ))}
+              {modes.map((m) => {
+                const label = t(m.label)
+                const dvProps = dv.buttonProps(m.id, label)
+                // The mode it opens on is orange: filled while you are on it,
+                // outlined while you are not — Jukebox's library tabs.
+                const isDefault = dvProps['data-default-view'] === 'true'
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    aria-pressed={mode === m.id}
+                    {...dvProps}
+                    onClick={() => { dv.tap(m.id); setMode(m.id) }}
+                    className={`rounded px-3 py-1 text-xs font-semibold ${
+                      mode === m.id
+                        ? isDefault
+                          ? 'bg-gradient-to-br from-[#FE8C01] to-[#E05504] text-white shadow-sm'
+                          : 'bg-white text-slate-900 shadow-sm'
+                        : isDefault
+                          ? 'text-orange-700 ring-1 ring-inset ring-orange-400/70'
+                          : 'text-slate-500'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
             </div>
           </div>
           <div className="mt-4">
