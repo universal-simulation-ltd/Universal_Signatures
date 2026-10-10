@@ -1,8 +1,8 @@
 {
   "app": "universal-signatures",
   "appVersion": "0.1.0",
-  "generated": "2026-09-28",
-  "noticesCount": 52,
+  "generated": "2026-10-10",
+  "noticesCount": 53,
   "ships": [
     {
       "name": "@supabase/supabase-js",
