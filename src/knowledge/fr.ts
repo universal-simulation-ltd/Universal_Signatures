@@ -186,7 +186,7 @@ Le stockage dans le cloud **n’est pas chiffré de bout en bout**. Les données
 - **Quand vous envoyez un PDF à signer à quelqu’un d’autre :** le PDF, votre adresse e-mail et la sienne. Quand cette personne l’ouvre et le signe, le serveur enregistre aussi les heures, son adresse IP, le pays correspondant et son navigateur (la page de certificat publique n’affiche que le pays). Une demande terminée — le PDF, la copie signée, ces informations et sa page de certificat — est conservée 7 ans après la signature, puis supprimée ; téléchargez une copie pour la garder plus longtemps. Retirer une demande non signée la supprime immédiatement.
 - **Quand vous enregistrez dans le cloud :** l’image de la signature et les informations listées ci-dessus.
 - **Quand vous êtes connecté :** une indication que l’application a été ouverte, pour que la page d’activité de votre compte soit exacte. Elle ne dit rien de vos documents.
-- **Tant que l’application est ouverte :** un signal périodique indiquant que l’application est utilisée, contenant le nom de l’application, un identifiant aléatoire créé sur cet appareil et le type d’appareil (web), ainsi que votre compte si vous êtes connecté.
+- **Une fois par jour, la première fois que vous ouvrez l’application :** après votre premier clic ou votre première frappe au clavier, un est ajouté au décompte anonyme des ouvertures quotidiennes. Il ne contient que le nom de l’application et le type de plateforme (web) : aucun identifiant, aucun compte et rien sur vos documents. Une marque « déjà compté aujourd’hui » reste sur cet appareil et n’est jamais envoyée.
 
 L’application ne contient aucun script publicitaire ni de suivi tiers.
 

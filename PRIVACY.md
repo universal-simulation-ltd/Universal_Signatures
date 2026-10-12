@@ -150,12 +150,16 @@ document name. See [`public/badge.js`](public/badge.js).
   saying the app was opened, so your account's activity page is accurate. It
   does not include anything about your document. See `<UsageTracker />`, from
   `@unisim/sdk`, mounted in [`src/main.tsx`](src/main.tsx).
-- **"The app was opened today".** Once a day, the app adds one to an
-  anonymous count of how often it is opened. That message holds only the app's
-  name and the platform field (always "web" here — this app has no phone or
-  desktop build): no ID, no account, nothing about what you are working on.
-  See `presence.ts` in `@unisim/sdk` and `openCount` in
-  [`src/main.tsx`](src/main.tsx).
+- **"The app was opened today".** Once a day, the first time you open the app
+  (after your first click or key press), it adds one to an anonymous count of
+  how often it is opened. That message holds only the app's name and the
+  platform field (always "web" here — this app has no phone or desktop build):
+  no ID, no account, nothing about what you are working on. A "counted today"
+  mark stays in your browser and is never sent; the totals identify nobody and
+  are kept indefinitely. See `presence.ts` in `@unisim/sdk` and `openCount` in
+  [`src/main.tsx`](src/main.tsx). There is no other usage count: the old "this
+  app is in use" signal (a random install ID sent every 45 seconds) was retired
+  in `@unisim/sdk` 0.187.0.
 - **The changelog and update notice.**
 
 **There is no third-party analytics, no tracking pixel, and no advertising

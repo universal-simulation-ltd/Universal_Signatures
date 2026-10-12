@@ -186,7 +186,7 @@ El almacenamiento en la nube **no está cifrado de extremo a extremo**. Los dato
 - **Cuando envía un PDF para que otra persona lo firme:** el PDF, su dirección de correo y la de esa persona. Cuando lo abre y lo firma, el servidor registra además las horas, su dirección IP, el país correspondiente y su navegador (la página pública del certificado solo muestra el país). Una solicitud completada —el PDF, la copia firmada, estos datos y su página de certificado— se conserva 7 años después de la firma y luego se elimina; descargue una copia para conservarla más tiempo. Retirar una solicitud que no se ha firmado la elimina de inmediato.
 - **Cuando guarda en la nube:** la imagen de la firma y los datos indicados arriba.
 - **Cuando ha iniciado sesión:** un aviso de que se abrió la aplicación, para que la página de actividad de su cuenta sea exacta. No dice nada de sus documentos.
-- **Mientras la aplicación está abierta:** una señal periódica de que la aplicación está en uso, con el nombre de la aplicación, un identificador aleatorio creado en este dispositivo y el tipo de dispositivo (web), además de su cuenta si ha iniciado sesión.
+- **Una vez al día, la primera vez que abre la aplicación:** tras su primer clic o pulsación de tecla, se suma uno al recuento anónimo de aperturas diarias. Solo contiene el nombre de la aplicación y el tipo de plataforma (web): ningún identificador, ninguna cuenta y nada sobre sus documentos. Una marca de «ya contado hoy» se queda en este dispositivo y nunca se envía.
 
 La aplicación no contiene scripts de publicidad ni de seguimiento de terceros.
 

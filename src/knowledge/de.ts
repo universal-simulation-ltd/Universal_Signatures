@@ -186,7 +186,7 @@ Die Cloud-Speicherung ist **nicht Ende-zu-Ende-verschlüsselt**. Die Daten werde
 - **Wenn Sie ein PDF zur Unterschrift an jemand anderen senden:** das PDF, Ihre E-Mail-Adresse und die der anderen Person. Wenn diese es öffnet und unterschreibt, speichert der Server außerdem die Zeitpunkte, ihre IP-Adresse, das zugehörige Land und ihren Browser (die öffentliche Zertifikatsseite zeigt nur das Land). Eine abgeschlossene Anfrage — das PDF, die unterschriebene Kopie, diese Angaben und ihre Zertifikatsseite — wird 7 Jahre nach der Unterschrift aufbewahrt und dann gelöscht; laden Sie eine Kopie herunter, um sie länger zu behalten. Wird eine noch nicht unterschriebene Anfrage zurückgezogen, wird sie sofort gelöscht.
 - **Beim Speichern in der Cloud:** das Bild der Unterschrift und die oben genannten Angaben.
 - **Wenn Sie angemeldet sind:** ein Hinweis, dass die App geöffnet wurde, damit die Aktivitätsseite Ihres Kontos stimmt. Er sagt nichts über Ihre Dokumente aus.
-- **Solange die App geöffnet ist:** ein regelmäßiges Signal, dass die App genutzt wird, mit dem Namen der App, einer zufälligen, auf diesem Gerät erzeugten ID und der Geräteart (Web), dazu Ihr Konto, falls Sie angemeldet sind.
+- **Einmal am Tag, beim ersten Öffnen der App:** Nach Ihrem ersten Klick oder Tastendruck wird die anonyme Zählung der täglichen Öffnungen um eins erhöht. Sie enthält nur den Namen der App und die Art der Plattform (Web): keine Kennung, kein Konto und nichts über Ihre Dokumente. Eine Markierung „heute schon gezählt“ bleibt auf diesem Gerät und wird nie gesendet.
 
 Die App enthält keine Werbe- oder Tracking-Skripte von Drittanbietern.
 

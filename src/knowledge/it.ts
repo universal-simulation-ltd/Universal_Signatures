@@ -186,7 +186,7 @@ L’archiviazione nel cloud **non è crittografata end-to-end**. I dati viaggian
 - **Quando invii un PDF da firmare a qualcun altro:** il PDF, il tuo indirizzo email e il suo. Quando lo apre e lo firma, il server registra anche gli orari, il suo indirizzo IP, il paese corrispondente e il browser (la pagina pubblica del certificato mostra solo il paese). Una richiesta completata — il PDF, la copia firmata, questi dati e la pagina del certificato — viene conservata per 7 anni dalla firma e poi eliminata; scarica una copia per conservarla più a lungo. Ritirare una richiesta non ancora firmata la elimina subito.
 - **Quando salvi nel cloud:** l’immagine della firma e i dati elencati sopra.
 - **Quando hai effettuato l’accesso:** una notifica che l’app è stata aperta, perché la pagina delle attività del tuo account sia corretta. Non dice nulla dei tuoi documenti.
-- **Mentre l’app è aperta:** un segnale periodico che l’app è in uso, con il nome dell’app, un ID casuale creato su questo dispositivo e il tipo di dispositivo (web), più il tuo account se hai effettuato l’accesso.
+- **Una volta al giorno, la prima volta che apri l’app:** dopo il tuo primo clic o tasto premuto, si aggiunge uno al conteggio anonimo delle aperture quotidiane. Contiene solo il nome dell’app e il tipo di piattaforma (web): nessun identificativo, nessun account e niente sui tuoi documenti. Un segno «già contato oggi» resta su questo dispositivo e non viene mai inviato.
 
 L’app non contiene script pubblicitari né di tracciamento di terze parti.
 

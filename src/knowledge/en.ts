@@ -186,7 +186,7 @@ Cloud storage is **not end-to-end encrypted**. Data travels over an encrypted co
 - **When you send a PDF for someone else to sign:** the PDF, your email address and theirs. When they open and sign it, the server also records the times, their IP address, its country and their browser (the public certificate page shows the country only). A completed request — the PDF, the signed copy, these details and its certificate page — is kept for 7 years after it is signed and then deleted; download a copy to keep it longer. Withdrawing a request that has not been signed deletes it straight away.
 - **When you save to the cloud:** the signature image and the details listed above.
 - **When you are signed in:** a note that the app was opened, so your account's activity page is accurate. It says nothing about your documents.
-- **While the app is open:** a periodic signal that the app is in use, holding the app's name, a random ID made on this device and the kind of device (web), plus your account if you are signed in.
+- **Once a day, the first time you open the app:** after your first click or key press, one is added to an anonymous count of daily opens. It holds only the app's name and the kind of platform (web): no identifier, no account and nothing about your documents. A "counted today" mark stays on this device and is never sent.
 
 There are no advertising or third-party tracking scripts in the app.
 

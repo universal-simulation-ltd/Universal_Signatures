@@ -186,7 +186,7 @@ O armazenamento na nuvem **não tem criptografia de ponta a ponta**. Os dados tr
 - **Quando você envia um PDF para outra pessoa assinar:** o PDF, o seu e-mail e o dela. Quando ela o abre e assina, o servidor também registra os horários, o endereço IP dela, o país correspondente e o navegador (a página pública do certificado mostra só o país). Uma solicitação concluída — o PDF, a cópia assinada, esses dados e a página do certificado — é mantida por 7 anos após a assinatura e depois excluída; baixe uma cópia para guardá-la por mais tempo. Retirar uma solicitação ainda não assinada a exclui na hora.
 - **Quando você salva na nuvem:** a imagem da assinatura e os dados listados acima.
 - **Quando você está conectado:** um aviso de que o app foi aberto, para que a página de atividade da sua conta fique correta. Ele não diz nada sobre seus documentos.
-- **Enquanto o app está aberto:** um sinal periódico de que o app está em uso, com o nome do app, um ID aleatório criado neste dispositivo e o tipo de dispositivo (web), além da sua conta se você estiver conectado.
+- **Uma vez por dia, na primeira vez que você abre o app:** depois do seu primeiro clique ou tecla pressionada, soma-se um à contagem anônima de aberturas diárias. Ela contém só o nome do app e o tipo de plataforma (web): nenhum identificador, nenhuma conta e nada sobre os seus documentos. Uma marca de "já contado hoje" fica neste dispositivo e nunca é enviada.
 
 O app não tem scripts de publicidade nem de rastreamento de terceiros.
 

@@ -186,7 +186,7 @@ Bulut depolama **uçtan uca şifreli değildir**. Veriler şifreli bir bağlant�
 - **Bir PDF'yi başkasına imzalatmak için gönderdiğinizde:** PDF, sizin ve onun e-posta adresi. Kişi belgeyi açıp imzaladığında sunucu ayrıca zamanları, IP adresini, bunun ülkesini ve tarayıcısını kaydeder (herkese açık sertifika sayfası yalnızca ülkeyi gösterir). Tamamlanan bir istek — PDF, imzalı kopya, bu bilgiler ve sertifika sayfası — imzadan sonra 7 yıl saklanır, ardından silinir; daha uzun saklamak için bir kopya indirin. İmzalanmamış bir isteği geri çekmek onu hemen siler.
 - **Buluta kaydettiğinizde:** imza görüntüsü ve yukarıda sayılan bilgiler.
 - **Oturum açtığınızda:** hesabınızın etkinlik sayfası doğru olsun diye uygulamanın açıldığına dair bir not. Belgeleriniz hakkında hiçbir şey içermez.
-- **Uygulama açıkken:** uygulamanın kullanımda olduğunu bildiren düzenli bir sinyal; uygulamanın adını, bu cihazda oluşturulan rastgele bir kimliği ve cihaz türünü (web), oturum açtıysanız hesabınızı da içerir.
+- **Günde bir kez, uygulamayı ilk açtığınızda:** ilk tıklamanızdan veya tuşa basmanızdan sonra anonim günlük açılış sayısına bir eklenir. Yalnızca uygulamanın adını ve platform türünü (web) içerir: hiçbir tanımlayıcı, hesap ya da belgelerinizle ilgili bir şey yoktur. "Bugün sayıldı" işareti bu cihazda kalır ve asla gönderilmez.
 
 Uygulamada reklam veya üçüncü taraf izleme betikleri yoktur.
 

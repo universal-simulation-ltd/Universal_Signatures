@@ -186,7 +186,7 @@ O armazenamento na nuvem **não tem encriptação ponto a ponto**. Os dados circ
 - **Quando envia um PDF para outra pessoa assinar:** o PDF, o seu endereço de e-mail e o dela. Quando a pessoa o abre e assina, o servidor regista também as horas, o endereço IP, o país correspondente e o navegador (a página pública do certificado mostra apenas o país). Um pedido concluído — o PDF, a cópia assinada, estes dados e a página do certificado — é guardado durante 7 anos após a assinatura e depois eliminado; transfira uma cópia para a guardar mais tempo. Retirar um pedido ainda não assinado elimina-o de imediato.
 - **Quando guarda na nuvem:** a imagem da assinatura e os dados indicados acima.
 - **Quando tem sessão iniciada:** uma indicação de que a aplicação foi aberta, para que a página de atividade da sua conta esteja correta. Não diz nada sobre os seus documentos.
-- **Enquanto a aplicação está aberta:** um sinal periódico de que a aplicação está em uso, com o nome da aplicação, um ID aleatório criado neste dispositivo e o tipo de dispositivo (web), além da sua conta se tiver sessão iniciada.
+- **Uma vez por dia, na primeira vez que abre a aplicação:** depois do seu primeiro clique ou da primeira tecla premida, soma-se um à contagem anónima de aberturas diárias. Contém apenas o nome da aplicação e o tipo de plataforma (web): nenhum identificador, nenhuma conta e nada sobre os seus documentos. Uma marca de «já contado hoje» fica neste dispositivo e nunca é enviada.
 
 A aplicação não contém scripts de publicidade nem de rastreio de terceiros.
 
