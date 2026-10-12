@@ -18,6 +18,7 @@
 
 import { consumeHostedUpload, refundHostedUpload, HOSTED_BUCKET, type useUniversal } from '@unisim/sdk'
 import { randomHex } from './signature'
+import { geoToken } from './geoToken'
 
 type Supabase = ReturnType<typeof useUniversal>['supabase']
 
@@ -301,8 +302,8 @@ export interface VerifyCodeResult {
   triesLeft?: number
 }
 
-export function verifySigningCode(supabase: Supabase, token: string, code: string): Promise<VerifyCodeResult> {
-  return invoke<VerifyCodeResult>(supabase, 'pdf-sign-request', { action: 'verify', token, code })
+export async function verifySigningCode(supabase: Supabase, token: string, code: string): Promise<VerifyCodeResult> {
+  return invoke<VerifyCodeResult>(supabase, 'pdf-sign-request', { action: 'verify', token, code, geo: await geoToken() })
 }
 
 export interface LoadResult {
@@ -315,8 +316,8 @@ export interface LoadResult {
   certId?: string | null
 }
 
-export function loadSigning(supabase: Supabase, token: string, session?: string): Promise<LoadResult> {
-  return invoke<LoadResult>(supabase, 'pdf-sign-request', { action: 'load', token, session })
+export async function loadSigning(supabase: Supabase, token: string, session?: string): Promise<LoadResult> {
+  return invoke<LoadResult>(supabase, 'pdf-sign-request', { action: 'load', token, session, geo: await geoToken() })
 }
 
 export interface SubmitResult {
@@ -328,7 +329,7 @@ export interface SubmitResult {
   notified?: boolean
 }
 
-export function submitSigned(
+export async function submitSigned(
   supabase: Supabase,
   token: string,
   bytes: Uint8Array,
@@ -340,6 +341,7 @@ export function submitSigned(
     app: 'signatures',
     token,
     session,
+    geo: await geoToken(),
     pdfBase64: base64FromBytes(bytes),
     // What was added, for the provenance log's label (the hash chain records
     // the change regardless): one signature.

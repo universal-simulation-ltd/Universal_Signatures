@@ -124,7 +124,10 @@ them to open it. This is the only flow in the app that uploads a document.
   address to be confirmed first); and, when they sign, **the signed copy**.
 - About the signer, the server logs when they opened and signed it, **their IP
   address, its country and their browser**. The public certificate page shows
-  the country only.
+  the country only. The country comes from a short-lived token the signing
+  page fetches from `opensource.unisim.co.uk/api/geo` (it names only the
+  signer's own country) and hands to the server with each step —
+  [`src/lib/geoToken.ts`](src/lib/geoToken.ts).
 - The link is the key, like a password in a URL: whoever holds it can open the
   document. "Ask them to confirm their email address before it opens" closes
   that gap — the document then only opens for someone who can read a code sent
