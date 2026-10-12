@@ -27,6 +27,8 @@ const verify: Messages['verify'] = {
   'row_signed_hash': 'İmzalı kopya karması (SHA-256)',
   'row_sent_hash': 'Gönderildiği haliyle belge (SHA-256)',
   'row_signature_hash': 'İmza karması (SHA-256)',
+  'row_kept_until': 'Saklanma tarihi',
+  'kept_until_note': 'İmzalı kopya ve bu kayıt bu tarihe kadar saklanır, ardından silinir. Daha uzun süre saklamak için bir kopyasını indirin.',
 
   'hash_note_both': 'İlk karma, {original} belgenin imzalanmadan önceki parmak izidir; ikincisi ise {signed} tam olarak üretildiği haliyle parmak izidir.',
   'hash_note_original_only': 'Yukarıdaki karma, {original} belgenin imza eklenmeden önceki parmak izidir.',

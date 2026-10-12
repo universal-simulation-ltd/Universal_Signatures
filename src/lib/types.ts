@@ -63,6 +63,9 @@ export interface RequestCertResult {
   original_sha256: string | null
   latest_sha256: string | null
   bytes_available: boolean
+  // When the stored copies are deleted (platform 0262): signed_at + 7 years,
+  // set once the request completes. null before then, or from an older server.
+  retain_until: string | null
   parties: { role: string; email: string | null; status: string; signed_at: string | null }[]
   events: { action: string; actor_email: string | null; occurred_at: string; ip_country: string | null }[]
 }

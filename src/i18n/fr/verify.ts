@@ -27,6 +27,8 @@ const verify: Messages['verify'] = {
   'row_signed_hash': 'Empreinte de la copie signée (SHA-256)',
   'row_sent_hash': 'Document tel qu’envoyé (SHA-256)',
   'row_signature_hash': 'Empreinte de la signature (SHA-256)',
+  'row_kept_until': 'Conservé jusqu’au',
+  'kept_until_note': 'La copie signée et ce certificat sont conservés jusqu’à cette date, puis supprimés. Téléchargez une copie pour la garder plus longtemps.',
 
   'hash_note_both': 'La première empreinte identifie le document {original}, avant sa signature ; la seconde, la {signed} exactement telle qu’elle a été produite.',
   'hash_note_original_only': 'L’empreinte ci-dessus identifie le document {original}, avant l’ajout de la signature.',

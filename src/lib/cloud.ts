@@ -327,6 +327,7 @@ export async function verifyAny(supabase: SupabaseClient, certId: string): Promi
         original_sha256: r.original_sha256 ?? null,
         latest_sha256: r.latest_sha256 ?? null,
         bytes_available: !!r.bytes_available,
+        retain_until: r.retain_until ?? null,
         parties: Array.isArray(r.parties) ? r.parties : [],
         events: Array.isArray(r.events) ? r.events : [],
       },

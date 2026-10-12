@@ -4,7 +4,7 @@ import type { RequestCertResult } from '../../lib/types'
 import { certificateDownload } from '../../lib/signRequests'
 import BadgeEmbed from './BadgeEmbed'
 import Row from './Row'
-import { useT, type MessageKey } from '../../i18n'
+import { intlLocale, useT, type MessageKey } from '../../i18n'
 
 // Activity-log actions → their label's key (translated at render).
 const ACTIONS: Record<string, MessageKey> = {
@@ -16,6 +16,13 @@ const ACTIONS: Record<string, MessageKey> = {
   text: 'verify.action_text',
   other: 'verify.action_other',
   completed: 'verify.action_completed',
+}
+
+function formatDay(iso: string | null, locale: string): string | null {
+  if (!iso) return null
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return null
+  try { return d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' }) } catch { return d.toISOString().slice(0, 10) }
 }
 
 /**
@@ -39,6 +46,9 @@ export default function RequestCertificate({
   const done = data.status === 'completed' || data.status === 'signed'
   const [downloading, setDownloading] = useState(false)
   const [downloadError, setDownloadError] = useState<string | null>(null)
+  // The 7-year retention (platform 0262), as a date: the time of day it falls
+  // on means nothing to a reader.
+  const keptUntil = formatDay(data.retain_until, intlLocale(t.lang))
 
   async function onDownload() {
     setDownloading(true)
@@ -77,7 +87,9 @@ export default function RequestCertificate({
         ))}
         {data.original_sha256 && <Row k={t('verify.row_sent_hash')} v={data.original_sha256} mono />}
         {done && data.latest_sha256 && <Row k={t('verify.row_signed_hash')} v={data.latest_sha256} mono />}
+        {done && keptUntil && <Row k={t('verify.row_kept_until')} v={keptUntil} />}
       </dl>
+      {done && keptUntil && <p className="mt-2 text-xs text-slate-500">{t('verify.kept_until_note')}</p>}
 
       {data.events.length > 0 && (
         <div className="mt-4">

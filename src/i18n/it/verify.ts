@@ -27,6 +27,8 @@ const verify: Messages['verify'] = {
   'row_signed_hash': 'Hash della copia firmata (SHA-256)',
   'row_sent_hash': 'Documento come inviato (SHA-256)',
   'row_signature_hash': 'Hash della firma (SHA-256)',
+  'row_kept_until': 'Conservato fino al',
+  'kept_until_note': 'La copia firmata e questo registro sono conservati fino a questa data, poi eliminati. Scarica una copia per conservarla più a lungo.',
 
   'hash_note_both': 'Il primo hash è l’impronta del documento {original}, prima che fosse firmato; il secondo, della {signed} esattamente com’è stata prodotta.',
   'hash_note_original_only': 'L’hash qui sopra è l’impronta del documento {original}, prima che venisse aggiunta la firma.',

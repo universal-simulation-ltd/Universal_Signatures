@@ -27,6 +27,8 @@ export default {
   'row_signed_hash': 'Signed copy hash (SHA-256)',
   'row_sent_hash': 'Document as sent (SHA-256)',
   'row_signature_hash': 'Signature hash (SHA-256)',
+  'row_kept_until': 'Kept until', // value is a date (no time)
+  'kept_until_note': 'The signed copy and this record are kept until this date, then deleted. Download a copy to keep it for longer.',
 
   'hash_note_both': 'The first hash fingerprints the {original} document, before it was signed; the second, the {signed} exactly as it was produced.', // {original} = bold "original", {signed} = bold "signed copy"
   'hash_note_original_only': 'The hash above fingerprints the {original} document, before the signature was added.', // {original} = bold "original"

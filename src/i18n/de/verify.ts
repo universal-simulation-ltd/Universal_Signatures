@@ -27,6 +27,8 @@ const verify: Messages['verify'] = {
   'row_signed_hash': 'Hash der unterschriebenen Kopie (SHA-256)',
   'row_sent_hash': 'Dokument wie gesendet (SHA-256)',
   'row_signature_hash': 'Hash der Unterschrift (SHA-256)',
+  'row_kept_until': 'Aufbewahrt bis',
+  'kept_until_note': 'Die unterschriebene Kopie und dieser Nachweis werden bis zu diesem Datum aufbewahrt und dann gelöscht. Laden Sie eine Kopie herunter, um sie länger aufzubewahren.',
 
   'hash_note_both': 'Der erste Hash ist der Fingerabdruck des {original} Dokuments vor dem Unterschreiben, der zweite der {signed}, genau wie sie erstellt wurde.',
   'hash_note_original_only': 'Der Hash oben ist der Fingerabdruck des {original} Dokuments, bevor die Unterschrift hinzugefügt wurde.',
