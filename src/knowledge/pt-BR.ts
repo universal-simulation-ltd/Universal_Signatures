@@ -180,12 +180,13 @@ O armazenamento na nuvem **não tem criptografia de ponta a ponta**. Os dados tr
 
 ## O que sai do seu dispositivo, e quando
 
-- **Nunca:** o PDF que você está assinando, em nenhum recurso deste app.
+- **Nunca:** um PDF que você mesmo assina, em nenhum recurso deste app.
 - **Quando você assina no celular:** a imagem da assinatura desenhada, repassada por um retransmissor ao vivo e não salva.
-- **Quando você adiciona um certificado de assinatura:** seu endereço de e-mail, o nome do arquivo e a impressão digital do documento.
+- **Quando você adiciona um certificado de assinatura:** seu endereço de e-mail, o nome do arquivo e a impressão digital do documento. O registro é mantido enquanto o seu Universal ID existir.
+- **Quando você envia um PDF para outra pessoa assinar:** o PDF, o seu e-mail e o dela. Quando ela o abre e assina, o servidor também registra os horários, o endereço IP dela, o país correspondente e o navegador (a página pública do certificado mostra só o país). Uma solicitação concluída — o PDF, a cópia assinada, esses dados e a página do certificado — é mantida por 7 anos após a assinatura e depois excluída; baixe uma cópia para guardá-la por mais tempo. Retirar uma solicitação ainda não assinada a exclui na hora.
 - **Quando você salva na nuvem:** a imagem da assinatura e os dados listados acima.
 - **Quando você está conectado:** um aviso de que o app foi aberto, para que a página de atividade da sua conta fique correta. Ele não diz nada sobre seus documentos.
-- **Enquanto o app está aberto:** um sinal periódico de que ele está em uso, com o nome do app e um ID aleatório criado neste dispositivo, além da sua conta se você estiver conectado.
+- **Enquanto o app está aberto:** um sinal periódico de que o app está em uso, com o nome do app, um ID aleatório criado neste dispositivo e o tipo de dispositivo (web), além da sua conta se você estiver conectado.
 
 O app não tem scripts de publicidade nem de rastreamento de terceiros.
 

@@ -180,12 +180,13 @@ Le stockage dans le cloud **n’est pas chiffré de bout en bout**. Les données
 
 ## Ce qui quitte votre appareil, et quand
 
-- **Jamais :** le PDF que vous signez, quelle que soit la fonction utilisée dans cette application.
+- **Jamais :** un PDF que vous signez vous-même, quelle que soit la fonction de l’application.
 - **Quand vous signez sur votre téléphone :** l’image de la signature dessinée, transmise par un relais en direct et non enregistrée.
-- **Quand vous ajoutez un certificat de signature :** votre adresse e-mail, le nom du fichier et l’empreinte du document.
+- **Quand vous ajoutez un certificat de signature :** votre adresse e-mail, le nom du fichier et l’empreinte du document. L’enregistrement est conservé tant que votre Universal ID existe.
+- **Quand vous envoyez un PDF à signer à quelqu’un d’autre :** le PDF, votre adresse e-mail et la sienne. Quand cette personne l’ouvre et le signe, le serveur enregistre aussi les heures, son adresse IP, le pays correspondant et son navigateur (la page de certificat publique n’affiche que le pays). Une demande terminée — le PDF, la copie signée, ces informations et sa page de certificat — est conservée 7 ans après la signature, puis supprimée ; téléchargez une copie pour la garder plus longtemps. Retirer une demande non signée la supprime immédiatement.
 - **Quand vous enregistrez dans le cloud :** l’image de la signature et les informations listées ci-dessus.
 - **Quand vous êtes connecté :** une indication que l’application a été ouverte, pour que la page d’activité de votre compte soit exacte. Elle ne dit rien de vos documents.
-- **Tant que l’application est ouverte :** un signal périodique indiquant qu’elle est utilisée, avec le nom de l’application et un identifiant aléatoire créé sur cet appareil, ainsi que votre compte si vous êtes connecté.
+- **Tant que l’application est ouverte :** un signal périodique indiquant que l’application est utilisée, contenant le nom de l’application, un identifiant aléatoire créé sur cet appareil et le type d’appareil (web), ainsi que votre compte si vous êtes connecté.
 
 L’application ne contient aucun script publicitaire ni de suivi tiers.
 

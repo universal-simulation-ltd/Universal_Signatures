@@ -180,12 +180,13 @@ Die Cloud-Speicherung ist **nicht Ende-zu-Ende-verschlüsselt**. Die Daten werde
 
 ## Was Ihr Gerät verlässt, und wann
 
-- **Nie:** das PDF, das Sie unterschreiben, bei keiner Funktion dieser App.
+- **Nie:** ein PDF, das Sie selbst unterschreiben, bei keiner Funktion dieser App.
 - **Beim Unterschreiben auf dem Handy:** das Bild der gezeichneten Unterschrift, weitergeleitet über ein Live-Relay und nicht gespeichert.
-- **Beim Hinzufügen eines Signaturzertifikats:** Ihre E-Mail-Adresse, der Dateiname und der Fingerabdruck des Dokuments.
+- **Beim Hinzufügen eines Signaturzertifikats:** Ihre E-Mail-Adresse, der Dateiname und der Fingerabdruck des Dokuments. Der Nachweis wird aufbewahrt, solange Ihre Universal ID besteht.
+- **Wenn Sie ein PDF zur Unterschrift an jemand anderen senden:** das PDF, Ihre E-Mail-Adresse und die der anderen Person. Wenn diese es öffnet und unterschreibt, speichert der Server außerdem die Zeitpunkte, ihre IP-Adresse, das zugehörige Land und ihren Browser (die öffentliche Zertifikatsseite zeigt nur das Land). Eine abgeschlossene Anfrage — das PDF, die unterschriebene Kopie, diese Angaben und ihre Zertifikatsseite — wird 7 Jahre nach der Unterschrift aufbewahrt und dann gelöscht; laden Sie eine Kopie herunter, um sie länger zu behalten. Wird eine noch nicht unterschriebene Anfrage zurückgezogen, wird sie sofort gelöscht.
 - **Beim Speichern in der Cloud:** das Bild der Unterschrift und die oben genannten Angaben.
 - **Wenn Sie angemeldet sind:** ein Hinweis, dass die App geöffnet wurde, damit die Aktivitätsseite Ihres Kontos stimmt. Er sagt nichts über Ihre Dokumente aus.
-- **Solange die App geöffnet ist:** ein regelmäßiges Signal, dass die App genutzt wird, mit dem Namen der App und einer zufälligen, auf diesem Gerät erzeugten ID, dazu Ihr Konto, falls Sie angemeldet sind.
+- **Solange die App geöffnet ist:** ein regelmäßiges Signal, dass die App genutzt wird, mit dem Namen der App, einer zufälligen, auf diesem Gerät erzeugten ID und der Geräteart (Web), dazu Ihr Konto, falls Sie angemeldet sind.
 
 Die App enthält keine Werbe- oder Tracking-Skripte von Drittanbietern.
 

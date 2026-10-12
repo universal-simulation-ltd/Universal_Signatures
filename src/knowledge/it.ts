@@ -180,12 +180,13 @@ L’archiviazione nel cloud **non è crittografata end-to-end**. I dati viaggian
 
 ## Cosa lascia il tuo dispositivo, e quando
 
-- **Mai:** il PDF che firmi, in nessuna funzione di questa app.
+- **Mai:** un PDF che firmi tu, in nessuna funzione di questa app.
 - **Quando firmi sul telefono:** l’immagine della firma che hai disegnato, trasmessa da un inoltro in tempo reale e non salvata.
-- **Quando aggiungi un certificato di firma:** il tuo indirizzo email, il nome del file e l’impronta del documento.
+- **Quando aggiungi un certificato di firma:** il tuo indirizzo email, il nome del file e l’impronta del documento. Il record viene conservato finché esiste il tuo Universal ID.
+- **Quando invii un PDF da firmare a qualcun altro:** il PDF, il tuo indirizzo email e il suo. Quando lo apre e lo firma, il server registra anche gli orari, il suo indirizzo IP, il paese corrispondente e il browser (la pagina pubblica del certificato mostra solo il paese). Una richiesta completata — il PDF, la copia firmata, questi dati e la pagina del certificato — viene conservata per 7 anni dalla firma e poi eliminata; scarica una copia per conservarla più a lungo. Ritirare una richiesta non ancora firmata la elimina subito.
 - **Quando salvi nel cloud:** l’immagine della firma e i dati elencati sopra.
 - **Quando hai effettuato l’accesso:** una notifica che l’app è stata aperta, perché la pagina delle attività del tuo account sia corretta. Non dice nulla dei tuoi documenti.
-- **Mentre l’app è aperta:** un segnale periodico che l’app è in uso, con il nome dell’app e un ID casuale creato su questo dispositivo, più il tuo account se hai effettuato l’accesso.
+- **Mentre l’app è aperta:** un segnale periodico che l’app è in uso, con il nome dell’app, un ID casuale creato su questo dispositivo e il tipo di dispositivo (web), più il tuo account se hai effettuato l’accesso.
 
 L’app non contiene script pubblicitari né di tracciamento di terze parti.
 

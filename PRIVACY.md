@@ -102,6 +102,10 @@ both taken in your browser.
   email) from facts your own machine reported (its clock, its timezone), and
   says so on the page, because presenting the second kind with the authority of
   the first would be a lie of layout. There is no geolocation.
+- How long it is kept: for as long as your Universal ID exists (deleting the
+  account deletes the record). A Universal ID is all you need for one; no
+  company is required once the platform accepts records without one (until
+  then, a Universal ID with no company is asked to set one up).
 
 ### 4. "Send to be signed"
 
@@ -125,8 +129,12 @@ them to open it. This is the only flow in the app that uploads a document.
   document. "Ask them to confirm their email address before it opens" closes
   that gap — the document then only opens for someone who can read a code sent
   to that address, and the PDF is not attached to the email.
-- **Withdrawing** a request that hasn't been signed deletes the stored copy. A
-  signed one is kept, because it is the proof behind its certificate page.
+- **Withdrawing** a request that hasn't been signed deletes the stored copy.
+- **A signed request is kept for 7 years after it is signed, then deleted** —
+  the stored PDF and every signed copy, both email addresses, the signer's IP
+  address, country and browser, the provenance log and the certificate page
+  (the platform's `pdf-sign-retention` job, migration 0262). The certificate
+  page and the signing screen show the date. Download a copy to keep it longer.
 
 The **verification badge** you can put on a website looks its certificate up
 from the browser of whoever views that page, the same way the certificate page
@@ -140,14 +148,16 @@ document name. See [`public/badge.js`](public/badge.js).
 - **Signing in.** Only if you choose to. The app signs PDFs without an account.
 - **"You opened the app".** When you are signed in, the app records one event
   saying the app was opened, so your account's activity page is accurate. It
-  does not include anything about your document.
-  See [`src/UsageTracker.tsx`](src/UsageTracker.tsx).
+  does not include anything about your document. See `<UsageTracker />`, from
+  `@unisim/sdk`, mounted in [`src/main.tsx`](src/main.tsx).
 - **"This app is in use".** While the app is open and on screen, it tells our
   server every 45 seconds that this app is in use on this device, so the menu
   can say how many people use it and how many are using it now. That message
-  holds the app's name and a random ID made on this device, and your account
-  if you are signed in: nothing about what you are working on. See `presence.ts`
-  in `@unisim/sdk`.
+  holds the app's name, a random ID made on this device (kept in the browser's
+  storage), the platform field (always "web" here — this app has no phone or
+  desktop build), and your account if you are signed in: nothing about what you
+  are working on. See `presence.ts` in `@unisim/sdk` and `presence` in
+  [`src/main.tsx`](src/main.tsx).
 - **The changelog and update notice.**
 
 **There is no third-party analytics, no tracking pixel, and no advertising

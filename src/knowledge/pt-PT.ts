@@ -180,12 +180,13 @@ O armazenamento na nuvem **não tem encriptação ponto a ponto**. Os dados circ
 
 ## O que sai do seu dispositivo, e quando
 
-- **Nunca:** o PDF que está a assinar, em nenhuma funcionalidade desta aplicação.
+- **Nunca:** um PDF que assina o próprio, em nenhuma funcionalidade desta aplicação.
 - **Quando assina no telemóvel:** a imagem da assinatura que desenhou, reencaminhada por um retransmissor em direto e não guardada.
-- **Quando adiciona um certificado de assinatura:** o seu endereço de e-mail, o nome do ficheiro e a impressão digital do documento.
+- **Quando adiciona um certificado de assinatura:** o seu endereço de e-mail, o nome do ficheiro e a impressão digital do documento. O registo é guardado enquanto o seu Universal ID existir.
+- **Quando envia um PDF para outra pessoa assinar:** o PDF, o seu endereço de e-mail e o dela. Quando a pessoa o abre e assina, o servidor regista também as horas, o endereço IP, o país correspondente e o navegador (a página pública do certificado mostra apenas o país). Um pedido concluído — o PDF, a cópia assinada, estes dados e a página do certificado — é guardado durante 7 anos após a assinatura e depois eliminado; transfira uma cópia para a guardar mais tempo. Retirar um pedido ainda não assinado elimina-o de imediato.
 - **Quando guarda na nuvem:** a imagem da assinatura e os dados indicados acima.
 - **Quando tem sessão iniciada:** uma indicação de que a aplicação foi aberta, para que a página de atividade da sua conta esteja correta. Não diz nada sobre os seus documentos.
-- **Enquanto a aplicação está aberta:** um sinal periódico de que está a ser usada, com o nome da aplicação e um ID aleatório criado neste dispositivo, mais a sua conta se tiver sessão iniciada.
+- **Enquanto a aplicação está aberta:** um sinal periódico de que a aplicação está em uso, com o nome da aplicação, um ID aleatório criado neste dispositivo e o tipo de dispositivo (web), além da sua conta se tiver sessão iniciada.
 
 A aplicação não contém scripts de publicidade nem de rastreio de terceiros.
 

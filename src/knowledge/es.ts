@@ -180,12 +180,13 @@ El almacenamiento en la nube **no está cifrado de extremo a extremo**. Los dato
 
 ## Qué sale de su dispositivo, y cuándo
 
-- **Nunca:** el PDF que firma, en ninguna de las funciones de esta aplicación.
+- **Nunca:** un PDF que firma usted mismo, en ninguna de las funciones de esta aplicación.
 - **Cuando firma en el teléfono:** la imagen de la firma que dibujó, que pasa por un relé en directo y no se guarda.
-- **Cuando añade un certificado de firma:** su dirección de correo, el nombre del archivo y la huella del documento.
+- **Cuando añade un certificado de firma:** su dirección de correo, el nombre del archivo y la huella del documento. El registro se conserva mientras exista su Universal ID.
+- **Cuando envía un PDF para que otra persona lo firme:** el PDF, su dirección de correo y la de esa persona. Cuando lo abre y lo firma, el servidor registra además las horas, su dirección IP, el país correspondiente y su navegador (la página pública del certificado solo muestra el país). Una solicitud completada —el PDF, la copia firmada, estos datos y su página de certificado— se conserva 7 años después de la firma y luego se elimina; descargue una copia para conservarla más tiempo. Retirar una solicitud que no se ha firmado la elimina de inmediato.
 - **Cuando guarda en la nube:** la imagen de la firma y los datos indicados arriba.
 - **Cuando ha iniciado sesión:** un aviso de que se abrió la aplicación, para que la página de actividad de su cuenta sea exacta. No dice nada de sus documentos.
-- **Mientras la aplicación está abierta:** una señal periódica de que se está usando, con el nombre de la aplicación y un identificador aleatorio creado en este dispositivo, además de su cuenta si ha iniciado sesión.
+- **Mientras la aplicación está abierta:** una señal periódica de que la aplicación está en uso, con el nombre de la aplicación, un identificador aleatorio creado en este dispositivo y el tipo de dispositivo (web), además de su cuenta si ha iniciado sesión.
 
 La aplicación no contiene scripts de publicidad ni de seguimiento de terceros.
 

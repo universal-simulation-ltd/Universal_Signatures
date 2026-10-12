@@ -180,12 +180,13 @@ Cloud storage is **not end-to-end encrypted**. Data travels over an encrypted co
 
 ## What leaves your device, and when
 
-- **Never:** the PDF you are signing, in any of the flows in this app.
+- **Never:** a PDF you sign yourself, in any of the flows in this app.
 - **When you sign on your phone:** the signature image you drew, passed through a live relay and not stored.
-- **When you add a signing certificate:** your email address, the file name and the document's fingerprint.
+- **When you add a signing certificate:** your email address, the file name and the document's fingerprint. The record is kept for as long as your Universal ID exists.
+- **When you send a PDF for someone else to sign:** the PDF, your email address and theirs. When they open and sign it, the server also records the times, their IP address, its country and their browser (the public certificate page shows the country only). A completed request — the PDF, the signed copy, these details and its certificate page — is kept for 7 years after it is signed and then deleted; download a copy to keep it longer. Withdrawing a request that has not been signed deletes it straight away.
 - **When you save to the cloud:** the signature image and the details listed above.
 - **When you are signed in:** a note that the app was opened, so your account's activity page is accurate. It says nothing about your documents.
-- **While the app is open:** a periodic signal that the app is in use, holding the app's name and a random ID made on this device, plus your account if you are signed in.
+- **While the app is open:** a periodic signal that the app is in use, holding the app's name, a random ID made on this device and the kind of device (web), plus your account if you are signed in.
 
 There are no advertising or third-party tracking scripts in the app.
 

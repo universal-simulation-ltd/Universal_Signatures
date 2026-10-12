@@ -216,12 +216,19 @@ export async function recordSigningEvent(
   input: SigningRecordInput,
 ): Promise<{ ok: boolean; certId?: string; recordedAt?: string; error?: string }> {
   if (!userId) return { ok: false, error: getT()('save.error_sign_in_to_record') }
-  // Signed in with no company: records are kept per company (signing_events.org_id).
-  if (!orgId) return { ok: false, error: getT()('save.error_no_company_record') }
+  // A Universal ID alone is enough for a record (privacy audit 2026-10-12): no
+  // company needed, so nobody has to hand over a company name to get one. With
+  // no company the row goes in with org_id null and belongs to the user.
+  //
+  // ⚠️ Needs the platform change that makes signing_events.org_id nullable and
+  // lets the owner insert/read an org-less row (and left-joins organisations in
+  // verify_signing_event_cert). Until it lands the server refuses the row —
+  // not-null (23502) or RLS (42501) — and we show the old "set up a company"
+  // message, so nothing changes for anyone in the meantime.
   const { data, error } = await supabase
     .from('signing_events')
     .insert({
-      org_id: orgId,
+      org_id: orgId ?? null,
       user_id: userId,
       signer_email: input.signerEmail,
       original_filename: input.originalFilename,
@@ -233,7 +240,12 @@ export async function recordSigningEvent(
     // with the signer's own clock shown separately and labelled self-reported.
     .select('cert_id, created_at')
     .single()
-  if (error) return { ok: false, error: error.message }
+  if (error) {
+    if (!orgId && (error.code === '23502' || error.code === '42501')) {
+      return { ok: false, error: getT()('save.error_no_company_record') }
+    }
+    return { ok: false, error: error.message }
+  }
   const row = data as { cert_id: string; created_at: string }
   return { ok: true, certId: row.cert_id, recordedAt: row.created_at }
 }
