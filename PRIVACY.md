@@ -150,13 +150,11 @@ document name. See [`public/badge.js`](public/badge.js).
   saying the app was opened, so your account's activity page is accurate. It
   does not include anything about your document. See `<UsageTracker />`, from
   `@unisim/sdk`, mounted in [`src/main.tsx`](src/main.tsx).
-- **"This app is in use".** While the app is open and on screen, it tells our
-  server every 45 seconds that this app is in use on this device, so the menu
-  can say how many people use it and how many are using it now. That message
-  holds the app's name, a random ID made on this device (kept in the browser's
-  storage), the platform field (always "web" here — this app has no phone or
-  desktop build), and your account if you are signed in: nothing about what you
-  are working on. See `presence.ts` in `@unisim/sdk` and `presence` in
+- **"The app was opened today".** Once a day, the app adds one to an
+  anonymous count of how often it is opened. That message holds only the app's
+  name and the platform field (always "web" here — this app has no phone or
+  desktop build): no ID, no account, nothing about what you are working on.
+  See `presence.ts` in `@unisim/sdk` and `openCount` in
   [`src/main.tsx`](src/main.tsx).
 - **The changelog and update notice.**
 

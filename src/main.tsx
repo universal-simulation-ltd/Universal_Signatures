@@ -25,10 +25,10 @@ const universalConfig = {
   // isn't in the published package yet — cast until the SDK is republished
   // (mirrors how QR shipped).
   product: 'signatures' as unknown as ProductCode,
-  // The SDK user count (random install id + platform every 45 s), set
-  // explicitly (privacy audit 2026-10-12). Web only — there is no phone build.
-  // Described in PRIVACY.md and the privacy-and-storage article.
-  presence: true,
+  // The SDK's anonymous daily open count (0.187.0: once a day, product +
+  // platform, no identifier), set explicitly. Web only — there is no phone
+  // build. Described in PRIVACY.md and the privacy-and-storage article.
+  openCount: true,
   cookieDomain: import.meta.env.PROD ? '.unisim.co.uk' : undefined,
   // Local dev runs against an offline "dummy account" by default so the
   // signed-in surfaces (navbar profile, cloud save, verify) work with no
