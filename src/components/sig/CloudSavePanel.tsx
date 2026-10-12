@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Chip, SignInDialog, useUniversal, useUser } from '@unisim/sdk'
+import { Chip, SignInDialog, useUniversal, useUser, withReturnUrl } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import {
   useCloudGate,
@@ -159,7 +159,7 @@ export default function CloudSavePanel({ bare = false }: { bare?: boolean }) {
               <p className="text-sm text-slate-700">
                 {t.rich('save.cloud_no_company', { id: <strong>Universal ID</strong> })}
               </p>
-              <a href={SET_UP_COMPANY_URL} className="mt-3 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-100">
+              <a href={withReturnUrl(SET_UP_COMPANY_URL)} className="mt-3 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-100">
                 {t('save.cloud_set_up_company')}
               </a>
             </div>
