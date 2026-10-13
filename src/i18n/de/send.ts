@@ -142,6 +142,24 @@ const send: Messages['send'] = {
   'signed_completed': 'Der Absender wurde benachrichtigt, und deine unterschriebene Kopie wurde heruntergeladen.',
   'signed_partial': 'Deine unterschriebene Kopie wurde heruntergeladen.',
   'signed_open_cert': 'Zertifikat öffnen →',
+
+  // ── Several places to sign; remind a signer (2026-10-12) ─────────────────
+  'spots_label': 'Unterschriftsstellen',
+  'spot_n': 'Stelle {n}',
+  'spot_remove_aria': 'Stelle {n} entfernen',
+  'add_spot': '+ Weitere Unterschriftsstelle hinzufügen',
+  'doc_fields_many': 'Es gibt {n} Stellen zum Unterschreiben. Sobald Ihre Unterschrift fertig ist, tippen Sie auf jedes „Unterschrift“-Feld, um sie dort einzusetzen.',
+  'doc_tap_to_sign': 'Hier tippen',
+  'doc_field_aria': 'Unterschrift hier einsetzen (Stelle {n} von {total})',
+  'doc_next_field': 'Zur nächsten Stelle ({done} von {total} erledigt)',
+  'doc_btn_fill_all': 'Zuerst jede markierte Stelle unterschreiben ({done} von {total})',
+  'remind': 'Erinnern',
+  'reminding': 'Wird gesendet…',
+  'reminded': 'Erinnerung gesendet',
+  'remind_title': 'Dem Unterzeichner den Link erneut mailen (höchstens einmal am Tag)',
+  'remind_too_soon': 'Eine weitere Erinnerung ist ab {time} möglich',
+  'remind_failed': 'Die Erinnerung konnte nicht gesendet werden.',
+  'remind_no_email': 'Keine E-Mail-Adresse zum Erinnern – kopieren Sie stattdessen den Link.',
 }
 
 export default send

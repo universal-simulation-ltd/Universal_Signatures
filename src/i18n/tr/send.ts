@@ -142,6 +142,24 @@ const send: Messages['send'] = {
   'signed_completed': 'Gönderene bildirildi ve imzalı kopyanız indirildi.',
   'signed_partial': 'İmzalı kopyanız indirildi.',
   'signed_open_cert': 'Sertifikayı aç →',
+
+  // ── Several places to sign; remind a signer (2026-10-12) ─────────────────
+  'spots_label': 'İmza yerleri',
+  'spot_n': 'Yer {n}',
+  'spot_remove_aria': '{n}. yeri kaldır',
+  'add_spot': '+ Başka bir imza yeri ekle',
+  'doc_fields_many': 'İmzalanacak {n} yer var. İmzanız hazır olduğunda, imzanızı koymak için her “Burayı imzala” kutusuna dokunun.',
+  'doc_tap_to_sign': 'Dokunun',
+  'doc_field_aria': 'İmzanızı buraya koyun ({total} yerden {n}.)',
+  'doc_next_field': 'Sonraki imza yerine git ({total} yerden {done} tamam)',
+  'doc_btn_fill_all': 'Önce işaretli her yeri imzalayın ({total} yerden {done})',
+  'remind': 'Hatırlat',
+  'reminding': 'Gönderiliyor…',
+  'reminded': 'Hatırlatma gönderildi',
+  'remind_title': 'İmzalayana bağlantısını yeniden e-postayla gönder (günde en fazla bir kez)',
+  'remind_too_soon': 'Bir sonraki hatırlatmayı {time} itibarıyla gönderebilirsiniz',
+  'remind_failed': 'Hatırlatma gönderilemedi.',
+  'remind_no_email': 'Hatırlatılacak e-posta adresi yok — bunun yerine bağlantıyı kopyalayın.',
 }
 
 export default send

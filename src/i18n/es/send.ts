@@ -142,6 +142,24 @@ const send: Messages['send'] = {
   'signed_completed': 'Se ha avisado al remitente y tu copia firmada se ha descargado.',
   'signed_partial': 'Tu copia firmada se ha descargado.',
   'signed_open_cert': 'Abrir el certificado →',
+
+  // ── Several places to sign; remind a signer (2026-10-12) ─────────────────
+  'spots_label': 'Lugares para firmar',
+  'spot_n': 'Lugar {n}',
+  'spot_remove_aria': 'Quitar el lugar {n}',
+  'add_spot': '+ Añadir otro lugar para firmar',
+  'doc_fields_many': 'Hay {n} lugares para firmar. Cuando su firma esté lista, toque cada recuadro «Firma aquí» para colocarla.',
+  'doc_tap_to_sign': 'Toque aquí',
+  'doc_field_aria': 'Poner su firma aquí (lugar {n} de {total})',
+  'doc_next_field': 'Ir al siguiente lugar ({done} de {total} hechos)',
+  'doc_btn_fill_all': 'Firme primero cada lugar marcado ({done} de {total})',
+  'remind': 'Recordar',
+  'reminding': 'Enviando…',
+  'reminded': 'Recordatorio enviado',
+  'remind_title': 'Volver a enviar el enlace al firmante por correo (como máximo una vez al día)',
+  'remind_too_soon': 'Podrá enviar otro recordatorio a partir del {time}',
+  'remind_failed': 'No se pudo enviar el recordatorio.',
+  'remind_no_email': 'No hay dirección de correo a la que recordar: copie el enlace.',
 }
 
 export default send

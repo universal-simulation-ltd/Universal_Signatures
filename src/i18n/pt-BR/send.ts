@@ -141,5 +141,23 @@ const send: Messages['send'] = {
   'signed_completed': 'O remetente foi avisado, e sua cópia assinada foi baixada.',
   'signed_partial': 'Sua cópia assinada foi baixada.',
   'signed_open_cert': 'Abrir o certificado →',
+
+  // ── Several places to sign; remind a signer (2026-10-12) ─────────────────
+  'spots_label': 'Locais para assinar',
+  'spot_n': 'Local {n}',
+  'spot_remove_aria': 'Remover o local {n}',
+  'add_spot': '+ Adicionar outro local para assinar',
+  'doc_fields_many': 'Há {n} locais para assinar. Quando sua assinatura estiver pronta, toque em cada caixa “Assine aqui” para colocá-la.',
+  'doc_tap_to_sign': 'Toque aqui',
+  'doc_field_aria': 'Colocar a assinatura aqui (local {n} de {total})',
+  'doc_next_field': 'Ir para o próximo local ({done} de {total} feitos)',
+  'doc_btn_fill_all': 'Assine primeiro cada local marcado ({done} de {total})',
+  'remind': 'Lembrar',
+  'reminding': 'Enviando…',
+  'reminded': 'Lembrete enviado',
+  'remind_title': 'Enviar o link de novo ao signatário por e-mail (no máximo uma vez por dia)',
+  'remind_too_soon': 'Você pode enviar outro lembrete a partir de {time}',
+  'remind_failed': 'Não foi possível enviar o lembrete.',
+  'remind_no_email': 'Não há e-mail para lembrar — copie o link.',
 }
 export default send

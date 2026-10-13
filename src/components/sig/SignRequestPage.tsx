@@ -38,7 +38,7 @@ type Phase =
 interface Doc {
   name: string
   bytes: ArrayBuffer
-  field: StoredSignField
+  fields: StoredSignField[]
   pageCount: number
   certId: string | null
   pages: { src: string; width: number; height: number }[]
@@ -119,11 +119,11 @@ export default function SignRequestPage({ token }: { token: string }) {
         const res = await fetch(l.signedUrl)
         if (!res.ok) throw new Error(String(res.status))
         const bytes = await res.arrayBuffer()
-        const [{ readSignField }, { renderPages }] = await Promise.all([loadPdf(), loadPdfjs()])
-        const { field, pages: pageCount } = await readSignField(bytes)
+        const [{ readSignFields }, { renderPages }] = await Promise.all([loadPdf(), loadPdfjs()])
+        const { fields, pages: pageCount } = await readSignFields(bytes)
         const { pages } = await renderPages(bytes, 760, PAGE_LIMIT)
         if (cancelled) return
-        setDoc({ name: l.docName ?? 'document.pdf', bytes, field: field ?? DEFAULT_FIELD, pageCount, certId: l.certId ?? null, pages })
+        setDoc({ name: l.docName ?? 'document.pdf', bytes, fields: fields.length ? fields : [DEFAULT_FIELD], pageCount, certId: l.certId ?? null, pages })
         setPhase({ kind: 'ready' })
       } catch {
         if (!cancelled) setPhase({ kind: 'failed', message: getT()('send.req_open_failed'), retry: true })
@@ -164,8 +164,8 @@ export default function SignRequestPage({ token }: { token: string }) {
         ) : doc ? (
           <SignDocument
             doc={doc}
-            onSigned={async (bytes, page) => {
-              const r = await submitSigned(supabase, token, bytes, page, session)
+            onSigned={async (bytes, pages) => {
+              const r = await submitSigned(supabase, token, bytes, pages, session)
               if (!r.ok) return messageFor(r.code, r.error)
               setPhase({ kind: 'signed', certId: r.cert_id ?? doc.certId, completed: !!r.completed })
               // The signer keeps exactly what was sent back.
@@ -292,7 +292,7 @@ function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedE
 }
 
 // ── Read and sign ───────────────────────────────────────────────────────────
-function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Array, page: number) => Promise<string | null> }) {
+function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Array, pages: number[]) => Promise<string | null> }) {
   const t = useT()
   const mode = useSigStore((s) => s.mode)
   const setMode = useSigStore((s) => s.setMode)
@@ -301,7 +301,7 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
   const [agree, setAgree] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const fieldRef = useRef<HTMLDivElement>(null)
+  const fieldRefs = useRef<(HTMLElement | null)[]>([])
 
   const stamp = sig && trimmed?.src === sig ? trimmed.png : null
   useEffect(() => {
@@ -311,23 +311,35 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
     return () => { cancelled = true }
   }, [sig])
 
-  const fieldPage = doc.field.page < 0 ? doc.pageCount - 1 : Math.min(doc.field.page, doc.pageCount - 1)
-  const fieldShown = fieldPage < doc.pages.length
+  // Every marked place, on its real page. With more than one, each must be
+  // tapped to put the signature there before it can be sent (2026-10-12) — a
+  // place on a page not rendered for reading (past PAGE_LIMIT) can't be
+  // tapped, so it counts as seen; the note under the pages names its page.
+  const spots = doc.fields.map((f) => ({ ...f, pageIndex: f.page < 0 ? doc.pageCount - 1 : Math.min(f.page, doc.pageCount - 1) }))
+  const many = spots.length > 1
+  const [placed, setPlaced] = useState<boolean[]>(() => spots.map(() => false))
+  const isDone = (i: number) => !many || placed[i] || spots[i].pageIndex >= doc.pages.length
+  const doneCount = spots.filter((_, i) => isDone(i)).length
+  const allDone = doneCount === spots.length
+  const hiddenPages = [...new Set(spots.filter((sp) => sp.pageIndex >= doc.pages.length).map((sp) => sp.pageIndex + 1))]
+  const firstPage = spots[0].pageIndex
+  const scrollTo = (i: number) => fieldRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  const nextOpen = spots.findIndex((_, i) => !isDone(i))
 
   async function sign() {
-    if (!sig || !agree || busy) return
+    if (!sig || !agree || !allDone || busy) return
     setBusy(true); setError(null)
     try {
       const { signPdf } = await loadPdf()
       const qrPng = doc.certId ? await (await loadQr()).makeQrPng(certificateLink(doc.certId)) : undefined
       const bytes = await signPdf(doc.bytes, stamp ?? await trimToInk(sig), {
-        pageIndex: fieldPage,
+        pageIndex: spots[0].pageIndex,
         anchor: 'bottom-right',
-        widthPct: doc.field.widthPct,
-        pos: { xPct: doc.field.xPct, yPct: doc.field.yPct },
+        widthPct: spots[0].widthPct,
+        placements: spots.map((sp) => ({ pageIndex: sp.pageIndex, pos: { xPct: sp.xPct, yPct: sp.yPct }, widthPct: sp.widthPct })),
         qrPng,
       })
-      const problem = await onSigned(bytes, fieldPage)
+      const problem = await onSigned(bytes, spots.map((sp) => sp.pageIndex))
       if (problem) setError(problem)
     } catch {
       setError(t('send.doc_err_sign'))
@@ -343,12 +355,13 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
         <p className="mt-1 text-sm text-slate-600">
           {t.rich('send.doc_intro', {
             link: (
-              <button type="button" onClick={() => fieldRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="font-semibold text-orange-700 hover:underline">
-                {t('send.doc_intro_link', { page: fieldPage + 1 })}
+              <button type="button" onClick={() => scrollTo(0)} className="font-semibold text-orange-700 hover:underline">
+                {t('send.doc_intro_link', { page: firstPage + 1 })}
               </button>
             ),
           })}
         </p>
+        {many && <p className="mt-1 text-sm text-slate-600">{t('send.doc_fields_many', { n: spots.length })}</p>}
         <button
           type="button"
           onClick={() => download(new Uint8Array(doc.bytes), doc.name)}
@@ -362,26 +375,43 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
         {doc.pages.map((p, i) => (
           <div key={i} className="relative mx-auto overflow-hidden rounded-lg bg-white shadow ring-1 ring-slate-200" style={{ maxWidth: p.width }}>
             <img src={p.src} alt={t('send.doc_page_alt', { n: i + 1, total: doc.pageCount })} className="block w-full" draggable={false} />
-            {i === fieldPage && (
-              <div
-                ref={fieldRef}
-                data-testid="sign-field"
-                className="absolute flex items-center justify-center rounded-md border-2 border-dashed border-orange-500 bg-orange-100/60"
-                style={{
-                  left: `${doc.field.xPct * 100}%`,
-                  top: `${doc.field.yPct * 100}%`,
-                  width: `${doc.field.widthPct}%`,
-                  aspectRatio: '3',
-                  transform: 'translate(-50%, -50%)',
-                }}
-              >
-                {stamp ? (
-                  <img src={stamp} alt={t('send.doc_stamp_alt')} className="max-h-full max-w-full object-contain" />
-                ) : (
-                  <span className="text-[11px] font-bold text-orange-800">{t('send.sign_here')}</span>
-                )}
-              </div>
-            )}
+            {spots.map((sp, j) => {
+              if (sp.pageIndex !== i) return null
+              const shown = isDone(j) && stamp
+              const style = {
+                left: `${sp.xPct * 100}%`,
+                top: `${sp.yPct * 100}%`,
+                width: `${sp.widthPct}%`,
+                aspectRatio: '3',
+                transform: 'translate(-50%, -50%)',
+              }
+              const face = shown ? (
+                <img src={stamp} alt={t('send.doc_stamp_alt')} className="max-h-full max-w-full object-contain" />
+              ) : (
+                <span className="text-[11px] font-bold text-orange-800">{many && stamp ? t('send.doc_tap_to_sign') : t('send.sign_here')}</span>
+              )
+              const box = `absolute flex items-center justify-center rounded-md border-2 border-dashed ${isDone(j) && many ? 'border-emerald-500 bg-emerald-50/50' : 'border-orange-500 bg-orange-100/60'}`
+              return many ? (
+                <button
+                  key={j}
+                  type="button"
+                  ref={(el) => { fieldRefs.current[j] = el }}
+                  data-testid="sign-field"
+                  disabled={!stamp}
+                  onClick={() => setPlaced((p) => p.map((v, k) => (k === j ? true : v)))}
+                  aria-label={t('send.doc_field_aria', { n: j + 1, total: spots.length })}
+                  aria-pressed={isDone(j)}
+                  className={`${box} ${stamp ? 'cursor-pointer hover:bg-orange-200/60' : 'cursor-default'}`}
+                  style={style}
+                >
+                  {face}
+                </button>
+              ) : (
+                <div key={j} ref={(el) => { fieldRefs.current[j] = el }} data-testid="sign-field" className={box} style={style}>
+                  {face}
+                </div>
+              )
+            })}
           </div>
         ))}
         {doc.pageCount > doc.pages.length && (
@@ -389,9 +419,9 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
             {t('send.doc_showing_first', { shown: doc.pages.length, total: doc.pageCount })}
           </p>
         )}
-        {!fieldShown && (
-          <p className="text-center text-xs text-slate-500">{t('send.doc_field_page', { page: fieldPage + 1 })}</p>
-        )}
+        {hiddenPages.map((pg) => (
+          <p key={pg} className="text-center text-xs text-slate-500">{t('send.doc_field_page', { page: pg })}</p>
+        ))}
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-5">
@@ -424,13 +454,23 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
 
         {error && <p role="alert" className="mt-3 text-sm text-rose-700">{error}</p>}
 
+        {many && stamp && nextOpen >= 0 && (
+          <button
+            type="button"
+            onClick={() => scrollTo(nextOpen)}
+            className="mt-3 w-full rounded-lg border border-orange-300 bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-800 hover:bg-orange-100"
+          >
+            {t('send.doc_next_field', { done: doneCount, total: spots.length })}
+          </button>
+        )}
+
         <button
           type="button"
           onClick={sign}
-          disabled={!sig || !agree || busy}
+          disabled={!sig || !agree || !allDone || busy}
           className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
         >
-          {busy ? t('send.doc_btn_signing') : !sig ? t('send.doc_btn_add_first') : !agree ? t('send.doc_btn_tick') : t('send.doc_btn_sign')}
+          {busy ? t('send.doc_btn_signing') : !sig ? t('send.doc_btn_add_first') : !allDone ? t('send.doc_btn_fill_all', { done: doneCount, total: spots.length }) : !agree ? t('send.doc_btn_tick') : t('send.doc_btn_sign')}
         </button>
         <p className="mt-2 text-[11px] text-slate-500">
           {t('send.doc_privacy')}

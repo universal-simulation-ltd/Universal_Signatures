@@ -7,6 +7,7 @@ import {
   createSignatureRequest,
   emailSignRequest,
   recipientToken,
+  remindSigner,
   revokeSignatureRequest,
   signerLink,
   type SignField,
@@ -29,6 +30,12 @@ const ANCHORS: { id: Anchor; label: MessageKey }[] = [
   { id: 'mid-left', label: 'send.anchor_mid_left' }, { id: 'mid-center', label: 'send.anchor_mid_center' }, { id: 'mid-right', label: 'send.anchor_mid_right' },
   { id: 'bottom-left', label: 'send.anchor_bottom_left' }, { id: 'bottom-center', label: 'send.anchor_bottom_center' }, { id: 'bottom-right', label: 'send.anchor_bottom_right' },
 ]
+
+// One place to sign, as the sender sets it up.
+interface Spot { page: number; widthPct: number; anchor: Anchor; pos: PlacePoint | null }
+const FIRST_SPOT: Spot = { page: -1, widthPct: 25, anchor: 'bottom-right', pos: null }
+// Matches MAX_SIGN_FIELDS in lib/pdf.ts (not imported: that module loads on demand).
+const MAX_SPOTS = 10
 
 // The 9-grid as a centre point, for a box `widthPct` wide and about a third as
 // tall. Close enough: the stamp is clamped onto the page whatever the shape.
@@ -82,10 +89,29 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
   const noCompany = !orgsLoading && !orgsError && orgs.length === 0
   const owner = noCompany && user?.id ? { userId: user.id } : activeOrgId ? { orgId: activeOrgId } : null
 
-  const [page, setPage] = useState(-1)
-  const [widthPct, setWidthPct] = useState(25)
-  const [anchor, setAnchor] = useState<Anchor>('bottom-right')
-  const [pos, setPos] = useState<PlacePoint | null>(null)
+  // Every place the signer must sign (all of them, 2026-10-12); the controls
+  // below edit the active one.
+  const [spots, setSpots] = useState<Spot[]>([FIRST_SPOT])
+  const [active, setActive] = useState(0)
+  const cur = spots[Math.min(active, spots.length - 1)]
+  const { page, widthPct, anchor, pos } = cur
+  const update = (patch: Partial<Spot>) => setSpots((list) => list.map((s, i) => (i === active ? { ...s, ...patch } : s)))
+  const setPage = (v: number) => update({ page: v })
+  const setWidthPct = (v: number) => update({ widthPct: v })
+  const setAnchor = (v: Anchor) => update({ anchor: v })
+  const setPos = (v: PlacePoint | null) => update({ pos: v })
+  function addSpot() {
+    if (spots.length >= MAX_SPOTS) return
+    // A new place starts on the same page, in a corner the last one isn't in.
+    const next: Spot = { page: cur.page, widthPct: cur.widthPct, anchor: cur.anchor === 'bottom-left' ? 'bottom-right' : 'bottom-left', pos: null }
+    setSpots((list) => [...list, next])
+    setActive(spots.length)
+  }
+  function removeSpot(i: number) {
+    if (spots.length <= 1) return
+    setSpots((list) => list.filter((_, j) => j !== i))
+    setActive((a) => (a > i ? a - 1 : a === i ? Math.max(0, i - 1) : a))
+  }
   const [pickerOpen, setPickerOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [protect, setProtect] = useState(false)
@@ -121,7 +147,7 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
     )
   }
 
-  const field: SignField = { page, widthPct, ...(pos ?? anchorPoint(anchor, widthPct)) }
+  const fields: SignField[] = spots.map((s) => ({ page: s.page, widthPct: s.widthPct, ...(s.pos ?? anchorPoint(s.anchor, s.widthPct)) }))
   const validEmail = EMAIL_RE.test(email.trim())
 
   async function copy(text: string, key: string) {
@@ -142,8 +168,8 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
     setError(null)
     setSent(null)
     try {
-      const { withSignField } = await loadPdf()
-      const bytes = await withSignField(await file.arrayBuffer(), field)
+      const { withSignFields } = await loadPdf()
+      const bytes = await withSignFields(await file.arrayBuffer(), fields)
       const created = await createSignatureRequest(supabase, {
         owner, bytes, fileName: file.name, senderEmail: user.email, recipientEmail: to, protect,
       })
@@ -186,6 +212,32 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
     <div className="mt-4" data-testid="send-for-signing">
       {file ? (
         <>
+          {spots.length > 1 && (
+            <div className="mb-3" data-testid="sign-spots">
+              <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('send.spots_label')}</div>
+              <div className="flex flex-wrap gap-1.5">
+                {spots.map((s, i) => (
+                  <span
+                    key={i}
+                    className={`inline-flex items-center rounded-full text-xs font-semibold ring-1 ${i === active ? 'bg-orange-600 text-white ring-orange-600' : 'bg-white text-slate-700 ring-slate-300'}`}
+                  >
+                    <button type="button" onClick={() => setActive(i)} aria-pressed={i === active} className="py-1 pl-3 pr-1.5">
+                      {t('send.spot_n', { n: i + 1 })} · {s.page < 0 ? t('send.page_last') : t('send.page_n', { n: s.page + 1 })}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeSpot(i)}
+                      aria-label={t('send.spot_remove_aria', { n: i + 1 })}
+                      title={t('send.spot_remove_aria', { n: i + 1 })}
+                      className={`rounded-full py-1 pl-1 pr-2.5 ${i === active ? 'text-orange-100 hover:text-white' : 'text-slate-400 hover:text-rose-600'}`}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="send-page" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('send.where_label')}</label>
@@ -247,6 +299,17 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
                 onClose={() => setPickerOpen(false)}
               />
             </Suspense>
+          )}
+
+          {spots.length < MAX_SPOTS && (
+            <button
+              type="button"
+              onClick={addSpot}
+              data-testid="add-sign-spot"
+              className="mt-3 text-xs font-semibold text-orange-700 hover:underline"
+            >
+              {t('send.add_spot')}
+            </button>
           )}
 
           <label htmlFor="send-email" className="mt-4 mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('send.email_label')}</label>
@@ -344,6 +407,25 @@ function SentList({
   useEffect(() => { if (version > 0) refresh() }, [version, refresh])
   const [confirming, setConfirming] = useState<string | null>(null)
   const [working, setWorking] = useState<string | null>(null)
+  // Per request: what the last Remind said (kept until the list is left).
+  const [reminders, setReminders] = useState<Record<string, { busy?: boolean; text?: string; ok?: boolean }>>({})
+  const { supabase } = useUniversal()
+  async function remind(r: SignRequest) {
+    setReminders((m) => ({ ...m, [r.id]: { busy: true } }))
+    const res = await remindSigner(supabase, r.id)
+    const when = res.nextAt ? new Date(res.nextAt).toLocaleString(intlLocale(t.lang), { dateStyle: 'medium', timeStyle: 'short' }) : ''
+    const text = res.ok
+      ? t('send.reminded')
+      : res.code === 'too_soon' && when
+        ? t('send.remind_too_soon', { time: when })
+        : res.code === 'no_recipient'
+          ? t('send.remind_no_email')
+          : res.code === 'rate_limited'
+            ? t('send.err_rate_limited')
+            : t('send.remind_failed')
+    setReminders((m) => ({ ...m, [r.id]: { text, ok: res.ok } }))
+    if (res.code === 'completed' || res.code === 'expired') refresh()
+  }
   return (
     <div className="mt-5 border-t border-slate-100 pt-4" data-testid="sent-list">
       <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('send.list_title')}</h3>
@@ -394,6 +476,18 @@ function SentList({
                         {copied === r.id ? t('send.copied') : t('send.copy_link')}
                       </button>
                     )}
+                    {!done && !expired && r.recipient_email && (
+                      <button
+                        type="button"
+                        onClick={() => void remind(r)}
+                        disabled={reminders[r.id]?.busy}
+                        title={t('send.remind_title')}
+                        data-testid="remind-signer"
+                        className="text-orange-700 hover:underline disabled:opacity-50"
+                      >
+                        {reminders[r.id]?.busy ? t('send.reminding') : t('send.remind')}
+                      </button>
+                    )}
                     {/* A signed request is the proof behind its certificate, so it
                         stays: deleting it would make the certificate page say
                         "no record found". Only one still waiting can go. */}
@@ -403,6 +497,11 @@ function SentList({
                       </button>
                     )}
                   </div>
+                )}
+                {reminders[r.id]?.text && (
+                  <p role="status" className={`mt-1 text-[11px] ${reminders[r.id]?.ok ? 'text-emerald-700' : 'text-amber-800'}`}>
+                    {reminders[r.id]?.text}
+                  </p>
                 )}
               </li>
             )

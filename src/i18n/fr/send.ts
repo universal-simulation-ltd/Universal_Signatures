@@ -142,6 +142,24 @@ const send: Messages['send'] = {
   'signed_completed': 'L’expéditeur a été prévenu et votre copie signée a été téléchargée.',
   'signed_partial': 'Votre copie signée a été téléchargée.',
   'signed_open_cert': 'Ouvrir le certificat →',
+
+  // ── Several places to sign; remind a signer (2026-10-12) ─────────────────
+  'spots_label': 'Emplacements à signer',
+  'spot_n': 'Emplacement {n}',
+  'spot_remove_aria': 'Supprimer l’emplacement {n}',
+  'add_spot': '+ Ajouter un autre emplacement à signer',
+  'doc_fields_many': 'Il y a {n} emplacements à signer. Une fois votre signature prête, touchez chaque case « Signez ici » pour l’y placer.',
+  'doc_tap_to_sign': 'Touchez ici',
+  'doc_field_aria': 'Placer votre signature ici (emplacement {n} sur {total})',
+  'doc_next_field': 'Aller à l’emplacement suivant ({done} sur {total} faits)',
+  'doc_btn_fill_all': 'Signez d’abord chaque emplacement ({done} sur {total})',
+  'remind': 'Relancer',
+  'reminding': 'Envoi…',
+  'reminded': 'Relance envoyée',
+  'remind_title': 'Renvoyer son lien au signataire par e-mail (une fois par jour au plus)',
+  'remind_too_soon': 'Vous pourrez relancer à nouveau à partir du {time}',
+  'remind_failed': 'Impossible d’envoyer la relance.',
+  'remind_no_email': 'Aucune adresse e-mail à relancer — copiez plutôt le lien.',
 }
 
 export default send

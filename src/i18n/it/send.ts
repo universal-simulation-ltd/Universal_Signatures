@@ -142,6 +142,24 @@ const send: Messages['send'] = {
   'signed_completed': 'Il mittente è stato avvisato e la tua copia firmata è stata scaricata.',
   'signed_partial': 'La tua copia firmata è stata scaricata.',
   'signed_open_cert': 'Apri il certificato →',
+
+  // ── Several places to sign; remind a signer (2026-10-12) ─────────────────
+  'spots_label': 'Punti da firmare',
+  'spot_n': 'Punto {n}',
+  'spot_remove_aria': 'Rimuovi il punto {n}',
+  'add_spot': '+ Aggiungi un altro punto da firmare',
+  'doc_fields_many': 'Ci sono {n} punti da firmare. Quando la firma è pronta, tocca ogni riquadro «Firma qui» per inserirla.',
+  'doc_tap_to_sign': 'Tocca qui',
+  'doc_field_aria': 'Inserisci qui la firma (punto {n} di {total})',
+  'doc_next_field': 'Vai al punto successivo ({done} di {total} fatti)',
+  'doc_btn_fill_all': 'Firma prima ogni punto indicato ({done} di {total})',
+  'remind': 'Sollecita',
+  'reminding': 'Invio…',
+  'reminded': 'Sollecito inviato',
+  'remind_title': 'Invia di nuovo il link al firmatario via email (al massimo una volta al giorno)',
+  'remind_too_soon': 'Potrai inviare un altro sollecito dal {time}',
+  'remind_failed': 'Impossibile inviare il sollecito.',
+  'remind_no_email': 'Nessun indirizzo email da sollecitare: copia il link.',
 }
 
 export default send

@@ -224,6 +224,23 @@ export function emailSignRequest(
   })
 }
 
+export interface RemindResult {
+  ok: boolean
+  error?: string
+  /** 'too_soon' (with nextAt) · 'no_recipient' · 'completed' · 'expired' ·
+   *  'rate_limited' · 'not_configured' · 'network' */
+  code?: string
+  /** When the next reminder is allowed (ISO). */
+  nextAt?: string
+}
+
+/** "Remind": the server emails the stored recipient their link again — at most
+ *  once a day per request, counted from the first email (platform 0290,
+ *  send-sign-request action 'remind'). Only the request id is sent. */
+export function remindSigner(supabase: Supabase, requestId: string): Promise<RemindResult> {
+  return invoke<RemindResult>(supabase, 'send-sign-request', { action: 'remind', app: 'signatures', requestId })
+}
+
 /** The recipient's link for a request already sent (to copy it again). */
 export async function recipientToken(supabase: Supabase, requestId: string): Promise<string | null> {
   const { data } = await supabase
@@ -333,7 +350,7 @@ export async function submitSigned(
   supabase: Supabase,
   token: string,
   bytes: Uint8Array,
-  page: number,
+  pages: number[],
   session?: string,
 ): Promise<SubmitResult> {
   return invoke<SubmitResult>(supabase, 'pdf-sign-request', {
@@ -344,8 +361,8 @@ export async function submitSigned(
     geo: await geoToken(),
     pdfBase64: base64FromBytes(bytes),
     // What was added, for the provenance log's label (the hash chain records
-    // the change regardless): one signature.
-    annotations: [{ type: 'signature', pageIndex: page }],
+    // the change regardless): one signature per marked place.
+    annotations: pages.map((pageIndex) => ({ type: 'signature', pageIndex })),
   })
 }
 

@@ -142,4 +142,22 @@ export default {
   'signed_completed': 'The sender has been told, and your signed copy has downloaded.',
   'signed_partial': 'Your signed copy has downloaded.',
   'signed_open_cert': 'Open the certificate →',
+
+  // ── Several places to sign; remind a signer (2026-10-12) ─────────────────
+  'spots_label': 'Places to sign',
+  'spot_n': 'Place {n}',
+  'spot_remove_aria': 'Remove place {n}',
+  'add_spot': '+ Add another place to sign',
+  'doc_fields_many': 'There are {n} places to sign. When your signature is ready, tap each “Sign here” box to put it there.',
+  'doc_tap_to_sign': 'Tap to sign',
+  'doc_field_aria': 'Put your signature here (place {n} of {total})',
+  'doc_next_field': 'Go to the next place to sign ({done} of {total} done)',
+  'doc_btn_fill_all': 'Sign every marked place first ({done} of {total})',
+  'remind': 'Remind',
+  'reminding': 'Sending…',
+  'reminded': 'Reminder sent',
+  'remind_title': 'Email the signer their link again (at most once a day)',
+  'remind_too_soon': 'You can send another reminder from {time}',
+  'remind_failed': 'Couldn’t send the reminder.',
+  'remind_no_email': 'There’s no email address to remind — copy the link instead.',
 }
