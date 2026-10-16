@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Chip, SignInDialog, useUniversal, useUser, withReturnUrl } from '@unisim/sdk'
+import { Chip, SignInDialog, useRevealOnOpen, useUniversal, useUser, withReturnUrl } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import {
   useCloudGate,
@@ -354,6 +354,8 @@ function MainSignatureSave({ primary = false }: { primary?: boolean }) {
   const currentImage = useSigStore((s) => s.currentImage())
   const [busy, setBusy] = useState(false)
   const [confirming, setConfirming] = useState(false)
+  // The replace-confirm box takes the save button's place, so it scrolls itself on screen.
+  const confirmRef = useRevealOnOpen()
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -383,7 +385,7 @@ function MainSignatureSave({ primary = false }: { primary?: boolean }) {
   return (
     <div data-testid="main-signature-save">
       {confirming ? (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+        <div ref={confirmRef} className="rounded-lg border border-amber-200 bg-amber-50 p-3">
           <p className="text-sm text-amber-900">{t('save.main_replace_confirm')}</p>
           <div className="mt-2 flex gap-2">
             <button type="button" onClick={save} disabled={busy} className="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black disabled:opacity-50">
