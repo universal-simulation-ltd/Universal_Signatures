@@ -5,7 +5,7 @@ const app: Messages['app'] = {
   'footer_love_sr': 'amor',
   'github_aria': 'Universal Signatures en GitHub',
   'about_subject': 'Tu firma',
-  'about_except': 'guardar una en la nube, firmar en el móvil o enviar un documento para que lo firmen',
+  'about_except': 'firmar en el móvil o enviar un documento para que lo firmen',
   'pref_opens_on': 'Se abre en',
 }
 

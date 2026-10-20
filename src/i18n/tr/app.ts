@@ -5,7 +5,7 @@ const app: Messages['app'] = {
   'footer_love_sr': 'sevgi',
   'github_aria': 'GitHub’da Universal Signatures',
   'about_subject': 'İmzanız',
-  'about_except': 'birini buluta kaydetmek, telefonunuzda imzalamak veya bir belgeyi imzaya göndermek',
+  'about_except': 'telefonunuzda imzalamak veya bir belgeyi imzaya göndermek',
   'pref_opens_on': 'Açılış sekmesi',
 }
 

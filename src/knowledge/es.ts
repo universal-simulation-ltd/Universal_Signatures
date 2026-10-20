@@ -76,7 +76,7 @@ Su archivo original no se modifica. La copia firmada es un archivo nuevo.
 
 ## Funciona sin conexión
 
-Como firmar no necesita ningún servidor, puede firmar un PDF con la conexión a internet desactivada. Solo las funciones opcionales necesitan conexión: guardar una firma en la nube, firmar en el teléfono y añadir un certificado de firma.
+Como firmar no necesita ningún servidor, puede firmar un PDF con la conexión a internet desactivada. Solo las funciones opcionales necesitan conexión: firmar en el teléfono, añadir un certificado de firma y enviar un documento para que lo firmen.
 
 ## Qué hace y qué no hace
 
@@ -159,7 +159,7 @@ El nombre del archivo es información real. Un nombre como «Carta de dimisión.
   {
     id: 'privacy-and-storage',
     title: 'Dónde se guarda su firma',
-    summary: 'Guardar en este dispositivo, guardar en la nube y qué sale de su dispositivo.',
+    summary: 'Guardar en este dispositivo, guardar en un archivo y qué sale de su dispositivo.',
     group: 'Privacidad y seguridad',
     body: `Puede usar Universal Signatures sin cuenta y sin que nada de lo que firme salga de su dispositivo. Esto es exactamente lo que se guarda, y dónde.
 
@@ -167,16 +167,15 @@ El nombre del archivo es información real. Un nombre como «Carta de dimisión.
 
 Puede conservar hasta seis firmas en este navegador para reutilizarlas más adelante. Se guardan en el almacenamiento propio de su navegador en este dispositivo, sin ninguna cuenta. Si borra los datos del navegador para este sitio, se eliminan, y no le acompañan a otros dispositivos ni navegadores.
 
-## Guardadas en la nube
+## Guardadas en un archivo
 
-Si ha iniciado sesión con un Universal ID, también puede guardar una firma en la nube para tenerla en sus otros dispositivos.
+Para usar sus firmas guardadas en otro navegador o en otro dispositivo, elija **Guardar en un archivo**. Obtendrá un pequeño archivo .json con la imagen de cada firma guardada, su nombre y su etiqueta, si se dibujó o se escribió, y la fecha. Ábralo con **Abrir un archivo** en el otro dispositivo y las firmas se añadirán a las que ya estén guardadas allí. No se sube nada: el archivo va donde usted lo ponga.
 
-- Qué se guarda: la imagen de la firma, el nombre que introdujo, si se dibujó o se escribió y con qué fuente, una huella SHA-256 de la imagen y la fecha.
-- Quién puede verla: su cuenta y los demás miembros de su organización de Universal ID, si comparte una.
-- Una firma guardada recibe un enlace de certificado. Cualquiera con ese enlace puede ver el nombre del firmante, el nombre de la organización, la fecha y la huella. El enlace no muestra la imagen de la firma.
-- Puede eliminar una firma guardada en cualquier momento. Con la sesión iniciada, el panel de guardado en línea muestra todas las firmas guardadas en su cuenta, de la más reciente a la más antigua, así que puede eliminar una aunque la haya guardado otro día o en otro dispositivo. Guardar firmas en línea es gratis con un Universal ID. Las cuentas gratuitas tienen un límite generoso: si alguna vez lo alcanza, elimine una firma que ya no necesite. Si necesita más, díganoslo en unisim.co.uk/support.
+- Puede ponerle una contraseña al archivo. Entonces se cifra (AES-256) y solo se abre con esa contraseña. Una contraseña olvidada no se puede recuperar.
+- Sin contraseña, cualquiera que obtenga el archivo puede ver sus firmas, así que guárdelo en un lugar privado.
+- Abrir un archivo nunca sustituye lo que ya está guardado. Una firma que ya está ahí no se añade dos veces.
 
-El almacenamiento en la nube **no está cifrado de extremo a extremo**. Los datos viajan por una conexión cifrada y están protegidos por reglas de acceso, pero nuestros sistemas pueden leerlos técnicamente. Si prefiere no aceptar ese compromiso, guárdela en este dispositivo.
+No existe ninguna copia en línea de sus firmas guardadas. Si ha iniciado sesión con un Universal ID y tiene en él una firma principal (guardada en la página «Me» del UNI·SIM Hub), la aplicación la muestra para que pueda firmar con ella.
 
 ## Qué sale de su dispositivo, y cuándo
 
@@ -184,7 +183,6 @@ El almacenamiento en la nube **no está cifrado de extremo a extremo**. Los dato
 - **Cuando firma en el teléfono:** la imagen de la firma que dibujó, que pasa por un relé en directo y no se guarda.
 - **Cuando añade un certificado de firma:** su dirección de correo, el nombre del archivo y la huella del documento. El registro se conserva mientras exista su Universal ID.
 - **Cuando envía un PDF para que otra persona lo firme:** el PDF, su dirección de correo y la de esa persona. Cuando lo abre y lo firma, el servidor registra además las horas, su dirección IP, el país correspondiente y su navegador (la página pública del certificado solo muestra el país). Una solicitud completada —el PDF, la copia firmada, estos datos y su página de certificado— se conserva 7 años después de la firma y luego se elimina; descargue una copia para conservarla más tiempo. Retirar una solicitud que no se ha firmado la elimina de inmediato.
-- **Cuando guarda en la nube:** la imagen de la firma y los datos indicados arriba.
 - **Cuando ha iniciado sesión:** un aviso de que se abrió la aplicación, para que la página de actividad de su cuenta sea exacta. No dice nada de sus documentos.
 - **Una vez al día, la primera vez que abre la aplicación:** tras su primer clic o pulsación de tecla, se suma uno al recuento anónimo de aperturas diarias. Solo contiene el nombre de la aplicación y el tipo de plataforma (web): ningún identificador, ninguna cuenta y nada sobre sus documentos. Una marca de «ya contado hoy» se queda en este dispositivo y nunca se envía.
 
@@ -192,7 +190,7 @@ La aplicación no contiene scripts de publicidad ni de seguimiento de terceros.
 
 ## Su Universal ID
 
-Su Universal ID es la cuenta única que comparten las aplicaciones de UNI·SIM. Solo la necesita para las funciones opcionales en la nube. Firmar un PDF nunca la requiere.`,
+Su Universal ID es la cuenta única que comparten las aplicaciones de UNI·SIM. Solo la necesita para dos cosas en las que interviene otra persona: un certificado de firma que otros pueden comprobar y el envío de un documento para que lo firmen. Firmar un PDF, y guardar o trasladar sus firmas, nunca la requiere.`,
   },
 ]
 

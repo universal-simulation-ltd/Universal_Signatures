@@ -10,9 +10,11 @@ import './index.css'
 console.log(`build: ${import.meta.env.VITE_BUILD_SHA}`)
 
 // Universal Signatures: the signature studio + sign-a-PDF flow run entirely
-// client-side (documents never leave the browser). Saving a *verified*
-// signature to the cloud uses the Universal ID session (cookie SSO on
-// .unisim.co.uk) and is gated by the org's entitlements — see lib/cloud.ts.
+// client-side (documents never leave the browser), and saved signatures stay
+// in the browser or a file (lib/signatureFile.ts). The Universal ID session
+// (cookie SSO on .unisim.co.uk) is used only by the two shared features — the
+// signing certificate and Send to be signed — which ask for it when chosen.
+// No `noAccounts`: those two need it (Docs_UNI_SIM/login-free-plan.md).
 //
 // The fallback is the REAL public suite project (publishable anon key — safe to
 // ship; RLS is the security boundary). A placeholder fallback left the SDK on a
@@ -31,7 +33,7 @@ const universalConfig = {
   openCount: true,
   cookieDomain: import.meta.env.PROD ? '.unisim.co.uk' : undefined,
   // Local dev runs against an offline "dummy account" by default so the
-  // signed-in surfaces (navbar profile, cloud save, verify) work with no
+  // signed-in surfaces (navbar profile, signing certificate, verify) work with no
   // network — sign in as demo@example.invalid / offline-demo. Set VITE_REAL_AUTH=1 to
   // talk to the real Supabase project instead. Never active in prod (the SDK
   // also hard-guards this off whenever cookieDomain is set).

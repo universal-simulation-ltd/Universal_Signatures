@@ -25,7 +25,7 @@ const create: Messages['create'] = {
   'labels_note': 'Compare sotto la firma. Quando firmi un PDF puoi scegliere se includerlo.',
   // Privacy note under the right column. Completes "… never leaves this computer, except …".
   'privacy_subject': 'La tua firma',
-  'privacy_except': 'salvarne una nel cloud, firmare sul telefono o inviare un documento da firmare',
+  'privacy_except': 'firmare sul telefono o inviare un documento da firmare',
 
   // Draw pad
   'pad_aria': 'Riquadro per la firma. Disegna la tua firma con il mouse, il dito o un pennino. Per usare la tastiera, scegli Scrivi.',

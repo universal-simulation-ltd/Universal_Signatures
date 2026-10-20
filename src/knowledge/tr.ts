@@ -76,7 +76,7 @@ Adınızı yazdığınızda uygulama onu seçtiğiniz el yazısı yazı tipiyle 
 
 ## Çevrimdışı çalışır
 
-İmzalamak için hiçbir sunucu gerekmediğinden, internet bağlantınız kapalıyken de bir PDF imzalayabilirsiniz. Yalnızca isteğe bağlı özellikler bağlantı gerektirir: imzayı buluta kaydetmek, telefonda imzalamak ve imzalama sertifikası eklemek.
+İmzalamak için hiçbir sunucu gerekmediğinden, internet bağlantınız kapalıyken de bir PDF imzalayabilirsiniz. Yalnızca isteğe bağlı özellikler bağlantı gerektirir: telefonda imzalamak, imzalama sertifikası eklemek ve bir belgeyi imzalatmak için göndermek.
 
 ## Neyi yapar, neyi yapmaz
 
@@ -159,7 +159,7 @@ Dosya adı gerçek bir bilgidir. "İstifa dilekçesi.pdf" gibi bir ad, içerik c
   {
     id: 'privacy-and-storage',
     title: 'İmzanız nerede saklanır',
-    summary: 'Bu cihaza kaydetmek, buluta kaydetmek ve cihazınızdan nelerin çıktığı.',
+    summary: 'Bu cihaza kaydetmek, bir dosyaya kaydetmek ve cihazınızdan nelerin çıktığı.',
     group: 'Gizlilik ve güvenlik',
     body: `Universal Signatures'ı hesap açmadan ve imzaladığınız hiçbir şey cihazınızdan çıkmadan kullanabilirsiniz. Neyin nerede saklandığı tam olarak şöyledir.
 
@@ -167,16 +167,15 @@ Dosya adı gerçek bir bilgidir. "İstifa dilekçesi.pdf" gibi bir ad, içerik c
 
 Daha sonra yeniden kullanmak için bu tarayıcıda en fazla altı imza saklayabilirsiniz. Bunlar hiçbir hesap gerektirmeden, bu cihazdaki tarayıcınızın kendi depolama alanında tutulur. Bu site için tarayıcı verilerini temizlerseniz silinirler ve başka cihazlara ya da tarayıcılara taşınmazlar.
 
-## Buluta kaydedilenler
+## Dosyaya kaydedilenler
 
-Bir Universal ID ile oturum açtıysanız, diğer cihazlarınızda da kullanabilmek için bir imzayı buluta da kaydedebilirsiniz.
+Kayıtlı imzalarınızı başka bir tarayıcıda veya başka bir cihazda kullanmak için **Dosyaya kaydet** seçeneğini kullanın. Her kayıtlı imzanın görüntüsünü, adını ve etiketini, çizilmiş mi yazılmış mı olduğunu ve tarihini içeren küçük bir .json dosyası alırsınız. Bu dosyayı diğer cihazda **Dosya aç** ile açın; imzalar orada zaten kayıtlı olanlara eklenir. Hiçbir şey yüklenmez: dosya, onu nereye koyarsanız oradadır.
 
-- Saklananlar: imza görüntüsü, girdiğiniz ad, çizilip çizilmediği veya yazıldıysa hangi yazı tipiyle yazıldığı, görüntünün SHA-256 parmak izi ve tarih.
-- Kimler görebilir: hesabınız ve bir Universal ID kuruluşunu paylaşıyorsanız o kuruluşun diğer üyeleri.
-- Kaydedilen bir imza bir sertifika bağlantısı alır. Bu bağlantıya sahip herkes imzalayanın adını, kuruluşun adını, tarihi ve parmak izini görebilir. Bağlantı imza görüntüsünü göstermez.
-- Kaydedilen bir imzayı istediğiniz zaman kaldırabilirsiniz. Oturum açtığınızda çevrimiçi kaydetme panelinde hesabınız için saklanan tüm imzalar en yenisinden başlayarak listelenir; böylece başka bir gün ya da başka bir cihazda kaydettiğiniz bir imzayı da kaldırabilirsiniz. İmzaları çevrimiçi saklamak Universal ID ile ücretsizdir. Ücretsiz hesapların cömert bir sınırı vardır; bir gün bu sınıra ulaşırsanız artık ihtiyacınız olmayan bir imzayı kaldırın. Daha fazlasına ihtiyacınız olursa unisim.co.uk/support adresinden bize bildirin.
+- Dosyaya bir parola koyabilirsiniz. Bu durumda dosya şifrelenir (AES-256) ve yalnızca o parolayla açılır. Unutulan bir parola kurtarılamaz.
+- Parola olmadan, dosyayı eline geçiren herkes imzalarınızı görebilir; bu yüzden onu gizli bir yerde saklayın.
+- Bir dosyayı açmak, zaten kayıtlı olanların yerini asla almaz. Zaten var olan bir imza ikinci kez eklenmez.
 
-Bulut depolama **uçtan uca şifreli değildir**. Veriler şifreli bir bağlantı üzerinden iletilir ve erişim kurallarıyla korunur, ancak sistemlerimiz teknik olarak bunları okuyabilir. Bu ödünleşimi yapmak istemiyorsanız bu cihaza kaydediniz.
+Kayıtlı imzalarınızın çevrimiçi bir kopyası yoktur. Bir Universal ID ile oturum açtıysanız ve onda bir ana imza tutuyorsanız (UNI·SIM Hub'ın Me sayfasında kaydedilir), uygulama bu imzayı gösterir; böylece onunla imzalayabilirsiniz.
 
 ## Cihazınızdan neler, ne zaman çıkar
 
@@ -184,7 +183,6 @@ Bulut depolama **uçtan uca şifreli değildir**. Veriler şifreli bir bağlant�
 - **Telefonda imzaladığınızda:** çizdiğiniz imza görüntüsü; canlı bir aktarıcıdan geçer ve saklanmaz.
 - **İmzalama sertifikası eklediğinizde:** e-posta adresiniz, dosya adı ve belgenin parmak izi. Kayıt, Universal ID'niz var olduğu sürece saklanır.
 - **Bir PDF'yi başkasına imzalatmak için gönderdiğinizde:** PDF, sizin ve onun e-posta adresi. Kişi belgeyi açıp imzaladığında sunucu ayrıca zamanları, IP adresini, bunun ülkesini ve tarayıcısını kaydeder (herkese açık sertifika sayfası yalnızca ülkeyi gösterir). Tamamlanan bir istek — PDF, imzalı kopya, bu bilgiler ve sertifika sayfası — imzadan sonra 7 yıl saklanır, ardından silinir; daha uzun saklamak için bir kopya indirin. İmzalanmamış bir isteği geri çekmek onu hemen siler.
-- **Buluta kaydettiğinizde:** imza görüntüsü ve yukarıda sayılan bilgiler.
 - **Oturum açtığınızda:** hesabınızın etkinlik sayfası doğru olsun diye uygulamanın açıldığına dair bir not. Belgeleriniz hakkında hiçbir şey içermez.
 - **Günde bir kez, uygulamayı ilk açtığınızda:** ilk tıklamanızdan veya tuşa basmanızdan sonra anonim günlük açılış sayısına bir eklenir. Yalnızca uygulamanın adını ve platform türünü (web) içerir: hiçbir tanımlayıcı, hesap ya da belgelerinizle ilgili bir şey yoktur. "Bugün sayıldı" işareti bu cihazda kalır ve asla gönderilmez.
 
@@ -192,7 +190,7 @@ Uygulamada reklam veya üçüncü taraf izleme betikleri yoktur.
 
 ## Universal ID'niz
 
-Universal ID'niz, UNI·SIM uygulamalarının ortak kullandığı tek hesaptır. Yalnızca isteğe bağlı bulut özellikleri için gerekir. Bir PDF imzalamak hiçbir zaman gerektirmez.`,
+Universal ID'niz, UNI·SIM uygulamalarının ortak kullandığı tek hesaptır. Yalnızca başka birini içeren iki şey için gerekir: başkalarının doğrulayabileceği bir imzalama sertifikası ve bir belgeyi imzalatmak için göndermek. Bir PDF imzalamak ve imzalarınızı kaydetmek ya da taşımak hiçbir zaman gerektirmez.`,
   },
 ]
 

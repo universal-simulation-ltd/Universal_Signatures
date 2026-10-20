@@ -76,7 +76,7 @@ Your original file is left untouched. The signed copy is a new file.
 
 ## It works offline
 
-Because nothing about signing needs a server, you can sign a PDF with your internet connection switched off. Only the optional extras need a connection: saving a signature to the cloud, signing on your phone, and adding a signing certificate.
+Because nothing about signing needs a server, you can sign a PDF with your internet connection switched off. Only the optional extras need a connection: signing on your phone, adding a signing certificate, and sending a document to be signed.
 
 ## What it does and does not do
 
@@ -159,7 +159,7 @@ The file name is real information. A name like "Resignation letter.pdf" says som
   {
     id: 'privacy-and-storage',
     title: 'Where your signature is kept',
-    summary: 'Saving on this device, saving to the cloud, and what ever leaves your device.',
+    summary: 'Saving on this device, saving to a file, and what ever leaves your device.',
     group: 'Privacy and security',
     body: `You can use Universal Signatures without an account, and without anything you sign leaving your device. Here is exactly what is kept, and where.
 
@@ -167,16 +167,15 @@ The file name is real information. A name like "Resignation letter.pdf" says som
 
 You can keep up to six signatures in this browser so you can reuse them later. They are stored in your browser's own storage on this device, with no account involved. Clearing your browser's data for this site deletes them, and they do not follow you to other devices or browsers.
 
-## Saved to the cloud
+## Saved to a file
 
-If you are signed in with a Universal ID, you can also save a signature to the cloud so it is available on your other devices.
+To use your saved signatures in another browser or on another device, choose **Save to a file**. You get a small .json file holding each saved signature's image, its name and label, whether it was drawn or typed, and the date. Open it with **Open a file** on the other device, and the signatures are added to the ones already saved there. Nothing is uploaded: the file goes wherever you put it.
 
-- What is stored: the signature image, the name you entered, whether it was drawn or typed and in which font, a SHA-256 fingerprint of the image, and the date.
-- Who can see it: your account, and other members of your Universal ID organisation if you share one.
-- A saved signature gets a certificate link. Anyone with that link can see the signer name, the organisation name, the date and the fingerprint. The link does not show the signature image.
-- You can remove a stored signature at any time. When you are signed in, the online save panel lists every signature stored for your account, newest first, so you can remove one even if you saved it on another day or device. Storing signatures online is free with a Universal ID. Free accounts have a generous limit — if you ever reach it, remove a signature you no longer need. If you need more, tell us at unisim.co.uk/support.
+- You can give the file a password. It is then encrypted (AES-256), and it opens only with that password. A forgotten password cannot be recovered.
+- Without a password, anyone who gets the file can see your signatures, so keep it somewhere private.
+- Opening a file never replaces what is already saved. A signature that is already there is not added twice.
 
-Cloud storage is **not end-to-end encrypted**. Data travels over an encrypted connection and is protected by access rules, but our systems can technically read it. If you would rather not make that trade, save on this device instead.
+There is no online copy of your saved signatures. If you are signed in with a Universal ID and keep a main signature on it (saved on the UNI·SIM Hub's Me page), the app shows it so you can sign with it.
 
 ## What leaves your device, and when
 
@@ -184,7 +183,6 @@ Cloud storage is **not end-to-end encrypted**. Data travels over an encrypted co
 - **When you sign on your phone:** the signature image you drew, passed through a live relay and not stored.
 - **When you add a signing certificate:** your email address, the file name and the document's fingerprint. The record is kept for as long as your Universal ID exists.
 - **When you send a PDF for someone else to sign:** the PDF, your email address and theirs. When they open and sign it, the server also records the times, their IP address, its country and their browser (the public certificate page shows the country only). A completed request — the PDF, the signed copy, these details and its certificate page — is kept for 7 years after it is signed and then deleted; download a copy to keep it longer. Withdrawing a request that has not been signed deletes it straight away.
-- **When you save to the cloud:** the signature image and the details listed above.
 - **When you are signed in:** a note that the app was opened, so your account's activity page is accurate. It says nothing about your documents.
 - **Once a day, the first time you open the app:** after your first click or key press, one is added to an anonymous count of daily opens. It holds only the app's name and the kind of platform (web): no identifier, no account and nothing about your documents. A "counted today" mark stays on this device and is never sent.
 
@@ -192,7 +190,7 @@ There are no advertising or third-party tracking scripts in the app.
 
 ## Your Universal ID
 
-Your Universal ID is the single account shared across UNI·SIM apps. You only need it for the optional cloud features. Signing a PDF never requires one.`,
+Your Universal ID is the single account shared across UNI·SIM apps. You only need it for two things that involve somebody else: a signing certificate that others can check, and sending a document to be signed. Signing a PDF, and saving or moving your signatures, never requires one.`,
   },
 ]
 

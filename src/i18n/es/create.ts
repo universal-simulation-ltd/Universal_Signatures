@@ -24,7 +24,7 @@ const create: Messages['create'] = {
   'labels_preview_empty': 'Añade tu firma arriba para ver la vista previa.',
   'labels_note': 'Aparece debajo de tu firma. Al firmar un PDF puedes elegir si incluirlo.',
   'privacy_subject': 'Tu firma',
-  'privacy_except': 'guardar una en la nube, firmar en el móvil o enviar un documento para que lo firmen',
+  'privacy_except': 'firmar en el móvil o enviar un documento para que lo firmen',
 
   // Draw pad
   'pad_aria': 'Panel de firma. Dibuja tu firma con el ratón, el dedo o un lápiz óptico. Para usar el teclado, elige Escribir.',

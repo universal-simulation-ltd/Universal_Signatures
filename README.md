@@ -1,8 +1,8 @@
 # Universal Signatures
 
 Draw or type a signature and **sign PDFs entirely in your browser** — free, open
-source, documents never leave your device. Optionally **save a verified
-signature to the cloud** with a Universal ID. Part of the
+source, documents never leave your device, no account needed. Save your
+signatures on this device, or **to a file** to use them on another one. Part of the
 [Universal Apps](https://opensource.unisim.co.uk) family from UNI·SIM.
 
 Live at **`opensource.unisim.co.uk/signatures`**.
@@ -26,9 +26,11 @@ Live at **`opensource.unisim.co.uk/signatures`**.
 - **Verification badge** — put "✓ Signed and verified" on any website: a link
   plus `badge.js`, which checks the certificate live, or a picture + link for
   email and Markdown.
-- **Save a verified signature to the cloud** *(optional, gated)* — store your
-  signature against your Universal ID with a SHA-256 hash + a public certificate
-  link anyone can verify.
+- **Save your signatures** — keep up to six in this browser, no account. **Save
+  to a file** (optionally with a password: AES-256-GCM) and **Open a file** on
+  another browser or device to carry them over; nothing is uploaded. The file
+  is the suite's transfer file (`@unisim/sdk` `packTransfer` / `readTransfer`),
+  product `signatures`, kind `saved-signatures`.
 - **Eight languages** — English, French, Spanish, Italian, German, Portuguese
   (Brazil and Portugal) and Turkish, following the suite's language setting.
 
@@ -42,12 +44,14 @@ Live at **`opensource.unisim.co.uk/signatures`**.
 
 The certificate page's "Show it on a website" fills the ID in for you.
 
-## Free vs. cloud
+## When you need a Universal ID
 
-Signing PDFs is **free forever** and needs no account. Saving a *verified*
-signature to our cloud is a hosted feature — it requires a Universal ID plus a
-token, an active project, or a subscription, because hosting costs money. Don't
-want to pay? **Self-host the whole thing for free** (see below).
+Signing PDFs and saving or moving your signatures need **no account**. A
+Universal ID is asked for only by the two features that involve somebody else,
+at the moment you choose them: a **signing certificate** others can check, and
+**Send to be signed**. (Saving a signature to the cloud against a Universal ID
+was removed on 2026-10-20 in favour of the file; certificate links for
+signatures saved that way still verify.)
 
 ## Stack
 
@@ -81,32 +85,30 @@ demo@example.invalid / offline-demo
 ```
 
 You'll get a seeded signed-in world (owner of a demo org with one free token) so
-the navbar profile, cloud save and verify pages all work offline. To test
+the navbar profile, the signing certificate and the verify page all work offline. To test
 against the **real** Supabase project instead, set `VITE_REAL_AUTH=1` in
 `.env.local`. The mock lives in `@unisim/sdk` (`mockAuth`) and is hard-guarded
 off in production.
 
 ## Self-hosting
 
-Universal Signatures is AGPL-3.0-licensed and self-contained. To run your own copy —
-including cloud save against **your own** Supabase, with no entitlement gate:
+Universal Signatures is AGPL-3.0-licensed and self-contained. Signing and saving
+signatures need no backend at all. To run your own copy with the signing
+certificate and the verify page against **your own** Supabase:
 
 1. Clone this repo and `npm install`.
-2. Create a Supabase project and apply the `signatures` table + the
-   `verify_signature_cert` RPC (see `0028_signatures.sql` in the platform repo,
-   or the SQL in `docs/`).
+2. Create a Supabase project and apply the `signing_events` table and the
+   `verify_*_cert` RPCs (see `0028_signatures.sql` and `0030_signing_events.sql`
+   in the platform repo).
 3. Set `VITE_PLATFORM_SUPABASE_URL` / `VITE_PLATFORM_SUPABASE_ANON_KEY` to your
    project in `.env.local`.
-4. Relax or remove the entitlement check in `src/lib/cloud.ts` (`useCloudGate`)
-   so cloud save is available to all your signed-in users.
-5. `npm run build` and host `dist/` anywhere static (Cloudflare Pages, Netlify,
+4. `npm run build` and host `dist/` anywhere static (Cloudflare Pages, Netlify,
    nginx, …).
 
-That's it — you get the full app, cloud save included, for the cost of your own
-hosting.
+That's it — you get the full app for the cost of your own hosting.
 
 ## Privacy
 
-PDFs are parsed and signed locally and never uploaded. Only the optional
-"save verified signature" feature sends data (your signature image + hash) to the
-cloud, and only when you're signed in and choose to.
+PDFs are parsed and signed locally and never uploaded (except a PDF you choose to
+send to somebody else to sign). Saved signatures stay in your browser or in a
+file you save. [PRIVACY.md](PRIVACY.md) names everything that can leave the device.

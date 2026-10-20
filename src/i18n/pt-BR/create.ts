@@ -24,7 +24,7 @@ const create: Messages['create'] = {
   'labels_note': 'Aparece abaixo da sua assinatura. Ao assinar um PDF, você pode escolher se quer incluí-lo.',
   // Privacy note under the right column.
   'privacy_subject': 'Sua assinatura',
-  'privacy_except': 'salvar uma na nuvem, assinar no celular ou enviar um documento para assinatura',
+  'privacy_except': 'assinar no celular ou enviar um documento para assinatura',
 
   // Draw pad
   'pad_aria': 'Área de assinatura. Desenhe sua assinatura com o mouse, o dedo ou uma caneta stylus. Para usar o teclado, escolha Digitar.',

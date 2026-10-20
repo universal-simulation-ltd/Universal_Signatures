@@ -249,12 +249,12 @@ export default function SignatureStudio() {
           {/* Under the box in the right column — the suite's placement (James,
               2026-08-28). It sat above both columns until then.
 
-              ⚠️ `except` names BOTH network paths. Cloud save is the one people
-              expect; "Sign on your phone" relays the drawing over a Supabase
-              realtime channel, which is just as much a departure from this
-              device and far less obvious from the button. Leaving it out would
-              have made the sentence false for the feature most likely to be
-              used by someone who read the sentence and trusted it. */}
+              ⚠️ `except` names BOTH network paths a signature can take: "Sign
+              on your phone" relays the drawing over a Supabase realtime
+              channel, which is a departure from this device far less obvious
+              from the button than sending a document. (Cloud save was the
+              third until it was removed on 2026-10-20; a saved-signatures file
+              is one the user saves themselves.) */}
           <PrivacyNote
             repo="https://github.com/universal-simulation-ltd/Universal_Signatures"
             proof="https://github.com/universal-simulation-ltd/Universal_Signatures/blob/main/PRIVACY.md"

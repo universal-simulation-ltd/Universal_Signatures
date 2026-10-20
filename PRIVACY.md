@@ -7,11 +7,15 @@ go and read it.
 
 The short version: **your signature is drawn, and your PDF is signed, by your
 own browser.** The PDF you sign is never uploaded — not to be rendered, not to
-be stamped, not at all. There are four things in this app that *can* send
-something out, all of them optional, and this page names all four, because
+be stamped, not at all. There are three things in this app that *can* send
+something out, all of them optional, and this page names all three, because
 this is an app about trust and a vague privacy page would be self-defeating.
-The fourth — sending a document to **someone else** to sign — is the only one
+The third — sending a document to **someone else** to sign — is the only one
 that uploads a PDF, because the other person has to be able to open it.
+
+**None of it needs an account except the two features that involve somebody
+else** (a certificate others can check, and sending a document to be signed).
+Those ask you to sign in at the moment you choose them, and not before.
 
 ---
 
@@ -33,25 +37,31 @@ localStorage and no account is involved — see
 [`src/lib/localSignatures.ts`](src/lib/localSignatures.ts). Clearing your
 browser data deletes them.
 
+**"Save to a file" / "Open a file"** is how you take saved signatures to another
+browser or device. The file is made in your browser and downloaded; nothing is
+uploaded. It holds each saved signature's image, its name and label, whether it
+was drawn or typed, and the date, in the suite's transfer-file format. With a
+password, those are encrypted in your browser (PBKDF2-SHA256, 600 000
+iterations, then AES-256-GCM); without one, anyone who has the file can see
+them. Opening a file checks everything in it — only real PNG/JPEG images
+within size limits, short plain-text names — and adds copies; it never
+replaces what is already saved. See
+[`src/lib/signatureFile.ts`](src/lib/signatureFile.ts) and `transfer.ts` in
+`@unisim/sdk`.
+
+There is **no online copy** of your saved signatures. Until 20 October 2026
+the app could also store a signature against your Universal ID; that was
+removed, and the file replaced it. Certificate links for signatures stored
+that way still verify. If you are signed in anyway and keep a main signature
+on your Universal ID (saved on the UNI·SIM Hub's Me page), the studio reads it
+so you can sign with it: [`src/lib/cloud.ts`](src/lib/cloud.ts)
+(`useMainSignature`).
+
 ---
 
-## The four things that *can* send something — all optional
+## The three things that *can* send something — all optional
 
-### 1. "Save to the cloud"
-
-If you are signed in and choose it, your signature image is stored against your
-Universal ID so it is there on your other devices.
-
-- The code: [`src/lib/cloud.ts`](src/lib/cloud.ts)
-- The panel that asks you: [`src/components/sig/CloudSavePanel.tsx`](src/components/sig/CloudSavePanel.tsx)
-- What travels: the signature image. **Not the PDF.**
-
-⚠️ **This is ordinary cloud storage, not end-to-end encryption.** We hold the
-keys, so this is a promise about our conduct rather than a mathematical
-guarantee. The free "on this device" option exists precisely so you never have
-to make that trade.
-
-### 2. "Sign on your phone"
+### 1. "Sign on your phone"
 
 This is the one people don't expect, and it is the reason this page exists.
 
@@ -71,7 +81,7 @@ each other.
   works identically whether or not you have an account. That is stated at the
   top of [`src/lib/mobileSign.ts`](src/lib/mobileSign.ts), and it is checkable.
 
-### 3. "Create a verifiable record" (the certificate page)
+### 2. "Create a verifiable record" (the certificate page)
 
 If you are signed in and tick this, the app creates a record that your
 Universal ID signed a particular document at a particular time.
@@ -107,7 +117,7 @@ both taken in your browser.
   company is required once the platform accepts records without one (until
   then, a Universal ID with no company is asked to set one up).
 
-### 4. "Send to be signed"
+### 3. "Send to be signed"
 
 If you are signed in (with a confirmed email address) and choose to send a PDF
 to somebody else to sign, **the PDF is uploaded** — there is no other way for
@@ -148,7 +158,9 @@ document name. See [`public/badge.js`](public/badge.js).
 
 ## What the app talks to a server for otherwise
 
-- **Signing in.** Only if you choose to. The app signs PDFs without an account.
+- **Signing in.** Only if you choose a feature that needs it (the verifiable
+  record, or sending a document to be signed). The app signs PDFs, and saves
+  and moves your signatures, without an account.
 - **"You opened the app".** When you are signed in, the app records one event
   saying the app was opened, so your account's activity page is accurate. It
   does not include anything about your document. See `<UsageTracker />`, from
@@ -175,12 +187,12 @@ script.**
 1. Open the app, then open your browser's developer tools (F12) on the
    **Network** tab.
 2. Drop a PDF in, draw a signature, place it, and export the signed file —
-   without touching cloud save, phone signing, the verifiable record or
-   sending it to be signed.
+   without touching phone signing, the verifiable record or sending it to be
+   signed.
 3. Watch the list. Your PDF is never in it.
 
 Or, more conclusively: **turn off your Wi-Fi and sign a PDF.** It works. Only
-the four optional features above need a connection, and each of them tells you
+the three optional features above need a connection, and each of them tells you
 so by failing rather than by silently doing nothing.
 
 ---

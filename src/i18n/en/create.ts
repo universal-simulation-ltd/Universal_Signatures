@@ -25,7 +25,7 @@ export default {
   'labels_note': 'Appears beneath your signature. When signing a PDF you can choose whether to include it.',
   // Privacy note under the right column. Completes "… never leaves this computer, except …".
   'privacy_subject': 'Your signature',
-  'privacy_except': 'saving one to the cloud, signing on your phone, or sending a document to be signed', // must keep exactly this scope: all three ways a signature can leave the device
+  'privacy_except': 'signing on your phone, or sending a document to be signed', // must keep exactly this scope: both ways a signature can leave the device (a saved-signatures file is one the user saves themselves)
 
   // Draw pad
   'pad_aria': 'Signature pad. Draw your signature with a mouse, finger or stylus. To use the keyboard instead, choose Type.', // "Type" is the tab name mode_type

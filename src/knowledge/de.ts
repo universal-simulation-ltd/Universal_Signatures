@@ -76,7 +76,7 @@ Ihre Originaldatei bleibt unverändert. Die unterschriebene Kopie ist eine neue 
 
 ## Es funktioniert offline
 
-Da das Unterschreiben keinen Server braucht, können Sie ein PDF auch ohne Internetverbindung unterschreiben. Nur die optionalen Extras brauchen eine Verbindung: eine Unterschrift in der Cloud speichern, auf dem Handy unterschreiben und ein Signaturzertifikat hinzufügen.
+Da das Unterschreiben keinen Server braucht, können Sie ein PDF auch ohne Internetverbindung unterschreiben. Nur die optionalen Extras brauchen eine Verbindung: auf dem Handy unterschreiben, ein Signaturzertifikat hinzufügen und ein Dokument zur Unterschrift senden.
 
 ## Was die App kann und was nicht
 
@@ -159,7 +159,7 @@ Der Dateiname ist eine echte Information. Ein Name wie „Kündigungsschreiben.p
   {
     id: 'privacy-and-storage',
     title: 'Wo Ihre Unterschrift gespeichert wird',
-    summary: 'Auf diesem Gerät speichern, in der Cloud speichern, und was Ihr Gerät verlässt.',
+    summary: 'Auf diesem Gerät speichern, in einer Datei speichern, und was Ihr Gerät verlässt.',
     group: 'Datenschutz und Sicherheit',
     body: `Sie können Universal Signatures ohne Konto nutzen, und ohne dass etwas, das Sie unterschreiben, Ihr Gerät verlässt. Hier steht genau, was wo gespeichert wird.
 
@@ -167,16 +167,15 @@ Der Dateiname ist eine echte Information. Ein Name wie „Kündigungsschreiben.p
 
 Sie können bis zu sechs Unterschriften in diesem Browser aufbewahren, um sie später wiederzuverwenden. Sie liegen im Speicher Ihres Browsers auf diesem Gerät, ohne Konto. Wenn Sie die Browserdaten für diese Website löschen, werden sie gelöscht, und sie stehen auf anderen Geräten oder in anderen Browsern nicht zur Verfügung.
 
-## In der Cloud gespeichert
+## In einer Datei gespeichert
 
-Wenn Sie mit einer Universal ID angemeldet sind, können Sie eine Unterschrift auch in der Cloud speichern, damit sie auf Ihren anderen Geräten verfügbar ist.
+Um Ihre gespeicherten Unterschriften in einem anderen Browser oder auf einem anderen Gerät zu nutzen, wählen Sie **In einer Datei speichern**. Sie erhalten eine kleine .json-Datei mit dem Bild jeder gespeicherten Unterschrift, ihrem Namen und ihrer Bezeichnung, der Angabe, ob sie gezeichnet oder getippt wurde, und dem Datum. Öffnen Sie sie auf dem anderen Gerät mit **Datei öffnen**, dann werden die Unterschriften zu den dort bereits gespeicherten hinzugefügt. Es wird nichts hochgeladen: Die Datei landet dort, wo Sie sie ablegen.
 
-- Was gespeichert wird: das Bild der Unterschrift, der eingegebene Name, ob sie gezeichnet oder getippt wurde und in welcher Schrift, ein SHA-256-Fingerabdruck des Bildes und das Datum.
-- Wer sie sehen kann: Ihr Konto und andere Mitglieder Ihrer Universal-ID-Organisation, falls Sie eine teilen.
-- Eine gespeicherte Unterschrift erhält einen Zertifikatslink. Wer diesen Link hat, sieht den Namen der unterschreibenden Person, den Namen der Organisation, das Datum und den Fingerabdruck. Das Bild der Unterschrift zeigt der Link nicht.
-- Sie können eine gespeicherte Unterschrift jederzeit entfernen. Wenn Sie angemeldet sind, listet der Bereich zum Online-Speichern alle für Ihr Konto gespeicherten Unterschriften auf, die neueste zuerst – so können Sie auch eine entfernen, die Sie an einem anderen Tag oder auf einem anderen Gerät gespeichert haben. Unterschriften online zu speichern ist mit einer Universal ID kostenlos. Kostenlose Konten haben ein großzügiges Limit – sollten Sie es einmal erreichen, entfernen Sie eine Unterschrift, die Sie nicht mehr brauchen. Wenn Sie mehr brauchen, sagen Sie es uns unter unisim.co.uk/support.
+- Sie können die Datei mit einem Passwort versehen. Sie wird dann verschlüsselt (AES-256) und lässt sich nur mit diesem Passwort öffnen. Ein vergessenes Passwort kann nicht wiederhergestellt werden.
+- Ohne Passwort kann jeder, der die Datei erhält, Ihre Unterschriften sehen – bewahren Sie sie also an einem privaten Ort auf.
+- Das Öffnen einer Datei ersetzt nie, was bereits gespeichert ist. Eine Unterschrift, die schon vorhanden ist, wird nicht doppelt hinzugefügt.
 
-Die Cloud-Speicherung ist **nicht Ende-zu-Ende-verschlüsselt**. Die Daten werden über eine verschlüsselte Verbindung übertragen und durch Zugriffsregeln geschützt, aber unsere Systeme können sie technisch lesen. Wenn Sie diesen Kompromiss nicht eingehen möchten, speichern Sie stattdessen auf diesem Gerät.
+Es gibt keine Online-Kopie Ihrer gespeicherten Unterschriften. Wenn Sie mit einer Universal ID angemeldet sind und dort eine Hauptunterschrift hinterlegt haben (gespeichert auf der Seite „Me“ im UNI·SIM Hub), zeigt die App sie an, damit Sie damit unterschreiben können.
 
 ## Was Ihr Gerät verlässt, und wann
 
@@ -184,7 +183,6 @@ Die Cloud-Speicherung ist **nicht Ende-zu-Ende-verschlüsselt**. Die Daten werde
 - **Beim Unterschreiben auf dem Handy:** das Bild der gezeichneten Unterschrift, weitergeleitet über ein Live-Relay und nicht gespeichert.
 - **Beim Hinzufügen eines Signaturzertifikats:** Ihre E-Mail-Adresse, der Dateiname und der Fingerabdruck des Dokuments. Der Nachweis wird aufbewahrt, solange Ihre Universal ID besteht.
 - **Wenn Sie ein PDF zur Unterschrift an jemand anderen senden:** das PDF, Ihre E-Mail-Adresse und die der anderen Person. Wenn diese es öffnet und unterschreibt, speichert der Server außerdem die Zeitpunkte, ihre IP-Adresse, das zugehörige Land und ihren Browser (die öffentliche Zertifikatsseite zeigt nur das Land). Eine abgeschlossene Anfrage — das PDF, die unterschriebene Kopie, diese Angaben und ihre Zertifikatsseite — wird 7 Jahre nach der Unterschrift aufbewahrt und dann gelöscht; laden Sie eine Kopie herunter, um sie länger zu behalten. Wird eine noch nicht unterschriebene Anfrage zurückgezogen, wird sie sofort gelöscht.
-- **Beim Speichern in der Cloud:** das Bild der Unterschrift und die oben genannten Angaben.
 - **Wenn Sie angemeldet sind:** ein Hinweis, dass die App geöffnet wurde, damit die Aktivitätsseite Ihres Kontos stimmt. Er sagt nichts über Ihre Dokumente aus.
 - **Einmal am Tag, beim ersten Öffnen der App:** Nach Ihrem ersten Klick oder Tastendruck wird die anonyme Zählung der täglichen Öffnungen um eins erhöht. Sie enthält nur den Namen der App und die Art der Plattform (Web): keine Kennung, kein Konto und nichts über Ihre Dokumente. Eine Markierung „heute schon gezählt“ bleibt auf diesem Gerät und wird nie gesendet.
 
@@ -192,7 +190,7 @@ Die App enthält keine Werbe- oder Tracking-Skripte von Drittanbietern.
 
 ## Ihre Universal ID
 
-Ihre Universal ID ist das eine Konto, das alle UNI·SIM-Apps gemeinsam nutzen. Sie brauchen sie nur für die optionalen Cloud-Funktionen. Zum Unterschreiben eines PDFs ist sie nie nötig.`,
+Ihre Universal ID ist das eine Konto, das alle UNI·SIM-Apps gemeinsam nutzen. Sie brauchen sie nur für zwei Dinge, bei denen eine andere Person beteiligt ist: ein Signaturzertifikat, das andere prüfen können, und das Senden eines Dokuments zur Unterschrift. Zum Unterschreiben eines PDFs und zum Speichern oder Übertragen Ihrer Unterschriften ist sie nie nötig.`,
   },
 ]
 

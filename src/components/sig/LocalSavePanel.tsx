@@ -1,18 +1,23 @@
-import { useEffect, useRef, useState } from 'react'
-import { Chip } from '@unisim/sdk'
+import { useEffect, useId, useRef, useState } from 'react'
+import { Chip, TRANSFER_ACCEPT, transferErrorText, useFileDrop, type TransferErrorReason } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import {
   loadLocalSignatures,
   saveLocalSignature,
   removeLocalSignature,
   renameLocalSignature,
+  importLocalSignatures,
+  MAX_LOCAL_SIGNATURES,
   type LocalSignature,
 } from '../../lib/localSignatures'
+import { packSavedSignatures, readSavedSignatures } from '../../lib/signatureFile'
 import { useT } from '../../i18n'
 
-// Free, no-account "Save on this device" — the local-first counterpart to the
-// cloud save. Guests can keep a few signatures in this browser and reuse them
-// without a Universal ID. Sits above the cloud panel so the free option leads.
+// Free, no-account "Save on this device": keep a few signatures in this
+// browser and reuse them later. "Save to a file" / "Open a file" carry them to
+// another browser or device (the suite transfer file, lib/signatureFile.ts).
+// That replaced saving a signature to the cloud with a Universal ID
+// (2026-10-20, Docs_UNI_SIM/login-free-plan.md): no sign-in anywhere here.
 export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
   const t = useT()
   const mode = useSigStore((s) => s.mode)
@@ -187,9 +192,144 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
           ))}
         </ul>
       )}
+
+      <SignatureFile saved={saved} onImported={setSaved} />
     </>
   )
 
   if (bare) return content
   return <div className="rounded-xl border border-slate-200 bg-white p-5">{content}</div>
+}
+
+// Save to a file / Open a file, with an optional password. A signature is
+// personal, so the password is offered, but empty by default.
+function SignatureFile({ saved, onImported }: { saved: LocalSignature[]; onImported: (list: LocalSignature[]) => void }) {
+  const t = useT()
+  const passwordId = useId()
+  const [password, setPassword] = useState('')
+  const [busy, setBusy] = useState<'save' | 'open' | null>(null)
+  // `seq` numbers each answer, so a repeat of the same one still reads as new
+  // (to a screen reader, and to e2e/signature-file.e2e.mjs).
+  const [note, setNoteState] = useState<{ tone: 'ok' | 'error'; text: string; seq: number } | null>(null)
+  const seq = useRef(0)
+  const setNote = (n: { tone: 'ok' | 'error'; text: string } | null) => setNoteState(n && { ...n, seq: ++seq.current })
+  // A file that needs (another try at) its password, kept so "Open it" can
+  // re-read it once the password is typed.
+  const [pending, setPending] = useState<File | null>(null)
+
+  const drop = useFileDrop({
+    onFiles: (files) => { if (files[0]) void open(files[0]) },
+    accept: TRANSFER_ACCEPT,
+    multiple: false,
+    clickToBrowse: false,
+    label: t('save.file_open'),
+  })
+
+  async function save() {
+    if (saved.length === 0 || busy) return
+    setBusy('save'); setNote(null)
+    try {
+      const packed = await packSavedSignatures(saved, password)
+      const url = URL.createObjectURL(packed.blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = packed.fileName
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.setTimeout(() => URL.revokeObjectURL(url), 10_000)
+      setNote({ tone: 'ok', text: t('save.file_saved', { name: packed.fileName }) })
+    } catch {
+      setNote({ tone: 'error', text: t('save.file_error_save') })
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  async function open(file: File) {
+    if (busy) return
+    setBusy('open'); setNote(null)
+    try {
+      const res = await readSavedSignatures(file, password)
+      if (!res.ok) {
+        const wantsPassword = res.reason === 'needs-password' || res.reason === 'wrong-password'
+        setPending(wantsPassword ? file : null)
+        setNote({ tone: 'error', text: errorText(res.reason) })
+        return
+      }
+      setPending(null)
+      if (res.signatures.length === 0) {
+        setNote({ tone: 'error', text: t('save.file_none_usable') })
+        return
+      }
+      const r = importLocalSignatures(res.signatures)
+      onImported(r.list)
+      const parts: string[] = []
+      parts.push(r.added > 0 ? t.plural('save.file_added', r.added) : t('save.file_already_here'))
+      if (r.didNotFit > 0) parts.push(t.plural('save.file_not_fit', r.didNotFit, { max: MAX_LOCAL_SIGNATURES }))
+      if (res.skipped > 0) parts.push(t.plural('save.file_skipped', res.skipped))
+      setNote({ tone: r.added > 0 ? 'ok' : 'error', text: parts.join(' ') })
+    } catch {
+      setNote({ tone: 'error', text: errorText('damaged') })
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  function errorText(reason: TransferErrorReason): string {
+    return transferErrorText(reason, t.lang)
+  }
+
+  return (
+    <div className="mt-5 border-t border-slate-100 pt-4" data-testid="signature-file" {...drop.dropzoneProps}>
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('save.file_title')}</h3>
+      <p className="mt-1 text-xs text-slate-500">{t('save.file_intro')}</p>
+
+      <label htmlFor={passwordId} className="mt-3 block text-[11px] font-medium text-slate-600">{t('save.file_password_label')}</label>
+      <input
+        id={passwordId}
+        type="password"
+        autoComplete="new-password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+      />
+      <p className="mt-1 text-[11px] text-slate-400">{t('save.file_password_hint')}</p>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={save}
+          disabled={saved.length === 0 || busy !== null}
+          className="rounded-lg bg-white px-3.5 py-2 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-50 disabled:opacity-50"
+        >
+          {busy === 'save' ? t('save.saving') : saved.length === 0 ? t('save.file_nothing_to_save') : t('save.file_save')}
+        </button>
+        <button
+          type="button"
+          onClick={drop.open}
+          disabled={busy !== null}
+          className="rounded-lg bg-white px-3.5 py-2 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-50 disabled:opacity-50"
+        >
+          {busy === 'open' ? t('save.file_opening') : t('save.file_open')}
+        </button>
+        {pending && (
+          <button
+            type="button"
+            onClick={() => void open(pending)}
+            disabled={busy !== null || !password}
+            className="rounded-lg bg-orange-700 px-3.5 py-2 text-sm font-semibold text-white hover:bg-orange-800 disabled:opacity-50"
+          >
+            {t('save.file_try_again')}
+          </button>
+        )}
+        <input {...drop.inputProps} className="hidden" data-testid="signature-file-input" />
+      </div>
+      {note && (
+        <p key={note.seq} data-note={note.seq} role={note.tone === 'error' ? 'alert' : 'status'} className={`mt-2 text-sm ${note.tone === 'ok' ? 'text-emerald-700' : 'text-rose-700'}`}>
+          {note.text}
+        </p>
+      )}
+    </div>
+  )
 }

@@ -4,11 +4,12 @@
 
 Universal Signatures lets you **draw or type a signature and sign PDFs
 entirely in the browser** — documents never leave the device. Signing is free
-forever and needs no account; guests can also save signatures device-locally
-for reuse. Optionally, a **verified signature** can be stored in the cloud
-against a Universal ID (SHA-256 hash + a public certificate link anyone can
-verify) — that hosted feature is gated behind a token, project, or
-subscription, and the whole app can be self-hosted for free instead.
+forever and needs no account; anyone can save signatures in the browser for
+reuse, and carry them to another device as a file (`src/lib/signatureFile.ts`,
+the suite transfer file, optional password). A Universal ID is asked for only
+by the signing certificate and Send to be signed, at the moment they are
+chosen (login-free plan, 2026-10-20; the cloud save against a Universal ID was
+removed then, and its certificate links still verify).
 
 - **Live:** [opensource.unisim.co.uk/signatures](https://opensource.unisim.co.uk/signatures)
   — served by path via the `opensource-portal` Worker, which proxies
@@ -19,7 +20,10 @@ subscription, and the whole app can be self-hosted for free instead.
   the shared navbar, SSO and entitlements (with an offline mock-auth mode for
   local dev).
 - **Local save:** `src/lib/localSignatures.ts` keeps a capped localStorage
-  list so guests can save/reuse signatures with no account.
+  list so guests can save/reuse signatures with no account;
+  `src/lib/signatureFile.ts` saves it to / opens it from a file.
+- **Tests:** `npm run test:file` (Playwright, against `vite preview`) and
+  `npm run test:modal`.
 
 MIT licensed — free and open source, like all Universal Apps.
 

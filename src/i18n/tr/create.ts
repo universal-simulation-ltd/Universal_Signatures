@@ -25,7 +25,7 @@ const create: Messages['create'] = {
   'labels_note': 'İmzanızın altında görünür. Bir PDF’i imzalarken eklenip eklenmeyeceğini seçebilirsiniz.',
   // Privacy note under the right column.
   'privacy_subject': 'İmzanız',
-  'privacy_except': 'birini buluta kaydetmek, telefonunuzda imzalamak veya bir belgeyi imzaya göndermek',
+  'privacy_except': 'telefonunuzda imzalamak veya bir belgeyi imzaya göndermek',
 
   // Draw pad
   'pad_aria': 'İmza alanı. İmzanızı fare, parmak veya kalemle çizin. Bunun yerine klavyeyi kullanmak için Yaz’ı seçin.',

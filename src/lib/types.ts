@@ -18,16 +18,6 @@ export const INITIAL_PAGES = -3
 // to 'draw', so a saved signature's `style` is only ever 'draw' | 'type'.
 export type StudioMode = SignatureMode | 'phone'
 
-export interface SavedSignature {
-  id: string
-  signer_name: string | null
-  style: SignatureMode
-  font: string | null
-  signature_hash: string
-  cert_id: string
-  created_at: string
-}
-
 // Public fields returned by the saved-signature verify RPC (no org/user internals).
 export interface VerifyResult {
   cert_id: string
@@ -75,13 +65,3 @@ export type AnyVerifyResult =
   | { kind: 'signing'; data: SigningEventResult }
   | { kind: 'request'; data: RequestCertResult }
   | { kind: 'signature'; data: VerifyResult }
-
-// Why the cloud-save action is or isn't available for the current visitor.
-export type CloudGate =
-  | { state: 'loading' }
-  | { state: 'signed_out' }
-  | { state: 'entitled'; via: 'subscription' | 'token' | 'project' }
-  | { state: 'blocked' }
-  // Signed in, but the Universal ID belongs to no company yet, so there is
-  // nowhere to store a signature (signatures.org_id is required).
-  | { state: 'no_company' }

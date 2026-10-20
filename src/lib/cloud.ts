@@ -1,202 +1,21 @@
-'use client'
-
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useUniversal, useOrg, useSubscription, useCredits, useProjects, useAppFreeToken } from '@unisim/sdk'
+import { useEffect, useState } from 'react'
+import { useUniversal } from '@unisim/sdk'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { sha256Hex } from './signature'
 import { getT } from '../i18n'
-import type { AnyVerifyResult, CloudGate, RequestCertResult, SavedSignature, SignatureMode, VerifyResult } from './types'
+import type { AnyVerifyResult, RequestCertResult, VerifyResult } from './types'
 
-// ── The gate ────────────────────────────────────────────────────────────────
-// Saving a verified signature to the cloud costs us hosting, so it's gated on
-// the org having ANY of: an active paid subscription, this app's free token
-// (migration 0045 — a missing row means available), a positive purchased
-// token/credit balance, or at least one project. Otherwise the free allowance
-// is used up and CloudSavePanel says so. Anonymous visitors are asked to create /
-// sign in with a Universal ID first.
-//
-// `refresh` re-reads the free token and the credit balance — after a stored
-// signature is saved or removed, so a blocked panel becomes entitled again (and
-// vice versa) without a reload.
-export function useCloudGate(): CloudGate & { refresh: () => void } {
-  const { session, loading: provLoading } = useUniversal()
-  const { org, orgs, loading: orgLoading, error: orgError } = useOrg()
-  const { subscription, loading: subLoading } = useSubscription()
-  const { credits, loading: creditsLoading, refresh: refreshCredits } = useCredits()
-  const { projects, loading: projLoading } = useProjects()
-  const { status: freeToken, loading: freeLoading, refresh: refreshFreeToken } = useAppFreeToken('signatures')
-  const refresh = useCallback(() => {
-    refreshFreeToken()
-    refreshCredits()
-  }, [refreshFreeToken, refreshCredits])
-
-  const signedIn = !!session?.user && session.user.is_anonymous !== true
-  const orgId = org?.id ?? null
-  const anyDataLoading = subLoading || creditsLoading || projLoading || freeLoading
-
-  // Know when the subscription/credits/projects data has actually been fetched
-  // for the CURRENT org. Those hooks short-circuit to `loading:false` with empty
-  // data while `org` is still null, and lag one render after `org` resolves — so
-  // a bare `!loading` check can't tell "stale/not-yet-fetched" from "checked and
-  // genuinely empty". We only trust the data once we've seen its loading flip
-  // true→false for this org; otherwise the gate would momentarily read `blocked`
-  // and flash the "self-host / sign up" placeholder before the check completes.
-  const fetchStartedForOrg = useRef<string | null>(null)
-  if (anyDataLoading && orgId) fetchStartedForOrg.current = orgId
-  const dataReady = !!orgId && !anyDataLoading && fetchStartedForOrg.current === orgId
-  // The last settled answer for this org: a refresh re-checks in the background
-  // instead of flashing "Checking your account…" over the panel.
-  const settled = useRef<{ orgId: string; gate: CloudGate } | null>(null)
-
-  if (provLoading) return { state: 'loading', refresh }
-  if (!signedIn) return { state: 'signed_out', refresh }
-  // Signed in but the account isn't checked yet: keep showing "Checking your
-  // account…" until the org resolves and its entitlement data is in.
-  if (orgLoading) return { state: 'loading', refresh }
-  // No company at all. Since 2026-10-02 the hub no longer makes every new ID
-  // create one at sign-in, so this is a normal state, not a broken one — say
-  // so, instead of falling through to "you've used your free storage". Only a
-  // SUCCESSFUL empty read counts: an org query error is "unknown" (SDK rule).
-  if (!orgError && orgs.length === 0) return { state: 'no_company', refresh }
-  if (orgId && !dataReady) {
-    const last = settled.current
-    return last && last.orgId === orgId ? { ...last.gate, refresh } : { state: 'loading', refresh }
-  }
-
-  const gate = decideGate()
-  if (orgId) settled.current = { orgId, gate }
-  return { ...gate, refresh }
-
-  function decideGate(): CloudGate {
-    const hasSub = !!subscription && subscription.status === 'active' && subscription.tier !== 'free'
-    if (hasSub) return { state: 'entitled', via: 'subscription' }
-    // acquire_token_hold spends the free token before purchased credits, so both
-    // take the same 'token' path in CloudSavePanel.
-    if (freeToken === 'available') return { state: 'entitled', via: 'token' }
-    if ((credits ?? 0) > 0) return { state: 'entitled', via: 'token' }
-    if ((projects?.length ?? 0) > 0) return { state: 'entitled', via: 'project' }
-    return { state: 'blocked' }
-  }
-}
-
-// ── Your stored signatures ───────────────────────────────────────────────────
-// Every signature stored against the workspace, newest first, so one saved in
-// an earlier session can still be seen and removed. RLS (platform 0028) lets
-// any member read the org's rows but only the owner delete one, so a
-// colleague's row is listed without a Remove button.
-export type StoredSignature = SavedSignature & { user_id: string; image_data: string }
-
-const STORED_COLUMNS = 'id, user_id, signer_name, style, font, image_data, signature_hash, cert_id, created_at'
-
-export function useStoredSignatures(orgId: string | null | undefined, signedIn: boolean) {
-  const { supabase } = useUniversal()
-  const [rows, setRows] = useState<StoredSignature[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [tick, setTick] = useState(0)
-
-  useEffect(() => {
-    if (!orgId || !signedIn) {
-      setRows([])
-      setLoading(false)
-      setError(null)
-      return
-    }
-    let cancelled = false
-    setLoading(true)
-    supabase
-      .from('signatures')
-      .select(STORED_COLUMNS)
-      .eq('org_id', orgId)
-      .order('created_at', { ascending: false })
-      .then(({ data, error: err }) => {
-        if (cancelled) return
-        setRows(err ? [] : ((data ?? []) as StoredSignature[]))
-        setError(err ? getT()('save.stored_error_load') : null)
-        setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [supabase, orgId, signedIn, tick])
-
-  const refresh = useCallback(() => setTick((t) => t + 1), [])
-  return { rows, loading, error, refresh }
-}
-
-// ── Save ────────────────────────────────────────────────────────────────────
-export interface SaveInput {
-  signerName: string
-  style: SignatureMode
-  font: string | null
-  imageDataUrl: string
-}
-
-export async function saveSignature(
-  supabase: SupabaseClient,
-  orgId: string | null,
-  userId: string | null,
-  input: SaveInput,
-): Promise<{ ok: boolean; certId?: string; error?: string }> {
-  if (!orgId || !userId) return { ok: false, error: getT()('save.error_sign_in_to_save') }
-  const signature_hash = await sha256Hex(input.imageDataUrl)
-  const { data, error } = await supabase
-    .from('signatures')
-    .insert({
-      org_id: orgId,
-      user_id: userId,
-      signer_name: input.signerName.trim() || null,
-      style: input.style,
-      font: input.font,
-      image_data: input.imageDataUrl,
-      signature_hash,
-    })
-    .select('cert_id')
-    .single()
-  if (error) return { ok: false, error: error.message }
-  return { ok: true, certId: (data as { cert_id: string }).cert_id }
-}
-
-// ── Free token hold ──────────────────────────────────────────────────────────
-// Storing a signature on a FREE account uses the app's own free token while
-// it's kept (one free returnable token PER Universal App — universal-platform
-// migration 0045; the RPC spends it before any purchased wallet credits).
-// Removing the signature releases + refunds it. Paid/project-entitled accounts
-// don't touch the token, so the caller only holds when entitled `via: 'token'`.
-export function friendlyTokenError(msg: string): string {
-  // Only reached at the limit, so this is the one place the allowance is
-  // mentioned — number-free, as the free limits are set to change.
-  if (msg.includes('token_in_use') || msg.includes('no_credits')) {
-    return getT()('save.error_storage_full')
-  }
-  return msg
-}
-
-export async function holdSignatureToken(
-  supabase: SupabaseClient,
-  certId: string,
-): Promise<{ ok: boolean; error?: string }> {
-  const { error } = await supabase.rpc('acquire_token_hold', {
-    p_app: 'signatures',
-    p_resource_id: certId,
-    p_label: 'Universal Signature',
-    p_refundable: true,
-  })
-  if (error) return { ok: false, error: friendlyTokenError(error.message) }
-  return { ok: true }
-}
-
-// Delete a stored signature and return the token it was holding (if any). We
-// delete the row first; the release/refund is best-effort after.
-export async function removeStoredSignature(
-  supabase: SupabaseClient,
-  certId: string,
-): Promise<{ ok: boolean; error?: string }> {
-  const { error } = await supabase.from('signatures').delete().eq('cert_id', certId)
-  if (error) return { ok: false, error: error.message }
-  await supabase.rpc('release_token_hold', { p_app: 'signatures', p_resource_id: certId })
-  return { ok: true }
-}
+// What this app still asks the platform for. Since 2026-10-20 nothing here
+// SAVES a signature to reuse: that is a file now (lib/signatureFile.ts,
+// Docs_UNI_SIM/login-free-plan.md). Left are the two things shared with
+// somebody else, and their public verification:
+//   • the signing certificate (a signing_events record, below), which needs a
+//     Universal ID and offers sign-in only when its box is ticked;
+//   • reading a signature's certificate (verifyCert / verifyAny), which needs
+//     nobody signed in. ⚠️ Saved signatures already issued (`signatures`,
+//     platform 0028 / 0224) keep their certificate links, so verifyCert stays
+//     even though this app no longer writes those rows;
+//   • reading your MAIN signature (platform 0224) when you happen to be signed
+//     in — saved on the hub's Me page. Read only; never a prompt.
 
 // ── Signing-event record (free for any signed-in Universal ID) ────────────────
 // A verifiable "this PDF was signed via Universal Signatures" record. We store
@@ -338,11 +157,10 @@ export async function verifyAny(supabase: SupabaseClient, certId: string): Promi
 }
 
 // ── Your main signature (one per Universal ID) ───────────────────────────────
-// Platform 0224: every Universal ID can keep ONE main signature, with or
-// without a company — a row in the same `signatures` table (is_main = true,
-// org_id = null) written only through save_main_signature(), which replaces
-// any previous main. It takes no free-allowance token. The hub's Me page saves
-// it in place; this app reads it (to sign with) and can save it too.
+// Platform 0224: every Universal ID can keep ONE main signature, saved on the
+// hub's Me page (this app saved one too until 2026-10-20). When you are signed
+// in anyway, the studio offers it to sign with. Nothing asks you to sign in
+// for it.
 export interface MainSignature {
   id: string
   cert_id: string
@@ -350,23 +168,17 @@ export interface MainSignature {
   created_at: string
 }
 
-const MAIN_CHANGED = 'unisim:main-signature-changed'
-
 export function useMainSignature() {
   const { supabase, session } = useUniversal()
   const userId = session?.user && session.user.is_anonymous !== true ? session.user.id : null
   const [main, setMain] = useState<MainSignature | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [tick, setTick] = useState(0)
 
   useEffect(() => {
     if (!userId) {
       setMain(null)
-      setLoading(false)
       return
     }
     let cancelled = false
-    setLoading(true)
     supabase
       .from('signatures')
       .select('id, cert_id, image_data, created_at')
@@ -374,42 +186,12 @@ export function useMainSignature() {
       .eq('is_main', true)
       .maybeSingle()
       .then(({ data, error }) => {
-        if (cancelled) return
-        setMain(error ? null : ((data as MainSignature | null) ?? null))
-        setLoading(false)
+        if (!cancelled) setMain(error ? null : ((data as MainSignature | null) ?? null))
       })
     return () => {
       cancelled = true
     }
-  }, [supabase, userId, tick])
+  }, [supabase, userId])
 
-  // Every reader of the main signature re-reads when any of them saves one
-  // (the studio's "Use it" bar and the save panel are separate components).
-  useEffect(() => {
-    const on = () => setTick((t) => t + 1)
-    window.addEventListener(MAIN_CHANGED, on)
-    return () => window.removeEventListener(MAIN_CHANGED, on)
-  }, [])
-
-  const refresh = useCallback(() => setTick((t) => t + 1), [])
-  return { main, loading, refresh, signedIn: !!userId }
-}
-
-export async function saveMainSignature(
-  supabase: SupabaseClient,
-  input: SaveInput,
-): Promise<{ ok: boolean; certId?: string; error?: string }> {
-  const { data, error } = await supabase.rpc('save_main_signature', {
-    p_image_data: input.imageDataUrl,
-    p_signer_name: input.signerName.trim() || null,
-    p_style: input.style,
-    p_font: input.font,
-  })
-  if (error) return { ok: false, error: error.message }
-  const d = data as { ok: boolean; cert_id?: string; error?: string } | null
-  if (!d?.ok || !d.cert_id) {
-    return { ok: false, error: d?.error === 'too_large' ? getT()('save.main_error_too_large') : getT()('save.main_error_save') }
-  }
-  window.dispatchEvent(new Event(MAIN_CHANGED))
-  return { ok: true, certId: d.cert_id }
+  return { main }
 }

@@ -76,7 +76,7 @@ O seu ficheiro original não é alterado. A cópia assinada é um ficheiro novo.
 
 ## Funciona sem ligação
 
-Como assinar não precisa de nenhum servidor, pode assinar um PDF com a ligação à internet desligada. Só as funcionalidades opcionais precisam de ligação: guardar uma assinatura na nuvem, assinar no telemóvel e adicionar um certificado de assinatura.
+Como assinar não precisa de nenhum servidor, pode assinar um PDF com a ligação à internet desligada. Só as funcionalidades opcionais precisam de ligação: assinar no telemóvel, adicionar um certificado de assinatura e enviar um documento para ser assinado.
 
 ## O que faz e o que não faz
 
@@ -159,7 +159,7 @@ O nome do ficheiro é informação real. Um nome como "Carta de demissão.pdf" d
   {
     id: 'privacy-and-storage',
     title: 'Onde a sua assinatura é guardada',
-    summary: 'Guardar neste dispositivo, guardar na nuvem e o que sai do seu dispositivo.',
+    summary: 'Guardar neste dispositivo, guardar num ficheiro e o que sai do seu dispositivo.',
     group: 'Privacidade e segurança',
     body: `Pode usar o Universal Signatures sem conta, e sem que nada do que assina saia do seu dispositivo. Eis exatamente o que é guardado, e onde.
 
@@ -167,16 +167,15 @@ O nome do ficheiro é informação real. Um nome como "Carta de demissão.pdf" d
 
 Pode guardar até seis assinaturas neste navegador para as reutilizar mais tarde. Ficam no armazenamento do próprio navegador neste dispositivo, sem qualquer conta. Limpar os dados do navegador para este site apaga-as, e não o acompanham noutros dispositivos ou navegadores.
 
-## Guardadas na nuvem
+## Guardadas num ficheiro
 
-Se tiver sessão iniciada com um Universal ID, também pode guardar uma assinatura na nuvem para a ter nos seus outros dispositivos.
+Para usar as suas assinaturas guardadas noutro navegador ou noutro dispositivo, escolha **Guardar num ficheiro**. Obtém um pequeno ficheiro .json com a imagem de cada assinatura guardada, o respetivo nome e etiqueta, se foi desenhada ou escrita, e a data. Abra-o com **Abrir um ficheiro** no outro dispositivo, e as assinaturas são adicionadas às que já lá estão guardadas. Nada é enviado: o ficheiro vai para onde o colocar.
 
-- O que é guardado: a imagem da assinatura, o nome que indicou, se foi desenhada ou escrita e em que tipo de letra, uma impressão digital SHA-256 da imagem e a data.
-- Quem a pode ver: a sua conta e os outros membros da sua organização Universal ID, se partilhar uma.
-- Uma assinatura guardada recebe uma ligação de certificado. Qualquer pessoa com essa ligação pode ver o nome de quem assinou, o nome da organização, a data e a impressão digital. A ligação não mostra a imagem da assinatura.
-- Pode remover uma assinatura guardada a qualquer momento. Com a sessão iniciada, o painel de gravação online apresenta todas as assinaturas guardadas na sua conta, da mais recente para a mais antiga, pelo que pode remover uma mesmo que a tenha guardado noutro dia ou noutro dispositivo. Guardar assinaturas online é gratuito com um Universal ID. As contas gratuitas têm um limite generoso: se algum dia o atingir, remova uma assinatura de que já não precise. Se precisar de mais, diga-nos em unisim.co.uk/support.
+- Pode proteger o ficheiro com uma palavra-passe. Fica então encriptado (AES-256) e só abre com essa palavra-passe. Uma palavra-passe esquecida não pode ser recuperada.
+- Sem palavra-passe, qualquer pessoa que obtenha o ficheiro pode ver as suas assinaturas, por isso guarde-o num local privado.
+- Abrir um ficheiro nunca substitui o que já está guardado. Uma assinatura que já lá está não é adicionada duas vezes.
 
-O armazenamento na nuvem **não tem encriptação ponto a ponto**. Os dados circulam por uma ligação encriptada e estão protegidos por regras de acesso, mas os nossos sistemas conseguem tecnicamente lê-los. Se preferir não aceitar esse compromisso, guarde neste dispositivo.
+Não existe nenhuma cópia online das suas assinaturas guardadas. Se tiver sessão iniciada com um Universal ID e tiver nele uma assinatura principal (guardada na página «Me» do UNI·SIM Hub), a aplicação mostra-a para que possa assinar com ela.
 
 ## O que sai do seu dispositivo, e quando
 
@@ -184,7 +183,6 @@ O armazenamento na nuvem **não tem encriptação ponto a ponto**. Os dados circ
 - **Quando assina no telemóvel:** a imagem da assinatura que desenhou, reencaminhada por um retransmissor em direto e não guardada.
 - **Quando adiciona um certificado de assinatura:** o seu endereço de e-mail, o nome do ficheiro e a impressão digital do documento. O registo é guardado enquanto o seu Universal ID existir.
 - **Quando envia um PDF para outra pessoa assinar:** o PDF, o seu endereço de e-mail e o dela. Quando a pessoa o abre e assina, o servidor regista também as horas, o endereço IP, o país correspondente e o navegador (a página pública do certificado mostra apenas o país). Um pedido concluído — o PDF, a cópia assinada, estes dados e a página do certificado — é guardado durante 7 anos após a assinatura e depois eliminado; transfira uma cópia para a guardar mais tempo. Retirar um pedido ainda não assinado elimina-o de imediato.
-- **Quando guarda na nuvem:** a imagem da assinatura e os dados indicados acima.
 - **Quando tem sessão iniciada:** uma indicação de que a aplicação foi aberta, para que a página de atividade da sua conta esteja correta. Não diz nada sobre os seus documentos.
 - **Uma vez por dia, na primeira vez que abre a aplicação:** depois do seu primeiro clique ou da primeira tecla premida, soma-se um à contagem anónima de aberturas diárias. Contém apenas o nome da aplicação e o tipo de plataforma (web): nenhum identificador, nenhuma conta e nada sobre os seus documentos. Uma marca de «já contado hoje» fica neste dispositivo e nunca é enviada.
 
@@ -192,7 +190,7 @@ A aplicação não contém scripts de publicidade nem de rastreio de terceiros.
 
 ## O seu Universal ID
 
-O seu Universal ID é a conta única partilhada pelas aplicações UNI·SIM. Só precisa dele para as funcionalidades opcionais na nuvem. Assinar um PDF nunca o exige.`,
+O seu Universal ID é a conta única partilhada pelas aplicações UNI·SIM. Só precisa dele para duas coisas que envolvem outra pessoa: um certificado de assinatura que outros podem verificar e o envio de um documento para ser assinado. Assinar um PDF, e guardar ou transferir as suas assinaturas, nunca o exige.`,
   },
 ]
 

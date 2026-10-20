@@ -76,7 +76,7 @@ Seu arquivo original não é alterado. A cópia assinada é um arquivo novo.
 
 ## Funciona offline
 
-Como assinar não depende de nenhum servidor, você pode assinar um PDF com a internet desligada. Só os recursos opcionais precisam de conexão: salvar uma assinatura na nuvem, assinar no celular e adicionar um certificado de assinatura.
+Como assinar não depende de nenhum servidor, você pode assinar um PDF com a internet desligada. Só os recursos opcionais precisam de conexão: assinar no celular, adicionar um certificado de assinatura e enviar um documento para ser assinado.
 
 ## O que ele faz e o que não faz
 
@@ -159,7 +159,7 @@ O nome do arquivo é uma informação real. Um nome como "Carta de demissão.pdf
   {
     id: 'privacy-and-storage',
     title: 'Onde sua assinatura fica guardada',
-    summary: 'Salvar neste dispositivo, salvar na nuvem e o que sai do seu dispositivo.',
+    summary: 'Salvar neste dispositivo, salvar em um arquivo e o que sai do seu dispositivo.',
     group: 'Privacidade e segurança',
     body: `Você pode usar o Universal Signatures sem conta, e sem que nada do que você assina saia do seu dispositivo. Veja exatamente o que é guardado, e onde.
 
@@ -167,16 +167,15 @@ O nome do arquivo é uma informação real. Um nome como "Carta de demissão.pdf
 
 Você pode guardar até seis assinaturas neste navegador para reutilizá-las depois. Elas ficam no armazenamento do próprio navegador neste dispositivo, sem nenhuma conta. Limpar os dados do navegador para este site as apaga, e elas não acompanham você em outros dispositivos ou navegadores.
 
-## Salvas na nuvem
+## Salvas em um arquivo
 
-Se você estiver conectado com um Universal ID, também pode salvar uma assinatura na nuvem para tê-la nos seus outros dispositivos.
+Para usar suas assinaturas salvas em outro navegador ou em outro dispositivo, escolha **Salvar em um arquivo**. Você recebe um pequeno arquivo .json com a imagem de cada assinatura salva, o nome e o rótulo dela, se foi desenhada ou digitada, e a data. Abra-o com **Abrir um arquivo** no outro dispositivo, e as assinaturas são adicionadas às que já estão salvas lá. Nada é enviado: o arquivo vai para onde você o colocar.
 
-- O que é guardado: a imagem da assinatura, o nome que você informou, se ela foi desenhada ou digitada e em qual fonte, uma impressão digital SHA-256 da imagem e a data.
-- Quem pode ver: sua conta e os outros membros da sua organização do Universal ID, se você compartilhar uma.
-- Uma assinatura salva recebe um link de certificado. Qualquer pessoa com esse link pode ver o nome de quem assinou, o nome da organização, a data e a impressão digital. O link não mostra a imagem da assinatura.
-- Você pode remover uma assinatura salva a qualquer momento. Com a sessão iniciada, o painel de salvamento online lista todas as assinaturas salvas na sua conta, da mais recente para a mais antiga, então você pode remover uma mesmo que a tenha salvo em outro dia ou em outro dispositivo. Salvar assinaturas online é grátis com um Universal ID. Contas gratuitas têm um limite generoso: se algum dia você chegar a ele, remova uma assinatura de que não precisa mais. Se precisar de mais, fale com a gente em unisim.co.uk/support.
+- Você pode dar uma senha ao arquivo. Ele é então criptografado (AES-256) e só abre com essa senha. Uma senha esquecida não pode ser recuperada.
+- Sem senha, qualquer pessoa que pegar o arquivo pode ver suas assinaturas, então guarde-o em um lugar privado.
+- Abrir um arquivo nunca substitui o que já está salvo. Uma assinatura que já está lá não é adicionada duas vezes.
 
-O armazenamento na nuvem **não tem criptografia de ponta a ponta**. Os dados trafegam por uma conexão criptografada e são protegidos por regras de acesso, mas nossos sistemas conseguem tecnicamente lê-los. Se você preferir não fazer essa troca, salve neste dispositivo.
+Não existe nenhuma cópia online das suas assinaturas salvas. Se você estiver conectado com um Universal ID e mantiver nele uma assinatura principal (salva na página "Me" do UNI·SIM Hub), o app a mostra para que você possa assinar com ela.
 
 ## O que sai do seu dispositivo, e quando
 
@@ -184,7 +183,6 @@ O armazenamento na nuvem **não tem criptografia de ponta a ponta**. Os dados tr
 - **Quando você assina no celular:** a imagem da assinatura desenhada, repassada por um retransmissor ao vivo e não salva.
 - **Quando você adiciona um certificado de assinatura:** seu endereço de e-mail, o nome do arquivo e a impressão digital do documento. O registro é mantido enquanto o seu Universal ID existir.
 - **Quando você envia um PDF para outra pessoa assinar:** o PDF, o seu e-mail e o dela. Quando ela o abre e assina, o servidor também registra os horários, o endereço IP dela, o país correspondente e o navegador (a página pública do certificado mostra só o país). Uma solicitação concluída — o PDF, a cópia assinada, esses dados e a página do certificado — é mantida por 7 anos após a assinatura e depois excluída; baixe uma cópia para guardá-la por mais tempo. Retirar uma solicitação ainda não assinada a exclui na hora.
-- **Quando você salva na nuvem:** a imagem da assinatura e os dados listados acima.
 - **Quando você está conectado:** um aviso de que o app foi aberto, para que a página de atividade da sua conta fique correta. Ele não diz nada sobre seus documentos.
 - **Uma vez por dia, na primeira vez que você abre o app:** depois do seu primeiro clique ou tecla pressionada, soma-se um à contagem anônima de aberturas diárias. Ela contém só o nome do app e o tipo de plataforma (web): nenhum identificador, nenhuma conta e nada sobre os seus documentos. Uma marca de "já contado hoje" fica neste dispositivo e nunca é enviada.
 
@@ -192,7 +190,7 @@ O app não tem scripts de publicidade nem de rastreamento de terceiros.
 
 ## Seu Universal ID
 
-Seu Universal ID é a conta única compartilhada pelos apps da UNI·SIM. Você só precisa dele para os recursos opcionais na nuvem. Assinar um PDF nunca exige um.`,
+Seu Universal ID é a conta única compartilhada pelos apps da UNI·SIM. Você só precisa dele para duas coisas que envolvem outra pessoa: um certificado de assinatura que outras pessoas podem verificar e o envio de um documento para ser assinado. Assinar um PDF, e salvar ou transferir suas assinaturas, nunca exige um.`,
   },
 ]
 

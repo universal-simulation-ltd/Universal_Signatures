@@ -25,7 +25,7 @@ const create: Messages['create'] = {
   'labels_note': 'Steht unter deiner Unterschrift. Beim Unterschreiben eines PDFs kannst du wählen, ob es mit draufkommt.',
   // Privacy note: completes the SDK's German sentence, which addresses the reader as „Sie“.
   'privacy_subject': 'Ihre Unterschrift',
-  'privacy_except': 'eine in der Cloud speichern, auf Ihrem Handy unterschreiben oder ein Dokument zum Unterschreiben senden',
+  'privacy_except': 'auf Ihrem Handy unterschreiben oder ein Dokument zum Unterschreiben senden',
 
   // Draw pad
   'pad_aria': 'Unterschriftsfeld. Zeichne deine Unterschrift mit Maus, Finger oder Stift. Wenn du lieber die Tastatur verwendest, wähle „Tippen“.',

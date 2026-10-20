@@ -76,7 +76,7 @@ Il file originale non viene toccato. La copia firmata è un file nuovo.
 
 ## Funziona offline
 
-Poiché la firma non ha bisogno di alcun server, puoi firmare un PDF con la connessione a internet disattivata. Solo le funzioni facoltative richiedono una connessione: salvare una firma nel cloud, firmare sul telefono e aggiungere un certificato di firma.
+Poiché la firma non ha bisogno di alcun server, puoi firmare un PDF con la connessione a internet disattivata. Solo le funzioni facoltative richiedono una connessione: firmare sul telefono, aggiungere un certificato di firma e inviare un documento da firmare.
 
 ## Cosa fa e cosa non fa
 
@@ -159,7 +159,7 @@ Il nome del file è un’informazione reale. Un nome come «Lettera di dimission
   {
     id: 'privacy-and-storage',
     title: 'Dove viene conservata la tua firma',
-    summary: 'Salvare su questo dispositivo, salvare nel cloud e cosa lascia il tuo dispositivo.',
+    summary: 'Salvare su questo dispositivo, salvare in un file e cosa lascia il tuo dispositivo.',
     group: 'Privacy e sicurezza',
     body: `Puoi usare Universal Signatures senza un account e senza che nulla di ciò che firmi lasci il tuo dispositivo. Ecco esattamente cosa viene conservato, e dove.
 
@@ -167,16 +167,15 @@ Il nome del file è un’informazione reale. Un nome come «Lettera di dimission
 
 Puoi conservare fino a sei firme in questo browser per riutilizzarle in seguito. Sono salvate nello spazio di archiviazione del browser su questo dispositivo, senza alcun account. Cancellando i dati del browser per questo sito vengono eliminate, e non ti seguono su altri dispositivi o browser.
 
-## Salvate nel cloud
+## Salvate in un file
 
-Se hai effettuato l’accesso con un Universal ID, puoi anche salvare una firma nel cloud per averla sugli altri tuoi dispositivi.
+Per usare le tue firme salvate in un altro browser o su un altro dispositivo, scegli **Salva in un file**. Ottieni un piccolo file .json con l’immagine di ogni firma salvata, il suo nome e la sua etichetta, se è stata disegnata o digitata, e la data. Aprilo con **Apri un file** sull’altro dispositivo e le firme vengono aggiunte a quelle già salvate lì. Non viene caricato nulla: il file va dove lo metti tu.
 
-- Cosa viene salvato: l’immagine della firma, il nome inserito, se è stata disegnata o digitata e con quale carattere, un’impronta SHA-256 dell’immagine e la data.
-- Chi può vederla: il tuo account e gli altri membri della tua organizzazione Universal ID, se ne condividi una.
-- Una firma salvata riceve un link di certificato. Chiunque abbia quel link può vedere il nome del firmatario, il nome dell’organizzazione, la data e l’impronta. Il link non mostra l’immagine della firma.
-- Puoi rimuovere una firma salvata in qualsiasi momento. Quando hai effettuato l’accesso, il pannello di salvataggio online elenca tutte le firme salvate nel tuo account, dalla più recente, così puoi rimuoverne una anche se l’hai salvata in un altro giorno o su un altro dispositivo. Salvare le firme online è gratuito con un Universal ID. Gli account gratuiti hanno un limite generoso: se mai lo raggiungi, rimuovi una firma che non ti serve più. Se ti serve di più, faccelo sapere su unisim.co.uk/support.
+- Puoi proteggere il file con una password. In quel caso viene crittografato (AES-256) e si apre solo con quella password. Una password dimenticata non si può recuperare.
+- Senza password, chiunque ottenga il file può vedere le tue firme, quindi conservalo in un posto riservato.
+- Aprire un file non sostituisce mai ciò che è già salvato. Una firma già presente non viene aggiunta due volte.
 
-L’archiviazione nel cloud **non è crittografata end-to-end**. I dati viaggiano su una connessione crittografata e sono protetti da regole di accesso, ma i nostri sistemi possono tecnicamente leggerli. Se preferisci evitare questo compromesso, salva su questo dispositivo.
+Non esiste alcuna copia online delle tue firme salvate. Se hai effettuato l’accesso con un Universal ID e vi conservi una firma principale (salvata nella pagina «Me» dell’UNI·SIM Hub), l’app la mostra così puoi firmare con quella.
 
 ## Cosa lascia il tuo dispositivo, e quando
 
@@ -184,7 +183,6 @@ L’archiviazione nel cloud **non è crittografata end-to-end**. I dati viaggian
 - **Quando firmi sul telefono:** l’immagine della firma che hai disegnato, trasmessa da un inoltro in tempo reale e non salvata.
 - **Quando aggiungi un certificato di firma:** il tuo indirizzo email, il nome del file e l’impronta del documento. Il record viene conservato finché esiste il tuo Universal ID.
 - **Quando invii un PDF da firmare a qualcun altro:** il PDF, il tuo indirizzo email e il suo. Quando lo apre e lo firma, il server registra anche gli orari, il suo indirizzo IP, il paese corrispondente e il browser (la pagina pubblica del certificato mostra solo il paese). Una richiesta completata — il PDF, la copia firmata, questi dati e la pagina del certificato — viene conservata per 7 anni dalla firma e poi eliminata; scarica una copia per conservarla più a lungo. Ritirare una richiesta non ancora firmata la elimina subito.
-- **Quando salvi nel cloud:** l’immagine della firma e i dati elencati sopra.
 - **Quando hai effettuato l’accesso:** una notifica che l’app è stata aperta, perché la pagina delle attività del tuo account sia corretta. Non dice nulla dei tuoi documenti.
 - **Una volta al giorno, la prima volta che apri l’app:** dopo il tuo primo clic o tasto premuto, si aggiunge uno al conteggio anonimo delle aperture quotidiane. Contiene solo il nome dell’app e il tipo di piattaforma (web): nessun identificativo, nessun account e niente sui tuoi documenti. Un segno «già contato oggi» resta su questo dispositivo e non viene mai inviato.
 
@@ -192,7 +190,7 @@ L’app non contiene script pubblicitari né di tracciamento di terze parti.
 
 ## Il tuo Universal ID
 
-Il tuo Universal ID è l’unico account condiviso tra le app UNI·SIM. Ti serve solo per le funzioni cloud facoltative. Firmare un PDF non lo richiede mai.`,
+Il tuo Universal ID è l’unico account condiviso tra le app UNI·SIM. Ti serve solo per due cose che coinvolgono qualcun altro: un certificato di firma che altri possono verificare e l’invio di un documento da firmare. Firmare un PDF, e salvare o spostare le tue firme, non lo richiede mai.`,
   },
 ]
 

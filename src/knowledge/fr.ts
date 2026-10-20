@@ -76,7 +76,7 @@ Votre fichier d’origine n’est pas modifié. La copie signée est un nouveau 
 
 ## Cela fonctionne hors ligne
 
-Comme la signature n’a besoin d’aucun serveur, vous pouvez signer un PDF avec votre connexion internet coupée. Seules les options facultatives nécessitent une connexion : l’enregistrement d’une signature dans le cloud, la signature sur téléphone et l’ajout d’un certificat de signature.
+Comme la signature n’a besoin d’aucun serveur, vous pouvez signer un PDF avec votre connexion internet coupée. Seules les options facultatives nécessitent une connexion : la signature sur téléphone, l’ajout d’un certificat de signature et l’envoi d’un document à signer.
 
 ## Ce que l’application fait et ne fait pas
 
@@ -159,7 +159,7 @@ Le nom du fichier est une vraie information. Un nom comme « Lettre de démissio
   {
     id: 'privacy-and-storage',
     title: 'Où votre signature est conservée',
-    summary: 'Enregistrer sur cet appareil, enregistrer dans le cloud, et ce qui quitte votre appareil.',
+    summary: 'Enregistrer sur cet appareil, enregistrer dans un fichier, et ce qui quitte votre appareil.',
     group: 'Confidentialité et sécurité',
     body: `Vous pouvez utiliser Universal Signatures sans compte, et sans que rien de ce que vous signez ne quitte votre appareil. Voici précisément ce qui est conservé, et où.
 
@@ -167,16 +167,15 @@ Le nom du fichier est une vraie information. Un nom comme « Lettre de démissio
 
 Vous pouvez conserver jusqu’à six signatures dans ce navigateur pour les réutiliser plus tard. Elles sont stockées dans l’espace de stockage de votre navigateur sur cet appareil, sans aucun compte. Effacer les données de navigation de ce site les supprime, et elles ne vous suivent pas sur d’autres appareils ou navigateurs.
 
-## Enregistrées dans le cloud
+## Enregistrées dans un fichier
 
-Si vous êtes connecté avec un Universal ID, vous pouvez aussi enregistrer une signature dans le cloud pour la retrouver sur vos autres appareils.
+Pour utiliser vos signatures enregistrées dans un autre navigateur ou sur un autre appareil, choisissez **Enregistrer dans un fichier**. Vous obtenez un petit fichier .json contenant l’image de chaque signature enregistrée, son nom et son libellé, si elle a été dessinée ou tapée, et la date. Ouvrez-le avec **Ouvrir un fichier** sur l’autre appareil : les signatures s’ajoutent à celles déjà enregistrées là-bas. Rien n’est envoyé en ligne : le fichier va là où vous le placez.
 
-- Ce qui est stocké : l’image de la signature, le nom saisi, si elle a été dessinée ou tapée et dans quelle police, une empreinte SHA-256 de l’image, et la date.
-- Qui peut la voir : votre compte, et les autres membres de votre organisation Universal ID si vous en partagez une.
-- Une signature enregistrée reçoit un lien de certificat. Toute personne disposant de ce lien peut voir le nom du signataire, le nom de l’organisation, la date et l’empreinte. Le lien n’affiche pas l’image de la signature.
-- Vous pouvez supprimer une signature enregistrée à tout moment. Une fois connecté, le panneau d’enregistrement en ligne affiche toutes les signatures conservées pour votre compte, de la plus récente à la plus ancienne : vous pouvez donc en supprimer une même si vous l’avez enregistrée un autre jour ou sur un autre appareil. Conserver vos signatures en ligne est gratuit avec un Universal ID. Les comptes gratuits disposent d’une limite généreuse : si vous l’atteignez un jour, supprimez une signature dont vous n’avez plus besoin. S’il vous en faut davantage, dites-le-nous sur unisim.co.uk/support.
+- Vous pouvez protéger le fichier par un mot de passe. Il est alors chiffré (AES-256) et ne s’ouvre qu’avec ce mot de passe. Un mot de passe oublié ne peut pas être récupéré.
+- Sans mot de passe, toute personne qui obtient le fichier peut voir vos signatures : conservez-le donc dans un endroit privé.
+- Ouvrir un fichier ne remplace jamais ce qui est déjà enregistré. Une signature déjà présente n’est pas ajoutée deux fois.
 
-Le stockage dans le cloud **n’est pas chiffré de bout en bout**. Les données circulent par une connexion chiffrée et sont protégées par des règles d’accès, mais nos systèmes peuvent techniquement les lire. Si vous préférez éviter ce compromis, enregistrez plutôt sur cet appareil.
+Il n’existe aucune copie en ligne de vos signatures enregistrées. Si vous êtes connecté avec un Universal ID et y conservez une signature principale (enregistrée sur la page « Me » du UNI·SIM Hub), l’application l’affiche pour que vous puissiez signer avec.
 
 ## Ce qui quitte votre appareil, et quand
 
@@ -184,7 +183,6 @@ Le stockage dans le cloud **n’est pas chiffré de bout en bout**. Les données
 - **Quand vous signez sur votre téléphone :** l’image de la signature dessinée, transmise par un relais en direct et non enregistrée.
 - **Quand vous ajoutez un certificat de signature :** votre adresse e-mail, le nom du fichier et l’empreinte du document. L’enregistrement est conservé tant que votre Universal ID existe.
 - **Quand vous envoyez un PDF à signer à quelqu’un d’autre :** le PDF, votre adresse e-mail et la sienne. Quand cette personne l’ouvre et le signe, le serveur enregistre aussi les heures, son adresse IP, le pays correspondant et son navigateur (la page de certificat publique n’affiche que le pays). Une demande terminée — le PDF, la copie signée, ces informations et sa page de certificat — est conservée 7 ans après la signature, puis supprimée ; téléchargez une copie pour la garder plus longtemps. Retirer une demande non signée la supprime immédiatement.
-- **Quand vous enregistrez dans le cloud :** l’image de la signature et les informations listées ci-dessus.
 - **Quand vous êtes connecté :** une indication que l’application a été ouverte, pour que la page d’activité de votre compte soit exacte. Elle ne dit rien de vos documents.
 - **Une fois par jour, la première fois que vous ouvrez l’application :** après votre premier clic ou votre première frappe au clavier, un est ajouté au décompte anonyme des ouvertures quotidiennes. Il ne contient que le nom de l’application et le type de plateforme (web) : aucun identifiant, aucun compte et rien sur vos documents. Une marque « déjà compté aujourd’hui » reste sur cet appareil et n’est jamais envoyée.
 
@@ -192,7 +190,7 @@ L’application ne contient aucun script publicitaire ni de suivi tiers.
 
 ## Votre Universal ID
 
-Votre Universal ID est le compte unique partagé par les applications UNI·SIM. Vous n’en avez besoin que pour les fonctions cloud facultatives. Signer un PDF n’en demande jamais.`,
+Votre Universal ID est le compte unique partagé par les applications UNI·SIM. Vous n’en avez besoin que pour deux choses qui impliquent quelqu’un d’autre : un certificat de signature que d’autres peuvent vérifier, et l’envoi d’un document à signer. Signer un PDF, ou enregistrer et déplacer vos signatures, n’en demande jamais.`,
   },
 ]
 

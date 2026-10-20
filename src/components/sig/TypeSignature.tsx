@@ -56,7 +56,7 @@ export default function TypeSignature() {
   }, [signerName, font.family])
 
   // Rasterise the typed signature whenever the name or font changes (once the
-  // web font is ready), so the cloud save / PDF embed always have a PNG.
+  // web font is ready), so saving and the PDF embed always have a PNG.
   useEffect(() => {
     let cancelled = false
     if (!signerName.trim()) { setTyped(null); return }

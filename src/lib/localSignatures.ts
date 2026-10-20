@@ -1,16 +1,18 @@
 import type { SignatureMode } from './types'
 
 // ── Saved-on-this-device signatures ──────────────────────────────────────────
-// A free, no-account counterpart to the cloud save: guests (and anyone) can keep
-// a small set of signatures in this browser's localStorage and reuse them later
-// without a Universal ID. The image is the same transparent PNG data URL used
+// Free, no account: anyone can keep a small set of signatures in this browser's
+// localStorage and reuse them later. To carry them to another browser or
+// device, Save to a file / Open a file (lib/signatureFile.ts) — that replaced
+// the old cloud save against a Universal ID (2026-10-20). The image is the same transparent PNG data URL used
 // for signing, so a reused local signature applies to a PDF exactly like a fresh
 // one. Nothing leaves the device.
 
 const KEY = 'unisim.signatures.local.v1'
 // Data URLs are heavy (a drawn PNG is tens of KB), and localStorage is ~5 MB, so
 // keep the list short — newest first, oldest dropped past the cap.
-const MAX = 6
+export const MAX_LOCAL_SIGNATURES = 6
+const MAX = MAX_LOCAL_SIGNATURES
 
 export interface LocalSignature {
   id: string
@@ -98,4 +100,45 @@ export function renameLocalSignature(id: string, label: string): LocalSignature[
 
 export function removeLocalSignature(id: string): LocalSignature[] {
   return persist(loadLocalSignatures().filter((s) => s.id !== id))
+}
+
+export interface ImportLocalInput {
+  signerName: string | null
+  label: string | null
+  style: SignatureMode
+  font: string | null
+  imageDataUrl: string
+  createdAt: string
+}
+
+/**
+ * Adds signatures opened from a file. A copy: each gets a fresh id, nothing
+ * already here is replaced or reordered, and one whose image is already saved
+ * is left out. New ones go after the existing ones; whatever does not fit
+ * under the cap is reported, not saved.
+ */
+export function importLocalSignatures(items: ImportLocalInput[]): {
+  list: LocalSignature[]
+  added: number
+  duplicates: number
+  didNotFit: number
+} {
+  const existing = loadLocalSignatures()
+  const have = new Set(existing.map((s) => s.imageDataUrl))
+  const fresh: LocalSignature[] = []
+  let duplicates = 0
+  for (const it of items) {
+    if (have.has(it.imageDataUrl)) { duplicates++; continue }
+    have.add(it.imageDataUrl)
+    fresh.push({ ...it, id: makeId() })
+  }
+  const room = Math.max(0, MAX - existing.length)
+  const taken = fresh.slice(0, room)
+  if (taken.length === 0) return { list: existing, added: 0, duplicates, didNotFit: fresh.length }
+  persist([...existing, ...taken])
+  // Read back: a full storage quota can drop entries persist() tried to keep.
+  const list = loadLocalSignatures()
+  const ids = new Set(list.map((s) => s.id))
+  const added = taken.filter((s) => ids.has(s.id)).length
+  return { list, added, duplicates, didNotFit: fresh.length - added }
 }

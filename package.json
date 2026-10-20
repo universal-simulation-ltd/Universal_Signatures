@@ -11,11 +11,12 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "credits": "node ../scripts/gen-credits.mjs . --repo https://github.com/universal-simulation-ltd/Universal_Signatures",
-    "test:modal": "node e2e/modal-and-input-zoom.e2e.mjs"
+    "test:modal": "node e2e/modal-and-input-zoom.e2e.mjs",
+    "test:file": "node e2e/signature-file.e2e.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
-    "@unisim/sdk": "^0.191.0",
+    "@unisim/sdk": "^0.199.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.10.38",
     "qrcode": "^1.5.4",

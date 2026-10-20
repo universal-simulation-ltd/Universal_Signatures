@@ -24,7 +24,7 @@ const create: Messages['create'] = {
   'labels_preview_empty': 'Ajoutez votre signature ci-dessus pour voir l’aperçu.',
   'labels_note': 'Apparaît sous votre signature. Lorsque vous signez un PDF, vous pouvez choisir de l’inclure ou non.',
   'privacy_subject': 'Votre signature',
-  'privacy_except': 'enregistrer une signature dans le cloud, signer sur votre téléphone ou envoyer un document à signer',
+  'privacy_except': 'signer sur votre téléphone ou envoyer un document à signer',
 
   // Draw pad
   'pad_aria': 'Zone de signature. Dessinez votre signature à la souris, au doigt ou au stylet. Pour utiliser le clavier, choisissez Taper.',

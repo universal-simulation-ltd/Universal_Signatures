@@ -6,7 +6,7 @@ const app: Messages['app'] = {
   'github_aria': 'Universal Signatures auf GitHub',
   // The SDK's German privacy sentence addresses the reader as „Sie“, so these two match it.
   'about_subject': 'Ihre Unterschrift',
-  'about_except': 'eine in der Cloud speichern, auf Ihrem Handy unterschreiben oder ein Dokument zum Unterschreiben senden',
+  'about_except': 'auf Ihrem Handy unterschreiben oder ein Dokument zum Unterschreiben senden',
   'pref_opens_on': 'Öffnet mit',
 }
 
