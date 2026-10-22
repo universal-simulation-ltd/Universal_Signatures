@@ -91,6 +91,8 @@ const sign: Messages['sign'] = {
 
   // ── Stamped into the signed PDF ──────────────────────────────────────────
   'qr_caption': 'Scansiona per verificare · Universal Signatures',
+  'attest_heading': 'Firma inviata da un telefono',
+  'attest_line': 'Firmato da {email} tramite Universal ID · {time}',
 }
 
 export default sign

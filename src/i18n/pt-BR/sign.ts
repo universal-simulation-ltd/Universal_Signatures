@@ -90,5 +90,7 @@ const sign: Messages['sign'] = {
 
   // ── Stamped into the signed PDF ──────────────────────────────────────────
   'qr_caption': 'Escaneie para verificar · Universal Signatures',
+  'attest_heading': 'Assinatura enviada de um celular',
+  'attest_line': 'Assinado por {email} via Universal ID · {time}',
 }
 export default sign

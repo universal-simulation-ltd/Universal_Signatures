@@ -57,6 +57,7 @@ const create: Messages['create'] = {
   'phone_received_alt': 'Firma ricevuta dal telefono',
   'phone_received': 'Firma ricevuta ✓',
   'phone_received_hint': 'Aggiungi qui sotto il nome, la data o l’ora, poi usala per firmare un PDF.',
+  'phone_attested_check': 'Verifica',
   'phone_sign_again': 'Firma di nuovo sul telefono',
   'phone_expired': 'Questo codice è scaduto',
   'phone_codes_last_one': 'I codici durano {count} minuto. Ottienine uno nuovo, poi scansionalo con il telefono.',

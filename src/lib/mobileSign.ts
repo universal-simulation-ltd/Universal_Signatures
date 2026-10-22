@@ -91,6 +91,11 @@ export interface MobileSignPayload {
   signature?: string
   /** Echoed back in the desktop's `result`, so the phone matches the reply to its send. */
   nonce?: string
+  /**
+   * UNI·SIM Hub only (platform 0306): a phone_sign_attestations cert id, checked
+   * by lib/phoneAttest.ts before anything is made of it.
+   */
+  attest?: string
 }
 
 /**

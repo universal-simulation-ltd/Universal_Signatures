@@ -4,6 +4,8 @@ import { dataUrlToBytes } from './signature'
 import { ALL_PAGES, INITIAL_PAGES } from './types'
 import { getT } from '../i18n'
 import { en } from '../i18n/en'
+import type { PhoneAttestation } from './phoneAttest'
+import { printPhoneAttest } from './phoneAttestPdf'
 
 export type Anchor =
   | 'top-left' | 'top-center' | 'top-right'
@@ -48,6 +50,12 @@ export interface PlaceOpts {
   // pageIndex / pos / widthPct for the signature itself; the QR goes beside
   // the last one. Not combined with INITIAL_PAGES.
   placements?: { pageIndex: number; pos: PlacePoint; widthPct: number }[]
+  // Scan to sign (platform 0306): the signature came from the UNI·SIM Hub app
+  // and its attestation checked out (lib/phoneAttest.ts). Printed on the
+  // certificate page — so only together with `audit` — with a QR to the hub's
+  // /check page (`qrPng`), and only if `signature` is still the very image the
+  // attestation is about (lib/phoneAttestPdf.ts re-checks).
+  phoneAttest?: { attestation: PhoneAttestation; signature: string | null; qrPng?: string }
 }
 
 // Thrown for a password-protected PDF, so the UI can say so rather than
@@ -261,7 +269,15 @@ export async function signPdf(pdfBytes: ArrayBuffer, sigPng: string, opts: Place
   // reads as an appendix rather than interrupting the document. `rgb` is
   // passed in because the SDK holds no runtime dependency on pdf-lib.
   if (opts.audit) {
-    await appendSigningAuditPage({ pdf: doc, fields: opts.audit, rgb, qrPng: opts.qrPng })
+    const auditPage = await appendSigningAuditPage({ pdf: doc, fields: opts.audit, rgb, qrPng: opts.qrPng })
+    if (opts.phoneAttest) {
+      const t = getT()
+      await printPhoneAttest(doc, auditPage, {
+        ...opts.phoneAttest,
+        texts: (vars) => ({ heading: t('sign.attest_heading'), line: t('sign.attest_line', vars) }),
+        english: { heading: en.sign.attest_heading, line: en.sign.attest_line },
+      })
+    }
   }
 
   return doc.save()

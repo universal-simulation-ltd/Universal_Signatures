@@ -80,6 +80,16 @@ each other.
   realtime channel and **no database rows are written** — which is why this
   works identically whether or not you have an account. That is stated at the
   top of [`src/lib/mobileSign.ts`](src/lib/mobileSign.ts), and it is checkable.
+- **Signing from the UNI·SIM Hub phone app** instead of the browser: if the
+  person signing is logged into a Universal ID whose email is confirmed, the
+  Hub app records on our server that this account sent this signature image
+  (a fingerprint of it, never the image, and a fingerprint of the one-time
+  token), and sends that record's id along with the image. This computer then
+  looks the id up — sending nothing but the id — and, only if the record
+  matches the token and the image it actually received, shows "Signed by
+  <their email> via Universal ID" and prints it, with a QR to check it, on the
+  certificate page. The Hub app's own privacy notice covers the record; the
+  code here is [`src/lib/phoneAttest.ts`](src/lib/phoneAttest.ts).
 
 ### 2. "Create a verifiable record" (the certificate page)
 

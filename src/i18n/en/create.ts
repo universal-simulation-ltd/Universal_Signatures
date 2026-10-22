@@ -57,6 +57,7 @@ export default {
   'phone_received_alt': 'Signature received from your phone',
   'phone_received': 'Signature received ✓',
   'phone_received_hint': 'Add your name, the date or the time below, then use it to sign a PDF.',
+  'phone_attested_check': 'Check', // link after the signed-by line: opens the public check of that signature
   'phone_sign_again': 'Sign again on phone',
   'phone_expired': 'This code has expired',
   'phone_codes_last_one': 'Codes last {count} minute. Get a new one, then scan it with your phone.',

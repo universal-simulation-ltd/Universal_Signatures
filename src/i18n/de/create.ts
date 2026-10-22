@@ -57,6 +57,7 @@ const create: Messages['create'] = {
   'phone_received_alt': 'Von deinem Handy empfangene Unterschrift',
   'phone_received': 'Unterschrift empfangen ✓',
   'phone_received_hint': 'Füge unten deinen Namen, das Datum oder die Uhrzeit hinzu und unterschreibe dann damit ein PDF.',
+  'phone_attested_check': 'Prüfen',
   'phone_sign_again': 'Erneut auf dem Handy unterschreiben',
   'phone_expired': 'Dieser Code ist abgelaufen',
   'phone_codes_last_one': 'Codes sind {count} Minute gültig. Hol dir einen neuen und scanne ihn dann mit deinem Handy.',

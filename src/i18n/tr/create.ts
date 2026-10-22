@@ -57,6 +57,7 @@ const create: Messages['create'] = {
   'phone_received_alt': 'Telefonunuzdan alınan imza',
   'phone_received': 'İmza alındı ✓',
   'phone_received_hint': 'Aşağıdan adınızı, tarihi veya saati ekleyin, ardından bir PDF’i imzalamak için kullanın.',
+  'phone_attested_check': 'Doğrula',
   'phone_sign_again': 'Telefonda yeniden imzala',
   'phone_expired': 'Bu kodun süresi doldu',
   'phone_codes_last_one': 'Kodlar {count} dakika geçerlidir. Yeni bir kod alın, ardından telefonunuzla tarayın.',

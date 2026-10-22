@@ -12,7 +12,9 @@
     "typecheck": "tsc -b --noEmit",
     "credits": "node ../scripts/gen-credits.mjs . --repo https://github.com/universal-simulation-ltd/Universal_Signatures",
     "test:modal": "node e2e/modal-and-input-zoom.e2e.mjs",
-    "test:file": "node e2e/signature-file.e2e.mjs"
+    "test:file": "node e2e/signature-file.e2e.mjs",
+    "test:attest": "node --experimental-strip-types --test scripts/phoneAttest.test.mjs",
+    "test:phone-attest": "node e2e/phone-attest.e2e.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

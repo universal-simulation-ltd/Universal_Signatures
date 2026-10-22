@@ -91,6 +91,8 @@ const sign: Messages['sign'] = {
 
   // Stamped into the signed PDF (WinAnsi only: no ı, ğ, ş, İ — falls back to English otherwise)
   'qr_caption': 'Kontrol etmek için okutun · Universal Signatures',
+  'attest_heading': 'Telefondan gönderilen imza',
+  'attest_line': '{email} tarafından Universal ID ile imzalandı · {time}',
 }
 
 export default sign

@@ -5,6 +5,7 @@ import type { Anchor, PlacePoint } from '../../lib/pdf'
 import { sha256Bytes, trimToInk } from '../../lib/signature'
 import { ALL_PAGES, INITIAL_PAGES } from '../../lib/types'
 import { recordSignedCopyHash, recordSigningEvent } from '../../lib/cloud'
+import type { PhoneAttestation } from '../../lib/phoneAttest'
 import { useT, type MessageKey } from '../../i18n'
 import DropWatermark from './DropWatermark'
 import { useCoarsePointer } from '../../lib/useCoarsePointer'
@@ -164,6 +165,9 @@ export default function ApplyToPdf() {
     setVerifyUrl(null)
     setCopyRecorded(false)
     setSavedAs(null)
+    // Where the signature came from, as it is at this moment: your main
+    // signature's id, or a checked Scan to sign attestation (sigStore DrawnMeta).
+    const meta = useSigStore.getState().currentMeta()
     try {
       const buf = await file.arrayBuffer()
 
@@ -184,6 +188,8 @@ export default function ApplyToPdf() {
           signerEmail: user.email,
           originalFilename: file.name,
           documentHash,
+          // The server keeps it only if it is the signer's own (platform 0306).
+          signatureId: meta?.signatureId ?? null,
         })
         if (!res.ok || !res.certId) {
           setError(res.error ?? t('sign.error_record'))
@@ -212,10 +218,21 @@ export default function ApplyToPdf() {
         }
       }
 
+      // Signed on a phone through the UNI·SIM Hub app by a confirmed Universal
+      // ID: the certificate page says so, with a QR to check it. The printer
+      // re-checks it against the image in use; anything off and the page is
+      // as before.
+      let phoneAttest: { attestation: PhoneAttestation; signature: string | null; qrPng?: string } | undefined
+      if (audit && meta?.attest) {
+        let attestQr: string | undefined
+        try { attestQr = await (await loadQr()).makeQrPng(meta.attest.checkUrl) } catch { attestQr = undefined }
+        phoneAttest = { attestation: meta.attest, signature: baseImage, qrPng: attestQr }
+      }
+
       const { signPdf } = await loadPdf()
       const sigPng = stampImage ?? await trimToInk(currentImage)
       const bytes = await signPdf(buf, sigPng, {
-        pageIndex, anchor, widthPct, pos: pos ?? undefined, qrPng, audit,
+        pageIndex, anchor, widthPct, pos: pos ?? undefined, qrPng, audit, phoneAttest,
         initials: initialling && initials.png
           ? { png: initials.png, anchor: initials.anchor, widthPct: initials.widthPct, includeLast: initials.includeLast }
           : undefined,

@@ -4,7 +4,8 @@ import { useT } from '../../i18n'
 
 // "Your main signature" — the one kept on your Universal ID (platform 0224),
 // saved here or on the hub's Me page. One tap loads it into the studio as the
-// drawn signature, ready to sign a PDF with on any device.
+// drawn signature, ready to sign a PDF with on any device. Its row id goes with
+// it, so a signing certificate made with it names it (signing_events.signature_id).
 export default function MainSignatureBar({ main }: { main: MainSignature }) {
   const t = useT()
   const setMode = useSigStore((s) => s.setMode)
@@ -23,7 +24,7 @@ export default function MainSignatureBar({ main }: { main: MainSignature }) {
       </span>
       <button
         type="button"
-        onClick={() => { setMode('draw'); setDrawn(main.image_data) }}
+        onClick={() => { setMode('draw'); setDrawn(main.image_data, { signatureId: main.id }) }}
         disabled={inUse}
         className="shrink-0 rounded-md bg-orange-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-800 disabled:bg-emerald-600 disabled:opacity-100"
       >

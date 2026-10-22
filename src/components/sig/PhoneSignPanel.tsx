@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { QrLightbox, UnisimQr, useUniversal } from '@unisim/sdk'
+import { QrLightbox, UnisimQr, useLanguage, useUniversal } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import { useT } from '../../i18n'
 import {
@@ -14,6 +14,7 @@ import {
   type MobileSignPayload,
   type MobileSignResult,
 } from '../../lib/mobileSign'
+import { formatAttestLocal, verifyPhoneAttestation } from '../../lib/phoneAttest'
 
 // The "Sign on phone" tab of Create your signature. Shows a QR + PIN; the phone
 // opens the URL, draws, and broadcasts the image back over a Supabase Realtime
@@ -23,8 +24,12 @@ import {
 export default function PhoneSignPanel() {
   const t = useT()
   const { supabase } = useUniversal()
+  const { language } = useLanguage()
   const setDrawn = useSigStore((s) => s.setDrawn)
+  const addDrawnMeta = useSigStore((s) => s.addDrawnMeta)
   const drawnDataUrl = useSigStore((s) => s.drawnDataUrl)
+  // A checked Scan to sign attestation for the image on show (lib/phoneAttest.ts).
+  const attest = useSigStore((s) => (s.drawnMeta && s.drawnMeta.url === s.drawnDataUrl ? s.drawnMeta.attest : undefined))
 
   const [token, setToken] = useState(randomToken)
   const [pin, setPin] = useState(randomPin)
@@ -96,18 +101,31 @@ export default function PhoneSignPanel() {
           return
         }
         const signature = payload.signature
+        // Sent from the UNI·SIM Hub app by a confirmed Universal ID (platform
+        // 0306)? Only believed once the record matches this channel and this
+        // image; until then — or if it never does — nothing extra is shown.
+        const verified = payload.attest === undefined
+          ? Promise.resolve(null)
+          : verifyPhoneAttestation((fn, args) => supabase.rpc(fn, args), {
+              attest: payload.attest, channelToken: token, signature, app: 'signatures',
+            })
         // Reply first: flipping the status closes this channel.
-        void reply({ nonce, ok: true }).finally(() => {
-          setReplaced(false)
-          setStatus('received')
-          // Load it as the active (drawn) signature but stay on this panel so
-          // the name/date/time + alignment options below still apply to it.
-          setDrawn(signature)
-        })
+        void reply({ nonce, ok: true })
+          .finally(() => {
+            setReplaced(false)
+            setStatus('received')
+            // Load it as the active (drawn) signature but stay on this panel so
+            // the name/date/time + alignment options below still apply to it.
+            setDrawn(signature)
+          })
+          // After setDrawn: the attestation is attached to THIS image, and only
+          // while it is still the one in use.
+          .then(() => verified, () => verified)
+          .then((a) => { if (a) addDrawnMeta(signature, { attest: a }) })
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [canRealtime, supabase, token, status, expired, setDrawn])
+  }, [canRealtime, supabase, token, status, expired, setDrawn, addDrawnMeta])
 
   // The received signature was cleared or replaced from elsewhere (say, a saved
   // one was loaded): go back to waiting with a fresh code rather than showing a
@@ -137,6 +155,14 @@ export default function PhoneSignPanel() {
       <div className="flex flex-col items-center gap-3 rounded-lg border-2 border-dashed border-emerald-300 bg-emerald-50/40 p-4 text-center">
         <img src={drawnDataUrl} alt={t('create.phone_received_alt')} className="h-32 w-full rounded-lg bg-white object-contain p-2 ring-1 ring-slate-200" />
         <p className="text-xs font-semibold text-emerald-700">{t('create.phone_received')}</p>
+        {attest && (
+          <p className="text-[11px] text-emerald-800" data-testid="phone-attested">
+            {t('sign.attest_line', { email: attest.signerEmail, time: formatAttestLocal(attest.signedAt, language) })}{' '}
+            <a href={attest.checkUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-orange-700 hover:underline">
+              {t('create.phone_attested_check')}
+            </a>
+          </p>
+        )}
         <p className="text-[11px] text-slate-500">{t('create.phone_received_hint')}</p>
         <button
           type="button"

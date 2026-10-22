@@ -91,4 +91,6 @@ export default {
 
   // ── Stamped into the signed PDF ──────────────────────────────────────────
   'qr_caption': 'Scan to verify · Universal Signatures', // tiny caption under the verification QR; Latin letters only render (Western European set)
+  'attest_heading': 'Signature sent from a phone', // certificate page: heading over the line below, when the signature came from the UNI·SIM Hub phone app (printed in capitals)
+  'attest_line': 'Signed by {email} via Universal ID · {time}', // certificate page and the received-from-phone panel; {email} is the signer's confirmed Universal ID email, {time} when our server recorded it. Universal ID is a product name: keep it
 }
