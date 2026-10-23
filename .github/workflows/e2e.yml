@@ -1,0 +1,104 @@
+# The browser specs in `e2e/` (the modal and input zoom, the signature file,
+# Scan to sign's signed-by line), on every push and pull request, against the
+# PRODUCTION build served by `vite preview` on :5186. phone-attest talks to the
+# real Realtime relay with the app's public anon key, as the page itself does
+# (no secret). What is left out, and why, is SKIP at the top of
+# e2e/run-all.mjs; a spec that fails, then passes on its one retry, is
+# reported as FLAKY and does not turn the run red.
+#
+# Playwright is not a dependency of the app (locally the specs borrow a
+# sibling repo's copy), so it is installed here with --no-save at the version
+# below.
+#
+# The jobs run in Playwright's own image for the version below, which already
+# holds the browsers AND their system libraries: installing the libraries with
+# `playwright install-deps` on a bare runner took 9 to 38 minutes of apt per
+# job (Universal PDF, measured 2026-10-22), where pulling the image takes about
+# one. The image is the browser cache. Keep its tag and PLAYWRIGHT_VERSION the
+# same as each other, and as the Playwright version npm installs.
+#
+# Free: the repo is public, so ubuntu-latest minutes cost nothing.
+
+name: e2e
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+# A newer push to a branch or PR cancels the older run, but not on main: main
+# moves often (several sessions push to it), and every commit there should
+# get its own result.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+env:
+  PLAYWRIGHT_VERSION: '1.62.1'
+  E2E_BASE_URL: 'http://localhost:5186/signatures/'
+  # Relative to the checkout: inside a container `github.workspace` is the
+  # host's path, not the one the job sees.
+  E2E_RESULTS: e2e-results
+
+jobs:
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      # --ipc=host: Chromium runs out of shared memory in a container
+      # without it. --user 1001: the runner's own user (Playwright's advice),
+      # so the checkout is writable and Firefox is not started as root.
+      options: --ipc=host --user 1001
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Playwright ${{ env.PLAYWRIGHT_VERSION }}
+        run: npm install --no-save --no-audit --no-fund "playwright@$PLAYWRIGHT_VERSION"
+
+      # The app has its production Supabase URL and anon key built in, so no
+      # .env.local is needed.
+      - run: npm run build
+
+      - name: Serve the build
+        run: |
+          # --host: every address, IPv4 and IPv6, whichever "localhost" is.
+          nohup npx vite preview --host --port 5186 --strictPort > preview.log 2>&1 &
+          node -e '
+            const until = Date.now() + 60000
+            const poll = () => fetch(process.env.E2E_BASE_URL).then(
+              (r) => (r.ok ? process.exit(0) : retry(`HTTP ${r.status}`)), (e) => retry(e.cause ?? e))
+            const retry = (why) => {
+              if (Date.now() > until) { console.error("preview server never answered:", why); process.exit(1) }
+              setTimeout(poll, 1000)
+            }
+            poll()
+          ' || { cat preview.log; exit 1; }
+
+      - name: Run the specs
+        run: node e2e/run-all.mjs --jobs 1
+
+      - name: Keep the logs of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-logs
+          path: |
+            e2e-results/
+            preview.log
+          retention-days: 14
