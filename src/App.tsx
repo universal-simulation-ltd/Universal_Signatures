@@ -6,6 +6,7 @@ import { DefaultViewSelect, UniversalAppsNavBar, UpdateNotice } from '@unisim/sd
 import credits from './generated/credits.json'
 import ProductLogo from './components/Header/ProductLogo'
 import SignatureStudio from './components/sig/SignatureStudio'
+import { EMBEDDED } from './lib/embed'
 import { CONTAINER } from './lib/layout'
 import SignMobilePage from './components/sig/SignMobilePage'
 import VerifyPage from './components/sig/VerifyPage'
@@ -50,6 +51,17 @@ export default function App() {
 
   // The phone signing page is a standalone full-screen view — no navbar/footer.
   if (r.name === 'signMobile') return <SignMobilePage token={r.token} expiresAt={r.expiresAt} />
+  // Framed by another Universal App (lib/embed.ts): just the studio — the
+  // framing app has its own bar, and a second one inside it only confuses.
+  if (EMBEDDED && r.name === 'studio') {
+    return (
+      <div className="min-h-screen bg-slate-100">
+        <main className={`${CONTAINER} py-4`}>
+          <SignatureStudio />
+        </main>
+      </div>
+    )
+  }
   return (
     <div className="flex flex-col min-h-screen bg-slate-100">
       <UniversalAppsNavBar

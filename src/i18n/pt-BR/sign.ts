@@ -69,6 +69,7 @@ const sign: Messages['sign'] = {
   'button_needs_signature': 'Crie uma assinatura primeiro',
   'button_needs_initials': 'Adicione suas iniciais primeiro',
   'button_sign': 'Assinar e baixar o PDF',
+  'button_sign_embedded': 'Assinar',
   'signed_as': '✓ Assinado — baixado como {name}',
   'record_created': '✓ Registro verificável criado',
   'record_qr_links_here': 'O PDF assinado traz um QR com link para cá:',

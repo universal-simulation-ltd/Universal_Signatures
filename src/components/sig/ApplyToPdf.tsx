@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { EMBEDDED, receivePdfs, sendSigned } from '../../lib/embed'
 import { DropAnywhere, DropRing, SignInDialog, useFileDrop, useUniversal, useUser, type SigningAuditFields } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
 import type { Anchor, PlacePoint } from '../../lib/pdf'
@@ -32,6 +33,8 @@ const ANCHORS: { id: Anchor; label: MessageKey }[] = [
 // /login navigated away from the signature (and PDF) being worked on, and the
 // hub then sent a newcomer on to the Assess portal, not back here.
 const SIGNUP_URL = 'https://app.unisim.co.uk/login'
+
+const verifyUrlFor = (certId: string | null) => (certId ? `${location.origin}${import.meta.env.BASE_URL}verify/${certId}` : null)
 
 export default function ApplyToPdf() {
   const t = useT()
@@ -128,6 +131,13 @@ export default function ApplyToPdf() {
   // when deciding who TAKES the file. Highlighting a target that will not take
   // anything is a lie, so gate the visuals here too.
   const over = drop.over && accepting
+
+  // Embedded (lib/embed.ts): the PDF comes from the app that framed this one.
+  useEffect(() => {
+    if (!EMBEDDED) return
+    return receivePdfs((f) => void onFile(f))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once; onFile reads state through setters
+  }, [])
 
   async function onFile(f: File) {
     setError(null)
@@ -241,11 +251,16 @@ export default function ApplyToPdf() {
       // is byte for byte what was produced (the record's document hash is of
       // the unsigned original). Taken from the exact bytes about to download.
       if (certId) setCopyRecorded(await recordSignedCopyHash(supabase, certId, await sha256Bytes(bytes.slice().buffer as ArrayBuffer)))
+      const name = file.name.replace(/\.pdf$/i, '') + '-signed.pdf'
+      // Embedded: back to the app that asked, not to Downloads.
+      if (EMBEDDED && sendSigned(name, bytes, verifyUrlFor(certId))) {
+        setSavedAs(name)
+        return
+      }
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      const name = file.name.replace(/\.pdf$/i, '') + '-signed.pdf'
       a.download = name
       document.body.appendChild(a); a.click(); a.remove()
       // Revoked on the next tick: some browsers start the download after
@@ -484,7 +499,7 @@ export default function ApplyToPdf() {
         disabled={!file || !currentImage || needsInitials || busy}
         className="mt-4 w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
       >
-        {busy ? t('sign.signing') : !currentImage ? t('sign.button_needs_signature') : needsInitials ? t('sign.button_needs_initials') : t('sign.button_sign')}
+        {busy ? t('sign.signing') : !currentImage ? t('sign.button_needs_signature') : needsInitials ? t('sign.button_needs_initials') : t(EMBEDDED ? 'sign.button_sign_embedded' : 'sign.button_sign')}
       </button>
 
       {/* Always in the tree (not empty:hidden) so screen readers announce it. */}

@@ -70,6 +70,7 @@ export default {
   'button_needs_signature': 'Create a signature first',
   'button_needs_initials': 'Add your initials first',
   'button_sign': 'Sign & download PDF',
+  'button_sign_embedded': 'Sign', // embedded in another app: the signed PDF goes back to it, not to Downloads
   'signed_as': '✓ Signed — downloaded as {name}', // {name} is the downloaded file name
   'record_created': '✓ Verifiable record created',
   'record_qr_links_here': 'The signed PDF carries a QR linking here:',

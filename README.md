@@ -23,6 +23,10 @@ Live at **`opensource.unisim.co.uk/signatures`**.
   browser with no account (optionally after confirming their email address with
   a code); you both get the certificate. This is the one flow that uploads a PDF
   — see [PRIVACY.md](PRIVACY.md).
+- **Sign inside another Universal App** — `/signatures/?embed` shows just the
+  studio; a page of the same site posts a PDF in, and Sign hands the signed
+  copy back to it instead of downloading (Universal Invoices' Sign button).
+  Only a parent on this same site is listened to or answered.
 - **Verification badge** — put "✓ Signed and verified" on any website: a link
   plus `badge.js`, which checks the certificate live, or a picture + link for
   email and Markdown.

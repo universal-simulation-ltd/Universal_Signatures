@@ -70,6 +70,7 @@ const sign: Messages['sign'] = {
   'button_needs_signature': 'Önce bir imza oluşturun',
   'button_needs_initials': 'Önce parafınızı ekleyin',
   'button_sign': 'İmzala ve PDF’i indir',
+  'button_sign_embedded': 'İmzala',
   'signed_as': '✓ İmzalandı — {name} olarak indirildi',
   'record_created': '✓ Doğrulanabilir kayıt oluşturuldu',
   'record_qr_links_here': 'İmzalı PDF, buraya bağlanan bir QR içerir:',

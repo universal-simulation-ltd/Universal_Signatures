@@ -70,6 +70,7 @@ const sign: Messages['sign'] = {
   'button_needs_signature': 'Erstelle zuerst eine Unterschrift',
   'button_needs_initials': 'Füge zuerst deine Initialen hinzu',
   'button_sign': 'Unterschreiben & PDF herunterladen',
+  'button_sign_embedded': 'Unterschreiben',
   'signed_as': '✓ Unterschrieben – heruntergeladen als {name}',
   'record_created': '✓ Überprüfbarer Eintrag erstellt',
   'record_qr_links_here': 'Das unterschriebene PDF trägt einen QR-Code, der hierher verlinkt:',
