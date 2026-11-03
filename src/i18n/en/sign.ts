@@ -21,6 +21,7 @@ export default {
   'drop_uploaded_on_send': 'uploaded only when you send it',
   'drop_browse': 'or click to browse',
   'drop_browse_tap': 'or tap to choose', // drop_browse on touch screens
+  'signature_first': 'Create your signature first, then add the PDF.', // under the greyed-out drop circle until there is a signature; turns red if a PDF is dropped anyway
   'drop_anywhere_title': 'Drop it anywhere', // full-page overlay while dragging a file
   'drop_anywhere_hint': 'A PDF — it\'s signed in this browser and never uploaded',
 

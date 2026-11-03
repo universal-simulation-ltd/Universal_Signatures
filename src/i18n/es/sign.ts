@@ -21,6 +21,7 @@ const sign: Messages['sign'] = {
   'drop_uploaded_on_send': 'solo se sube cuando lo envías',
   'drop_browse': 'o haz clic para buscarlo',
   'drop_browse_tap': 'o toca para buscarlo',
+  'signature_first': 'Crea primero tu firma y después añade el PDF.',
   'drop_anywhere_title': 'Suéltalo en cualquier sitio',
   'drop_anywhere_hint': 'Un PDF: se firma en este navegador y nunca se sube',
 

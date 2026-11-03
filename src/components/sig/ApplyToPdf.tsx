@@ -123,16 +123,27 @@ export default function ApplyToPdf() {
 
   // Not mid-signing.
   const accepting = !busy
+  // Sign it myself takes a PDF only once there is a signature to put on it
+  // (James, 2026-11-03): the circle is greyed out until then, and a PDF
+  // dropped anyway is turned away with a note. Send to be signed needs no
+  // signature of your own, so it is open from the start.
+  const signatureFirst = mode === 'self' && !currentImage
+  const [turnedAway, setTurnedAway] = useState(false)
 
   // `pageWide`: the circle is where to aim, not where you have to land. It also
   // closes a real trap in this app specifically — a PDF let go just outside the
   // ring used to be handed to the browser, which navigates away from the tab and
   // takes the signature drawn in the left-hand column with it, unsaved.
   const drop = useFileDrop({
-    onFiles: (files) => { if (files[0]) void onFile(files[0]) },
+    onFiles: (files) => {
+      if (!files[0]) return
+      if (signatureFirst) setTurnedAway(true)
+      else void onFile(files[0])
+    },
     accept: 'application/pdf',
     multiple: false,
     pageWide: true,
+    clickToBrowse: !signatureFirst,
     disabled: !accepting,
     label: file ? t('sign.drop_label_another') : t('sign.drop_label'),
   })
@@ -140,7 +151,7 @@ export default function ApplyToPdf() {
   // disabled — the hook lights every page-wide zone and only checks `disabled`
   // when deciding who TAKES the file. Highlighting a target that will not take
   // anything is a lie, so gate the visuals here too.
-  const over = drop.over && accepting
+  const over = drop.over && accepting && !signatureFirst
 
   // Embedded (lib/embed.ts): the PDF comes from the app that framed this one.
   useEffect(() => {
@@ -151,6 +162,7 @@ export default function ApplyToPdf() {
 
   async function onFile(f: File) {
     setError(null)
+    setTurnedAway(false)
     setVerifyUrl(null)
     setSavedAs(null)
     // A page-wide target takes whatever is dropped on the margin, including the
@@ -342,14 +354,15 @@ export default function ApplyToPdf() {
           </button>
         </div>
       ) : (
-      <div className="mt-4 flex flex-col items-center">
+      <div className={`mt-4 flex flex-col items-center ${signatureFirst ? 'cursor-not-allowed opacity-50 grayscale' : ''}`}>
         <div
           {...drop.dropzoneProps}
-          className={`w-full max-w-[260px] cursor-pointer rounded-full transition-transform focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-600 ${
+          aria-disabled={signatureFirst || undefined}
+          className={`w-full max-w-[260px] rounded-full ${signatureFirst ? 'pointer-events-none' : 'cursor-pointer'} transition-transform focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-600 ${
             over ? 'scale-[1.02]' : ''
           }`}
         >
-          <DropRing size="100%" over={over} motion="idle" watermark={<DropWatermark />}>
+          <DropRing size="100%" over={over} motion={signatureFirst ? 'still' : 'idle'} watermark={<DropWatermark />}>
                 <svg
                   viewBox="0 0 24 24"
                   className={`mb-1 h-9 w-9 ${over ? 'text-orange-500' : 'text-slate-400'}`}
@@ -373,10 +386,17 @@ export default function ApplyToPdf() {
                 <span className="text-[11.5px] leading-relaxed text-slate-500">
                   {mode === 'self' ? t('sign.drop_stays_local') : t('sign.drop_uploaded_on_send')}
                 </span>
-                <span className="mt-1 text-[11px] text-slate-400">{touch ? t('sign.drop_browse_tap') : t('sign.drop_browse')}</span>
+                {!signatureFirst && <span className="mt-1 text-[11px] text-slate-400">{touch ? t('sign.drop_browse_tap') : t('sign.drop_browse')}</span>}
           </DropRing>
         </div>
       </div>
+      )}
+      {/* Outside the greyed-out circle so it reads at full strength; red once
+          a PDF has been dropped on it anyway. */}
+      {!file && signatureFirst && (
+        <p role={turnedAway ? 'alert' : undefined} className={`mt-3 text-center text-sm font-medium ${turnedAway ? 'text-rose-700' : 'text-slate-600'}`}>
+          {t('sign.signature_first')}
+        </p>
       )}
       {/* Outside the ring, so the picker is never the thing a drop lands on. */}
       <input {...drop.inputProps} className="hidden" />
@@ -548,7 +568,7 @@ export default function ApplyToPdf() {
 
       {/* From `pageOver`, not `over`: over the ring itself the ring answers. */}
       <DropAnywhere
-        show={drop.pageOver && accepting}
+        show={drop.pageOver && accepting && !signatureFirst}
         title={t('sign.drop_anywhere_title')}
         hint={t('sign.drop_anywhere_hint')}
       />

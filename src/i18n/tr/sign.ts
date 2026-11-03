@@ -21,6 +21,7 @@ const sign: Messages['sign'] = {
   'drop_uploaded_on_send': 'yalnızca gönderdiğinizde yüklenir',
   'drop_browse': 'veya göz atmak için tıklayın',
   'drop_browse_tap': 'veya göz atmak için dokunun',
+  'signature_first': 'Önce imzanızı oluşturun, ardından PDF’yi ekleyin.',
   'drop_anywhere_title': 'Herhangi bir yere bırakın',
   'drop_anywhere_hint': 'Bir PDF — bu tarayıcıda imzalanır ve asla karşıya yüklenmez',
 

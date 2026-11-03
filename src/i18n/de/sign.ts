@@ -21,6 +21,7 @@ const sign: Messages['sign'] = {
   'drop_uploaded_on_send': 'erst beim Senden hochgeladen',
   'drop_browse': 'oder zum Durchsuchen klicken',
   'drop_browse_tap': 'oder zum Durchsuchen tippen',
+  'signature_first': 'Erstellen Sie zuerst Ihre Unterschrift, dann fügen Sie das PDF hinzu.',
   'drop_anywhere_title': 'Irgendwo ablegen',
   'drop_anywhere_hint': 'Ein PDF – es wird in diesem Browser unterschrieben und nie hochgeladen',
 

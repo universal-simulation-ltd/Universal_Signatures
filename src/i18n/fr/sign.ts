@@ -21,6 +21,7 @@ const sign: Messages['sign'] = {
   'drop_uploaded_on_send': 'envoyé en ligne seulement à l’envoi',
   'drop_browse': 'ou cliquez pour parcourir',
   'drop_browse_tap': 'ou touchez pour parcourir',
+  'signature_first': 'Créez d’abord votre signature, puis ajoutez le PDF.',
   'drop_anywhere_title': 'Déposez-le n’importe où',
   'drop_anywhere_hint': 'Un PDF — il est signé dans ce navigateur et n’est jamais envoyé en ligne',
 
