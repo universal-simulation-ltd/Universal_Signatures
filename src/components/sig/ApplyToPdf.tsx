@@ -10,7 +10,7 @@ import type { PhoneAttestation } from '../../lib/phoneAttest'
 import { useT, type MessageKey } from '../../i18n'
 import DropWatermark from './DropWatermark'
 import { useCoarsePointer } from '../../lib/useCoarsePointer'
-import InitialsPanel, { type InitialsChoice } from './InitialsPanel'
+import InitialsPanel, { InitialsPlacement, type InitialsChoice } from './InitialsPanel'
 import SendForSigning from './SendForSigning'
 
 // pdf-lib (~500 kB), pdf.js (+ its 1.3 MB worker) and the QR encoder are only
@@ -429,6 +429,11 @@ export default function ApplyToPdf() {
         </div>
       )}
 
+      {/* The initials' box above the pages, not under them (James,
+          2026-11-03): type "JM" and it is on the pages straight away. Where
+          they go and how big stays under the pages (InitialsPlacement). */}
+      {file && initialling && <InitialsPanel value={initials} onChange={setInitials} />}
+
       {/* The whole document, to swipe through and sign where it goes (James,
           2026-11-03): no page list, no size slider — tap a page to put the
           signature there, drag it, pull its corner to size it. */}
@@ -454,7 +459,7 @@ export default function ApplyToPdf() {
         </div>
       )}
 
-      {file && initialling && <InitialsPanel value={initials} onChange={setInitials} everyPage={shownLayout === 'initial-every'} />}
+      {file && initialling && <InitialsPlacement value={initials} onChange={setInitials} everyPage={shownLayout === 'initial-every'} />}
 
       {file && hasExtras && (
         <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-lg border border-slate-200 bg-slate-50/60 p-3">

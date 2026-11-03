@@ -23,11 +23,10 @@ export interface InitialsChoice {
  * Initials for "initials on every page, signature on the last". Typed in the
  * font chosen for the typed signature (pre-filled from the name, when there is
  * one) or drawn on a small pad of their own — the main pad holds the full
- * signature, which is still what goes on the last page. `everyPage`: the
- * signature goes on every page too, so every page is initialled and the
- * "initial the last page too" box has nothing to ask.
+ * signature, which is still what goes on the last page. Where they go is
+ * InitialsPlacement's, so the two can sit either side of the page preview.
  */
-export default function InitialsPanel({ value, onChange, everyPage = false }: { value: InitialsChoice; onChange: (v: InitialsChoice) => void; everyPage?: boolean }) {
+export default function InitialsPanel({ value, onChange }: { value: InitialsChoice; onChange: (v: InitialsChoice) => void }) {
   const t = useT()
   const signerName = useSigStore((s) => s.signerName)
   const fontId = useSigStore((s) => s.fontId)
@@ -64,8 +63,6 @@ export default function InitialsPanel({ value, onChange, everyPage = false }: { 
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, text, drawn, font.family])
-
-  const set = (patch: Partial<InitialsChoice>) => onChange({ ...value, ...patch })
 
   return (
     <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50/60 p-3" data-testid="initials-panel">
@@ -120,8 +117,24 @@ export default function InitialsPanel({ value, onChange, everyPage = false }: { 
           <button type="button" onClick={ink.clear} disabled={!ink.hasInk} className="rounded-md px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40">{t('create.initials_clear')}</button>
         </div>
       </div>
+    </div>
+  )
+}
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+/**
+ * Where the initials go and how big, under the page preview (James,
+ * 2026-11-03: the initials box sits above the pages, so typing shows on them
+ * straight away; these would push the pages off a phone's screen up there).
+ * `everyPage`: the signature goes on every page too, so every page is
+ * initialled and the "initial the signed page too" box has nothing to ask.
+ */
+export function InitialsPlacement({ value, onChange, everyPage = false }: { value: InitialsChoice; onChange: (v: InitialsChoice) => void; everyPage?: boolean }) {
+  const t = useT()
+  const set = (patch: Partial<InitialsChoice>) => onChange({ ...value, ...patch })
+
+  return (
+    <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50/60 p-3" data-testid="initials-placement">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{t('create.initials_position')}</div>
           <div role="group" aria-label={t('create.initials_position_aria')} className="grid grid-cols-3 gap-1.5">
