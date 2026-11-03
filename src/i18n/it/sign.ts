@@ -83,6 +83,8 @@ const sign: Messages['sign'] = {
   'picker_surface_label': 'Anteprima della pagina. Usa i tasti freccia per spostare la firma; tieni premuto Maiusc per spostarla di più.',
   'picker_page_alt': 'Pagina del PDF',
   'picker_sig_alt': 'Anteprima della firma',
+  'picker_initials_alt': 'Anteprima delle iniziali',
+  'preview_other_pages': 'Le altre pagine: le tue iniziali',
   'picker_live': 'Centro della firma al {x}% in orizzontale e al {y}% in verticale nella pagina.',
   'picker_cancel': 'Annulla',
   'picker_confirm': 'Usa questa posizione',

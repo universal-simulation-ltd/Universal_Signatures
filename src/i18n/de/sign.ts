@@ -83,6 +83,8 @@ const sign: Messages['sign'] = {
   'picker_surface_label': 'Seitenvorschau. Verschiebe die Unterschrift mit den Pfeiltasten; halte die Umschalttaste gedrückt, um sie weiter zu verschieben.',
   'picker_page_alt': 'PDF-Seite',
   'picker_sig_alt': 'Vorschau der Unterschrift',
+  'picker_initials_alt': 'Vorschau der Initialen',
+  'preview_other_pages': 'Die übrigen Seiten: Ihre Initialen',
   'picker_live': 'Mitte der Unterschrift bei {x} % von links, {y} % von oben.',
   'picker_cancel': 'Abbrechen',
   'picker_confirm': 'Diese Position verwenden',

@@ -83,6 +83,8 @@ const sign: Messages['sign'] = {
   'picker_surface_label': 'Aperçu de la page. Utilisez les touches fléchées pour déplacer la signature ; maintenez Maj pour la déplacer plus loin.',
   'picker_page_alt': 'Page du PDF',
   'picker_sig_alt': 'Aperçu de la signature',
+  'picker_initials_alt': 'Aperçu du paraphe',
+  'preview_other_pages': 'Les autres pages : votre paraphe',
   'picker_live': 'Centre de la signature à {x} % de la largeur et {y} % de la hauteur de la page.',
   'picker_cancel': 'Annuler',
   'picker_confirm': 'Utiliser cette position',

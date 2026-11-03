@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { renderPageToCanvas } from '../../lib/pdfjs'
-import type { PlacePoint } from '../../lib/pdf'
+import type { Anchor, PlacePoint } from '../../lib/pdf'
 import { useT } from '../../i18n'
 
 interface Props {
@@ -15,6 +15,14 @@ interface Props {
   onChange: (pos: PlacePoint) => void
   /** CSS pixels across; rendered sharper than that for high-density screens. */
   displayWidth?: number
+  /** Initials this page gets, drawn where signPdf stamps them (not draggable: their corner is chosen in the InitialsPanel). */
+  initials?: PreviewInitials | null
+}
+
+export interface PreviewInitials {
+  png: string
+  anchor: Anchor
+  widthPct: number
 }
 
 // signPdf's corner margin, in PDF points.
@@ -29,10 +37,11 @@ const MARGIN_PT = 24
 // alone) and a tap on the page moves it there: inline, a page-sized
 // `touch-none` surface would be a dead patch the phone cannot scroll past. A
 // mouse drags from anywhere on the page, as the dialog always did.
-export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onChange, displayWidth = 520 }: Props) {
+export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onChange, displayWidth = 520, initials = null }: Props) {
   const t = useT()
   const [page, setPage] = useState<{ url: string; w: number; h: number; ptW: number; ptH: number } | null>(null)
   const [sigAspect, setSigAspect] = useState(3) // width / height fallback
+  const [iniAspect, setIniAspect] = useState(1.5)
   const [error, setError] = useState<string | null>(null)
   const surfaceRef = useRef<HTMLDivElement>(null)
   // While dragging: where in the signature it was picked up, as page fractions from its centre.
@@ -60,6 +69,14 @@ export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onC
     img.onload = () => { if (img.width && img.height) setSigAspect(img.width / img.height) }
     img.src = sigPng
   }, [sigPng])
+
+  const iniPng = initials?.png
+  useEffect(() => {
+    if (!iniPng) return
+    const img = new Image()
+    img.onload = () => { if (img.width && img.height) setIniAspect(img.width / img.height) }
+    img.src = iniPng
+  }, [iniPng])
 
   // Keep the signature wholly on the page, as signPdf does when it stamps it —
   // otherwise a point near an edge previewed hanging off the page and then
@@ -100,6 +117,31 @@ export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onC
         {t('sign.picker_rendering')}
       </div>
     )
+  }
+
+  // Where the initials land, worked out as signPdf does (in PDF points,
+  // bottom-left origin), so the preview and the signed copy agree — including
+  // the hop above (or below) the signature when they would overlap.
+  let initialsStyle: React.CSSProperties | null = null
+  if (initials) {
+    const { ptW: pw, ptH: ph } = page
+    const w = (Math.max(3, Math.min(30, initials.widthPct)) / 100) * pw
+    const h = w / iniAspect
+    const [vert, horiz] = initials.anchor.split('-')
+    let x = horiz === 'center' ? (pw - w) / 2 : horiz === 'right' ? pw - w - MARGIN_PT : MARGIN_PT
+    let y = vert === 'mid' ? (ph - h) / 2 : vert === 'top' ? ph - h - MARGIN_PT : MARGIN_PT
+    if (sigPng) {
+      const sw = (Math.max(5, Math.min(60, widthPct)) / 100) * pw
+      const sh = sw / sigAspect
+      const sx = Math.max(0, Math.min(pw - sw, shown.xPct * pw - sw / 2))
+      const sy = Math.max(0, Math.min(ph - sh, ph - shown.yPct * ph - sh / 2))
+      if (x < sx + sw && x + w > sx && y < sy + sh && y + h > sy) {
+        const gap = 6
+        y = sy + sh + gap + h <= ph ? sy + sh + gap : Math.max(0, sy - gap - h)
+      }
+    }
+    x = Math.max(0, x)
+    initialsStyle = { left: `${(x / pw) * 100}%`, top: `${((ph - y - h) / ph) * 100}%`, width: `${(w / pw) * 100}%`, aspectRatio: `${iniAspect}` }
   }
 
   // Percentages, not canvas pixels. The page image is capped at `maxWidth: 100%`
@@ -156,6 +198,15 @@ export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onC
       }}
     >
       <img src={page.url} alt={t('sign.picker_page_alt')} className="block w-full rounded-lg" draggable={false} />
+      {initials && initialsStyle && (
+        <img
+          src={initials.png}
+          alt={t('sign.picker_initials_alt')}
+          draggable={false}
+          className="pointer-events-none absolute rounded-sm ring-1 ring-orange-300/60"
+          style={initialsStyle}
+        />
+      )}
       {sigPng && (
         <img
           src={sigPng}

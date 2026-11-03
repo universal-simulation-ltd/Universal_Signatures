@@ -83,6 +83,8 @@ export default {
   'picker_surface_label': 'Page preview. Use the arrow keys to move the signature; hold Shift to move it further.', // screen-reader label
   'picker_page_alt': 'PDF page',
   'picker_sig_alt': 'Signature preview',
+  'picker_initials_alt': 'Initials preview',
+  'preview_other_pages': 'The other pages: your initials', // over a small preview of page 1 with initials, under the signed last page
   'picker_live': 'Signature centre {x}% across, {y}% down the page.', // screen-reader announcement; {x}/{y} are percentages
   'picker_cancel': 'Cancel',
   'picker_confirm': 'Use this position',

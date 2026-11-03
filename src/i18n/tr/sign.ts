@@ -83,6 +83,8 @@ const sign: Messages['sign'] = {
   'picker_surface_label': 'Sayfa önizlemesi. İmzayı taşımak için ok tuşlarını kullanın; daha fazla taşımak için Shift’i basılı tutun.',
   'picker_page_alt': 'PDF sayfası',
   'picker_sig_alt': 'İmza önizlemesi',
+  'picker_initials_alt': 'Paraf önizlemesi',
+  'preview_other_pages': 'Diğer sayfalar: parafınız',
   'picker_live': 'İmzanın merkezi sayfanın soldan %{x}, üstten %{y} konumunda.',
   'picker_cancel': 'İptal',
   'picker_confirm': 'Bu konumu kullan',

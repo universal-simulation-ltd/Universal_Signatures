@@ -82,6 +82,8 @@ const sign: Messages['sign'] = {
   'picker_surface_label': 'Visualização da página. Use as teclas de seta para mover a assinatura; segure Shift para movê-la mais longe.',
   'picker_page_alt': 'Página do PDF',
   'picker_sig_alt': 'Visualização da assinatura',
+  'picker_initials_alt': 'Visualização da rubrica',
+  'preview_other_pages': 'As outras páginas: sua rubrica',
   'picker_live': 'Centro da assinatura a {x}% na horizontal e {y}% na vertical da página.',
   'picker_cancel': 'Cancelar',
   'picker_confirm': 'Usar esta posição',

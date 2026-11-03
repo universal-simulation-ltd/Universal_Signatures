@@ -112,6 +112,13 @@ export default function ApplyToPdf() {
   const [initials, setInitials] = useState<InitialsChoice>({ png: null, anchor: 'bottom-right', widthPct: 10, includeLast: false })
   const initialling = shownLayout === 'initial-once' || shownLayout === 'initial-every'
   const needsInitials = initialling && !initials.png
+  // The initials as the preview draws them (James, 2026-11-03), on the page
+  // shown when it gets them: every page with Initial and sign all; with
+  // Initial all, sign once, the signed last page only when "initial the last
+  // page too" is ticked, so a second, smaller page shows the others.
+  const previewInitials = initialling && initials.png
+    ? { png: initials.png, anchor: initials.anchor, widthPct: initials.widthPct }
+    : null
   const [makeRecord, setMakeRecord] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -479,11 +486,20 @@ export default function ApplyToPdf() {
               widthPct={widthPct}
               pos={pos}
               onChange={setPos}
+              initials={shownLayout === 'initial-every' || initials.includeLast ? previewInitials : null}
             />
           </Suspense>
           <p className="mt-1.5 text-center text-[11px] text-slate-400">
             {currentImage ? t('sign.placer_hint') : t('sign.position_needs_signature')}
           </p>
+          {shownLayout === 'initial-once' && previewInitials && (
+            <div className="mt-4">
+              <div className="mb-1.5 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.preview_other_pages')}</div>
+              <Suspense fallback={<div className="mx-auto aspect-[1/1.414] w-full max-w-[200px] animate-pulse rounded-lg bg-slate-100" />}>
+                <PagePlacer file={file} pageIndex={0} sigPng={null} widthPct={widthPct} pos={null} onChange={() => {}} displayWidth={200} initials={previewInitials} />
+              </Suspense>
+            </div>
+          )}
         </div>
       )}
 
