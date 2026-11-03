@@ -25,13 +25,16 @@ export interface InitialsOpts {
   png: string
   anchor: Anchor
   widthPct: number    // initials width as % of page width
-  includeLast: boolean // also initial the last page (the one carrying the signature); always, with INITIAL_ALL_PAGES
+  includeLast: boolean // also initial the page carrying the signature; always, with INITIAL_ALL_PAGES
 }
 
 export interface PlaceOpts {
   pageIndex: number   // 0-based; -1 = last page; ALL_PAGES = every page; INITIAL_PAGES = initials + signature on the last; INITIAL_ALL_PAGES = both on every page
   // Required with INITIAL_PAGES / INITIAL_ALL_PAGES, ignored otherwise.
   initials?: InitialsOpts
+  // With INITIAL_PAGES: the page the signature goes on (0-based, -1 = last,
+  // the default); every other page is initialled.
+  sigPage?: number
   anchor: Anchor
   widthPct: number    // signature width as % of page width (5–60)
   // When set (from the "Choose position" picker), the signature is centred on
@@ -156,7 +159,7 @@ export async function signPdf(pdfBytes: ArrayBuffer, sigPng: string, opts: Place
   const targets = opts.pageIndex === ALL_PAGES || opts.pageIndex === INITIAL_ALL_PAGES
     ? pages
     : opts.pageIndex === INITIAL_PAGES
-      ? [pages[pages.length - 1]]
+      ? [pages[opts.sigPage === undefined || opts.sigPage < 0 ? pages.length - 1 : Math.min(opts.sigPage, pages.length - 1)]]
       : [pages[opts.pageIndex < 0 ? pages.length - 1 : Math.min(opts.pageIndex, pages.length - 1)]]
 
   const png = await doc.embedPng(dataUrlToBytes(sigPng))
@@ -193,7 +196,7 @@ export async function signPdf(pdfBytes: ArrayBuffer, sigPng: string, opts: Place
   if (initialling && opts.initials) {
     const ini = opts.initials
     const iniPng = await doc.embedPng(dataUrlToBytes(ini.png))
-    const initialled = ini.includeLast || opts.pageIndex === INITIAL_ALL_PAGES ? pages : pages.slice(0, -1)
+    const initialled = ini.includeLast || opts.pageIndex === INITIAL_ALL_PAGES ? pages : pages.filter((p) => !targets.includes(p))
     for (const page of initialled) {
       const { width: pw, height: ph } = page.getSize()
       const w = (Math.max(3, Math.min(30, ini.widthPct)) / 100) * pw

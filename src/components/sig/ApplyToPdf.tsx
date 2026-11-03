@@ -15,10 +15,10 @@ import SendForSigning from './SendForSigning'
 
 // pdf-lib (~500 kB), pdf.js (+ its 1.3 MB worker) and the QR encoder are only
 // needed once a PDF is in play, so they load on demand rather than in the
-// first-load bundle. The page preview pulls pdf.js in with it, and pdf.js spins up
+// first-load bundle. The page viewer pulls pdf.js in with it, and pdf.js spins up
 // its worker the moment its module runs — before this split, every visit to
 // the studio started that worker whether or not a PDF was ever opened.
-const PagePlacer = lazy(() => import('./PagePlacer'))
+const PageStrip = lazy(() => import('./PageStrip'))
 const loadPdf = () => import('../../lib/pdf')
 const loadQr = () => import('../../lib/qr')
 
@@ -31,11 +31,11 @@ const SIGNUP_URL = 'https://app.unisim.co.uk/login'
 // How the signature goes on (James, 2026-11-03), sign once first as the
 // default. Each maps to a signPdf `pageIndex`; a one-page PDF only gets once.
 type Layout = 'once' | 'every' | 'initial-once' | 'initial-every'
-const LAYOUTS: { id: Layout; label: MessageKey; hint: MessageKey }[] = [
-  { id: 'once', label: 'sign.layout_once', hint: 'sign.layout_once_hint' },
-  { id: 'every', label: 'sign.layout_every', hint: 'sign.layout_every_hint' },
-  { id: 'initial-once', label: 'sign.layout_initial_once', hint: 'sign.layout_initial_once_hint' },
-  { id: 'initial-every', label: 'sign.layout_initial_every', hint: 'sign.layout_initial_every_hint' },
+const LAYOUTS: { id: Layout; label: MessageKey }[] = [
+  { id: 'once', label: 'sign.layout_once' },
+  { id: 'every', label: 'sign.layout_every' },
+  { id: 'initial-once', label: 'sign.layout_initial_once' },
+  { id: 'initial-every', label: 'sign.layout_initial_every' },
 ]
 
 const verifyUrlFor = (certId: string | null) => (certId ? `${location.origin}${import.meta.env.BASE_URL}verify/${certId}` : null)
@@ -97,13 +97,16 @@ export default function ApplyToPdf() {
   const [file, setFile] = useState<File | null>(null)
   const [pages, setPages] = useState(0)
   const [layout, setLayout] = useState<Layout>('once')
-  // The page for "Sign once".
-  const [onePage, setOnePage] = useState(0)
   const shownLayout: Layout = pages > 1 ? layout : 'once'
+  // The page carrying the signature with Sign once / Initial all, sign once:
+  // whichever page it was last put on in the viewer, else the first page for
+  // Sign once and the last for Initial all, sign once.
+  const [chosenPage, setChosenPage] = useState<number | null>(null)
+  const sigPage = chosenPage ?? (shownLayout === 'initial-once' ? Math.max(0, pages - 1) : 0)
   const pageIndex = shownLayout === 'every' ? ALL_PAGES
     : shownLayout === 'initial-once' ? INITIAL_PAGES
       : shownLayout === 'initial-every' ? INITIAL_ALL_PAGES
-        : onePage
+        : sigPage
   // Where the signature goes: null is signPdf's bottom-right corner, which
   // the page preview shows it in until it is dragged somewhere else.
   const [pos, setPos] = useState<PlacePoint | null>(null)
@@ -112,10 +115,8 @@ export default function ApplyToPdf() {
   const [initials, setInitials] = useState<InitialsChoice>({ png: null, anchor: 'bottom-right', widthPct: 10, includeLast: false })
   const initialling = shownLayout === 'initial-once' || shownLayout === 'initial-every'
   const needsInitials = initialling && !initials.png
-  // The initials as the preview draws them (James, 2026-11-03), on the page
-  // shown when it gets them: every page with Initial and sign all; with
-  // Initial all, sign once, the signed last page only when "initial the last
-  // page too" is ticked, so a second, smaller page shows the others.
+  // The initials as the viewer draws them (James, 2026-11-03), on every page
+  // that gets them.
   const previewInitials = initialling && initials.png
     ? { png: initials.png, anchor: initials.anchor, widthPct: initials.widthPct }
     : null
@@ -184,7 +185,7 @@ export default function ApplyToPdf() {
       const { pageCount } = await loadPdf()
       const n = await pageCount(await f.arrayBuffer())
       setPages(n)
-      setOnePage(0)
+      setChosenPage(null)
       setPos(null)
     } catch (err) {
       setError(
@@ -271,7 +272,7 @@ export default function ApplyToPdf() {
       const { signPdf } = await loadPdf()
       const sigPng = stampImage ?? await trimToInk(currentImage)
       const bytes = await signPdf(buf, sigPng, {
-        pageIndex, anchor: 'bottom-right', widthPct, pos: pos ?? undefined, qrPng, audit, phoneAttest,
+        pageIndex, sigPage, anchor: 'bottom-right', widthPct, pos: pos ?? undefined, qrPng, audit, phoneAttest,
         initials: initialling && initials.png
           ? { png: initials.png, anchor: initials.anchor, widthPct: initials.widthPct, includeLast: initials.includeLast }
           : undefined,
@@ -415,91 +416,41 @@ export default function ApplyToPdf() {
 
       {mode === 'self' && (<>
       {file && pages > 1 && (
-        <div className="mt-4" role="radiogroup" aria-label={t('sign.layout_label')}>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.layout_label')}</div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {LAYOUTS.map((l) => (
-              <label
-                key={l.id}
-                className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition ${layout === l.id ? 'border-orange-500 bg-orange-50/60 ring-1 ring-orange-500' : 'border-slate-200 bg-white hover:bg-slate-50'}`}
-              >
-                <input
-                  type="radio"
-                  name="sig-layout"
-                  value={l.id}
-                  checked={layout === l.id}
-                  onChange={() => setLayout(l.id)}
-                  className="mt-0.5 h-4 w-4 accent-orange-600"
-                />
-                <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-slate-900">{t(l.label)}</span>
-                  <span className="block text-[11px] text-slate-500">{t(l.hint)}</span>
-                </span>
-              </label>
-            ))}
-          </div>
+        <div className="mt-4">
+          <label htmlFor="sig-layout" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.layout_label')}</label>
+          <select
+            id="sig-layout"
+            value={layout}
+            onChange={(e) => setLayout(e.target.value as Layout)}
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none"
+          >
+            {LAYOUTS.map((l) => <option key={l.id} value={l.id}>{t(l.label)}</option>)}
+          </select>
         </div>
       )}
 
-      {file && (
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {shownLayout === 'once' && pages > 1 && (
-            <div>
-              <label htmlFor="sig-page" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.page_label')}</label>
-              <select
-                id="sig-page"
-                value={onePage}
-                onChange={(e) => setOnePage(Number(e.target.value))}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm bg-white outline-none"
-              >
-                {Array.from({ length: pages }).map((_, i) => (
-                  <option key={i} value={i}>{t(i === pages - 1 ? 'sign.page_option_last' : 'sign.page_option', { n: i + 1 })}</option>
-                ))}
-              </select>
-            </div>
-          )}
-          <div>
-            <label htmlFor="sig-size" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.size_label', { pct: widthPct })}</label>
-            <input id="sig-size" type="range" min={8} max={50} value={widthPct} onChange={(e) => setWidthPct(Number(e.target.value))} className="mt-2 w-full accent-orange-600" />
-          </div>
-        </div>
-      )}
-
-      {/* The page itself, straight away, with the signature on it to drag
-          where it goes (James, 2026-11-03) — no grid of corners, no dialog. */}
+      {/* The whole document, to swipe through and sign where it goes (James,
+          2026-11-03): no page list, no size slider — tap a page to put the
+          signature there, drag it, pull its corner to size it. */}
       {file && (
         <div className="mt-4">
-          <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-2 text-xs">
-            <span className="font-semibold uppercase tracking-wide text-slate-500">
-              {t(shownLayout === 'initial-once' ? 'sign.position_label_initials' : shownLayout === 'once' ? 'sign.position_label' : 'sign.position_label_every')}
-            </span>
-            {pos && (
-              <button type="button" onClick={() => setPos(null)} className="font-medium text-slate-500 hover:text-orange-700">{t('sign.position_reset')}</button>
-            )}
-          </div>
-          <Suspense fallback={<div className="aspect-[1/1.414] w-full animate-pulse rounded-lg bg-slate-100" />}>
-            <PagePlacer
+          <Suspense fallback={<div className="h-80 w-full animate-pulse rounded-lg bg-slate-100" />}>
+            <PageStrip
               file={file}
-              // Every page: preview the first. Initial all, sign once: the signature goes on the last.
-              pageIndex={shownLayout === 'once' ? onePage : shownLayout === 'initial-once' ? -1 : 0}
+              layout={shownLayout}
               sigPng={currentImage ? stampImage ?? currentImage : null}
-              widthPct={widthPct}
+              sigPage={sigPage}
               pos={pos}
-              onChange={setPos}
-              initials={shownLayout === 'initial-every' || initials.includeLast ? previewInitials : null}
+              widthPct={widthPct}
+              initials={previewInitials}
+              includeSigned={initials.includeLast}
+              onPlace={(page, p) => { setChosenPage(page); setPos(p) }}
+              onResize={setWidthPct}
             />
           </Suspense>
-          <p className="mt-1.5 text-center text-[11px] text-slate-400">
-            {currentImage ? t('sign.placer_hint') : t('sign.position_needs_signature')}
+          <p className="mt-1 text-center text-[11px] text-slate-400">
+            {currentImage ? t('sign.viewer_hint') : t('sign.position_needs_signature')}
           </p>
-          {shownLayout === 'initial-once' && previewInitials && (
-            <div className="mt-4">
-              <div className="mb-1.5 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.preview_other_pages')}</div>
-              <Suspense fallback={<div className="mx-auto aspect-[1/1.414] w-full max-w-[200px] animate-pulse rounded-lg bg-slate-100" />}>
-                <PagePlacer file={file} pageIndex={0} sigPng={null} widthPct={widthPct} pos={null} onChange={() => {}} displayWidth={200} initials={previewInitials} />
-              </Suspense>
-            </div>
-          )}
         </div>
       )}
 

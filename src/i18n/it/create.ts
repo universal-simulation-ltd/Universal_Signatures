@@ -112,7 +112,7 @@ const create: Messages['create'] = {
   'corner_bottom_center': 'In basso al centro',
   'corner_bottom_right': 'In basso a destra',
   'initials_size': 'Dimensione iniziali ({pct}%)',
-  'initials_include_last': 'Metti le iniziali anche sull’ultima pagina, oltre alla firma',
+  'initials_include_last': 'Metti le iniziali anche sulla pagina firmata, oltre alla firma',
 }
 
 export default create

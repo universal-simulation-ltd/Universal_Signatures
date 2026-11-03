@@ -36,23 +36,16 @@ export default {
   // ── Page, size and position ──────────────────────────────────────────────
   'layout_label': 'How to sign', // heading over the four ways to sign a PDF of more than one page
   'layout_once': 'Sign once',
-  'layout_once_hint': 'Your signature on one page',
   'layout_every': 'Sign every page',
-  'layout_every_hint': 'Your signature in the same place on each page',
   'layout_initial_once': 'Initial all pages, sign once',
-  'layout_initial_once_hint': 'Your initials on each page, your signature on the last',
   'layout_initial_every': 'Initial and sign all pages',
-  'layout_initial_every_hint': 'Your initials and your signature on every page',
-  'page_label': 'Page',
-  'page_option': 'Page {n}', // an entry in the page list; {n} is the page number
-  'page_option_last': 'Page {n} (last)',
+  'viewer_page': 'Page {n} of {total}', // {n} is the page number, {total} the number of pages
+  'viewer_sig_label': 'Your signature: drag it, or use the arrow keys; + and − resize it',
+  'viewer_prev': 'Previous page',
+  'viewer_next': 'Next page',
+  'viewer_hint': 'Swipe through the pages. Tap where your signature goes, drag it to move it, and pull its corner to resize it.', // under the page viewer, once there is a signature
   'size_label': 'Size ({pct}%)', // {pct} is the signature width as a percentage of the page
-  'position_label': 'Position',
-  'position_label_initials': 'Signature position (last page)',
-  'position_label_every': 'Signature position (every page)',
   'position_needs_signature': 'Create a signature to preview placement.',
-  'placer_hint': 'Drag your signature to where it goes, or tap the page to move it there.', // under the page preview, once there is a signature to drag
-  'position_reset': 'Back to the corner', // drops a dragged position: the signature goes back to the bottom-right corner
 
   // ── Options ──────────────────────────────────────────────────────────────
   'omit_extras': '{bold} — sign this document with the signature alone, without what you added in "Create your signature".', // {bold} is sign.omit_extras_bold
@@ -84,7 +77,6 @@ export default {
   'picker_page_alt': 'PDF page',
   'picker_sig_alt': 'Signature preview',
   'picker_initials_alt': 'Initials preview',
-  'preview_other_pages': 'The other pages: your initials', // over a small preview of page 1 with initials, under the signed last page
   'picker_live': 'Signature centre {x}% across, {y}% down the page.', // screen-reader announcement; {x}/{y} are percentages
   'picker_cancel': 'Cancel',
   'picker_confirm': 'Use this position',

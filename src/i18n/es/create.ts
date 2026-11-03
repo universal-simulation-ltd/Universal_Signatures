@@ -111,7 +111,7 @@ const create: Messages['create'] = {
   'corner_bottom_center': 'Abajo en el centro',
   'corner_bottom_right': 'Abajo a la derecha',
   'initials_size': 'Tamaño de las iniciales ({pct}%)',
-  'initials_include_last': 'Poner también las iniciales en la última página, además de firmarla',
+  'initials_include_last': 'Poner también las iniciales en la página firmada, además de firmarla',
 }
 
 export default create

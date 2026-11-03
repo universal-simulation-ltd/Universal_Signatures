@@ -111,7 +111,7 @@ const create: Messages['create'] = {
   'corner_bottom_center': 'En bas au centre',
   'corner_bottom_right': 'En bas à droite',
   'initials_size': 'Taille des initiales ({pct} %)',
-  'initials_include_last': 'Parapher aussi la dernière page, en plus de la signer',
+  'initials_include_last': 'Parapher aussi la page signée, en plus de la signer',
 }
 
 export default create

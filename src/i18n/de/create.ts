@@ -112,7 +112,7 @@ const create: Messages['create'] = {
   'corner_bottom_center': 'Unten mittig',
   'corner_bottom_right': 'Unten rechts',
   'initials_size': 'Größe der Initialen ({pct} %)',
-  'initials_include_last': 'Auch die letzte Seite mit Initialen versehen, nicht nur unterschreiben',
+  'initials_include_last': 'Auch die unterschriebene Seite mit Initialen versehen, nicht nur unterschreiben',
 }
 
 export default create

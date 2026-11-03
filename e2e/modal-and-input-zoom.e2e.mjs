@@ -36,6 +36,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 const HERE = dirname(fileURLToPath(import.meta.url))
 const BASE = process.env.E2E_BASE_URL ?? 'http://localhost:5186/signatures/'
 const PDF = join(HERE, 'fixtures', 'sample.pdf')
+const PDF_3 = join(HERE, 'fixtures', 'three-pages.pdf')
 
 // Sibling repos that carry a Playwright install — this app has none of its own.
 // Launch a probe rather than trusting the first import that resolves: an
@@ -91,8 +92,8 @@ function check(label, condition, detail) {
 }
 
 // Drive the studio far enough to have a signature and a loaded PDF. Since
-// 2026-11-03 that alone shows the page with the signature on it — no
-// "Choose position…" button, no dialog. The dialog is Send to be signed's
+// 2026-11-03 that alone shows the document (PageStrip, a row of pages) with
+// the signature on it — no "Choose position…" button, no dialog. The dialog is Send to be signed's
 // only now, which needs a signed-in Universal ID this harness doesn't have,
 // so the nav-bar checks below are on the inline preview instead.
 async function openPositionPicker(page) {
@@ -104,8 +105,8 @@ async function openPositionPicker(page) {
   await page.waitForFunction(() => !!document.querySelector('input[type=file][accept*="pdf"]'))
   await page.waitForTimeout(1200)
   await page.locator('input[type=file][accept*="pdf"]').first().setInputFiles(PDF)
-  await page.locator('img[alt="PDF page"]').waitFor({ state: 'visible', timeout: 20000 })
-  await page.locator('img[alt="Signature preview"]').waitFor({ state: 'visible', timeout: 10000 })
+  await page.locator('[data-page="0"] > img').first().waitFor({ state: 'visible', timeout: 20000 })
+  await page.locator('img[data-handle="sig"]').waitFor({ state: 'visible', timeout: 10000 })
 }
 
 const playwright = await loadPlaywright()
@@ -113,7 +114,7 @@ const browser = await playwright.chromium.launch()
 
 try {
   // ────────────────────────────────────────────────────────────────────────
-  console.log('\nPage preview — shows on its own, and the signature drags')
+  console.log('\nPage viewer — shows on its own, the signature drags and resizes')
 
   for (const vp of [
     { label: 'phone portrait 390×844', width: 390, height: 844 },
@@ -127,7 +128,7 @@ try {
     const page = await ctx.newPage()
     await openPositionPicker(page)
     check(`${vp.label}: no dialog opened`, (await page.locator('[role="dialog"]').count()) === 0)
-    const sig = page.locator('img[alt="Signature preview"]')
+    const sig = page.locator('img[data-handle="sig"]')
     await sig.scrollIntoViewIfNeeded()
     const before = await sig.boundingBox()
     await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2)
@@ -137,8 +138,21 @@ try {
     const after = await sig.boundingBox()
     check(`${vp.label}: dragging moves the signature up and left`,
       after.x < before.x - 40 && after.y < before.y - 40, JSON.stringify({ before, after }))
-    check(`${vp.label}: "Back to the corner" appears once it has moved`,
-      await page.getByRole('button', { name: 'Back to the corner' }).isVisible())
+    const handle = page.locator('[data-handle="size"]')
+    const h = await handle.boundingBox()
+    const w0 = (await sig.boundingBox()).width
+    await page.mouse.move(h.x + h.width / 2, h.y + h.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(h.x + h.width / 2 + 40, h.y + h.height / 2, { steps: 6 })
+    await page.mouse.up()
+    const w1 = (await sig.boundingBox()).width
+    check(`${vp.label}: pulling the corner makes the signature bigger`, w1 > w0 + 20, JSON.stringify({ w0, w1 }))
+    // A row of several pages: a scroll box still offers its content's width to
+    // a content-sized layout, and once widened the whole page on a phone.
+    await page.locator('input[type=file][accept*="pdf"]').first().setInputFiles(PDF_3)
+    await page.locator('[data-page="2"]').waitFor({ timeout: 20000 })
+    check(`${vp.label}: three pages side by side are no wider than the screen`,
+      await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
     await ctx.close()
   }
 
@@ -157,7 +171,7 @@ try {
         return e ? (({ top, bottom, left, right, width }) =>
           ({ top, bottom, left, right, width }))(e.getBoundingClientRect()) : null
       }
-      return { page: b('img[alt="PDF page"]'), sig: b('img[alt="Signature preview"]') }
+      return { page: b('[data-page="0"]'), sig: b('img[data-handle="sig"]') }
     })
     // Placed in canvas pixels it used to sit outside the scaled-down image
     // entirely — invisible on every phone.

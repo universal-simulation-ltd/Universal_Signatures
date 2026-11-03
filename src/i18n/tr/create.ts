@@ -112,7 +112,7 @@ const create: Messages['create'] = {
   'corner_bottom_center': 'Orta alt',
   'corner_bottom_right': 'Sağ alt',
   'initials_size': 'Paraf boyutu (%{pct})',
-  'initials_include_last': 'Son sayfayı imzalamanın yanı sıra parafla da',
+  'initials_include_last': 'İmzalanan sayfayı imzalamanın yanı sıra parafla da',
 }
 
 export default create

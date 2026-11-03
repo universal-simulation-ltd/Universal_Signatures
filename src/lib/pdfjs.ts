@@ -6,6 +6,45 @@ import PdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?worker'
 pdfjsLib.GlobalWorkerOptions.workerPort = new PdfjsWorker()
 
 /**
+ * Open a PDF and keep it open, for the page viewer: the page sizes up front
+ * (to lay out the row before anything is drawn) and a way to draw any page
+ * when it comes near the screen. The caller `destroy()`s it.
+ */
+export async function openForViewing(data: ArrayBuffer): Promise<{
+  sizes: { width: number; height: number }[]
+  render: (pageIndex: number, width: number) => Promise<string>
+  destroy: () => void
+}> {
+  // A copy, and the same untrusted-file settings as renderPageToCanvas below.
+  const doc = await pdfjsLib.getDocument({
+    data: data.slice(0),
+    isEvalSupported: false,
+    disableAutoFetch: true,
+    disableStream: true,
+  }).promise
+  const sizes: { width: number; height: number }[] = []
+  for (let i = 1; i <= doc.numPages; i++) {
+    const vp = (await doc.getPage(i)).getViewport({ scale: 1 })
+    sizes.push({ width: vp.width, height: vp.height })
+  }
+  return {
+    sizes,
+    async render(pageIndex, width) {
+      const page = await doc.getPage(pageIndex + 1)
+      const base = page.getViewport({ scale: 1 })
+      const viewport = page.getViewport({ scale: Math.min(width / base.width, 3) })
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.ceil(viewport.width)
+      canvas.height = Math.ceil(viewport.height)
+      await page.render({ canvasContext: canvas.getContext('2d')!, viewport }).promise
+      page.cleanup()
+      return canvas.toDataURL('image/jpeg', 0.9)
+    },
+    destroy: () => { void doc.destroy() },
+  }
+}
+
+/**
  * Render one page of a PDF to a canvas for the position picker. Returns the
  * canvas plus the page's logical size (PDF points) so callers can map a click
  * on the canvas back to a fraction of the page. `maxWidth` caps the render

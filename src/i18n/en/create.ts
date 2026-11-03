@@ -112,5 +112,5 @@ export default {
   'corner_bottom_center': 'Bottom centre',
   'corner_bottom_right': 'Bottom right',
   'initials_size': 'Initials size ({pct}%)', // {pct} is a number, e.g. 8
-  'initials_include_last': 'Initial the last page too, as well as signing it',
+  'initials_include_last': 'Initial the signed page too, as well as signing it',
 }

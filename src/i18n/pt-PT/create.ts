@@ -111,7 +111,7 @@ const create: Messages['create'] = {
   'corner_bottom_center': 'Em baixo ao centro',
   'corner_bottom_right': 'Em baixo à direita',
   'initials_size': 'Tamanho das iniciais ({pct}%)',
-  'initials_include_last': 'Rubricar também a última página, além de a assinar',
+  'initials_include_last': 'Rubricar também a página assinada, além de a assinar',
 }
 
 export default create

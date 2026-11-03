@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { renderPageToCanvas } from '../../lib/pdfjs'
-import type { Anchor, PlacePoint } from '../../lib/pdf'
+import type { PlacePoint } from '../../lib/pdf'
+import { initialsBox, loadAspect, sigCentre, type PreviewInitials } from '../../lib/placement'
 import { useT } from '../../i18n'
 
 interface Props {
@@ -19,14 +20,6 @@ interface Props {
   initials?: PreviewInitials | null
 }
 
-export interface PreviewInitials {
-  png: string
-  anchor: Anchor
-  widthPct: number
-}
-
-// signPdf's corner margin, in PDF points.
-const MARGIN_PT = 24
 
 // The PDF page with the signature on it, to drag where it goes (James,
 // 2026-11-03: "just show a preview of PDF immediately with the signature to be
@@ -63,34 +56,17 @@ export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onC
     // Not on `t`: a language change needs no new render of the page.
   }, [file, pageIndex, displayWidth])
 
-  useEffect(() => {
-    if (!sigPng) return
-    const img = new Image()
-    img.onload = () => { if (img.width && img.height) setSigAspect(img.width / img.height) }
-    img.src = sigPng
-  }, [sigPng])
+  useEffect(() => { if (sigPng) loadAspect(sigPng, setSigAspect) }, [sigPng])
 
   const iniPng = initials?.png
-  useEffect(() => {
-    if (!iniPng) return
-    const img = new Image()
-    img.onload = () => { if (img.width && img.height) setIniAspect(img.width / img.height) }
-    img.src = iniPng
-  }, [iniPng])
+  useEffect(() => { if (iniPng) loadAspect(iniPng, setIniAspect) }, [iniPng])
 
-  // Keep the signature wholly on the page, as signPdf does when it stamps it —
-  // otherwise a point near an edge previewed hanging off the page and then
-  // landed somewhere else. Half the signature's size, as page fractions.
-  const halfW = widthPct / 200
-  const halfH = page ? (widthPct / 100) * (page.w / sigAspect) / page.h / 2 : 0
-  const clampPos = (p: PlacePoint): PlacePoint => ({
-    xPct: Math.max(halfW, Math.min(1 - halfW, p.xPct)),
-    yPct: Math.max(Math.min(0.5, halfH), Math.min(1 - Math.min(0.5, halfH), p.yPct)),
-  })
-  const corner: PlacePoint = page
-    ? { xPct: 1 - MARGIN_PT / page.ptW - halfW, yPct: 1 - MARGIN_PT / page.ptH - halfH }
-    : { xPct: 0.75, yPct: 0.85 }
-  const shown = clampPos(pos ?? corner)
+  // Kept wholly on the page, as signPdf does when it stamps it — otherwise a
+  // point near an edge previewed hanging off the page and then landed
+  // somewhere else (lib/placement).
+  const clampPos = (p: PlacePoint | null): PlacePoint =>
+    page ? sigCentre(page.ptW, page.ptH, widthPct, sigAspect, p) : (p ?? { xPct: 0.75, yPct: 0.85 })
+  const shown = clampPos(pos)
 
   function pointAt(clientX: number, clientY: number) {
     const rect = surfaceRef.current!.getBoundingClientRect()
@@ -119,30 +95,11 @@ export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onC
     )
   }
 
-  // Where the initials land, worked out as signPdf does (in PDF points,
-  // bottom-left origin), so the preview and the signed copy agree — including
-  // the hop above (or below) the signature when they would overlap.
-  let initialsStyle: React.CSSProperties | null = null
-  if (initials) {
-    const { ptW: pw, ptH: ph } = page
-    const w = (Math.max(3, Math.min(30, initials.widthPct)) / 100) * pw
-    const h = w / iniAspect
-    const [vert, horiz] = initials.anchor.split('-')
-    let x = horiz === 'center' ? (pw - w) / 2 : horiz === 'right' ? pw - w - MARGIN_PT : MARGIN_PT
-    let y = vert === 'mid' ? (ph - h) / 2 : vert === 'top' ? ph - h - MARGIN_PT : MARGIN_PT
-    if (sigPng) {
-      const sw = (Math.max(5, Math.min(60, widthPct)) / 100) * pw
-      const sh = sw / sigAspect
-      const sx = Math.max(0, Math.min(pw - sw, shown.xPct * pw - sw / 2))
-      const sy = Math.max(0, Math.min(ph - sh, ph - shown.yPct * ph - sh / 2))
-      if (x < sx + sw && x + w > sx && y < sy + sh && y + h > sy) {
-        const gap = 6
-        y = sy + sh + gap + h <= ph ? sy + sh + gap : Math.max(0, sy - gap - h)
-      }
-    }
-    x = Math.max(0, x)
-    initialsStyle = { left: `${(x / pw) * 100}%`, top: `${((ph - y - h) / ph) * 100}%`, width: `${(w / pw) * 100}%`, aspectRatio: `${iniAspect}` }
-  }
+  // Where the initials land, as signPdf stamps them (lib/placement).
+  const box = initials ? initialsBox(page.ptW, page.ptH, initials, iniAspect, sigPng ? { widthPct, sigAspect, centre: shown } : null) : null
+  const initialsStyle = box
+    ? { left: `${box.left * 100}%`, top: `${box.top * 100}%`, width: `${box.width * 100}%`, aspectRatio: `${iniAspect}` }
+    : null
 
   // Percentages, not canvas pixels. The page image is capped at `maxWidth: 100%`
   // so on a phone it renders narrower than its canvas, and an offset computed in
