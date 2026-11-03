@@ -2,12 +2,12 @@ import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 're
 import { EMBEDDED, receivePdfs, sendSigned } from '../../lib/embed'
 import { DropAnywhere, DropRing, SignInDialog, useFileDrop, useUniversal, useUser, type SigningAuditFields } from '@unisim/sdk'
 import { useSigStore } from '../../stores/sigStore'
-import type { Anchor, PlacePoint } from '../../lib/pdf'
+import type { PlacePoint } from '../../lib/pdf'
 import { sha256Bytes, trimToInk } from '../../lib/signature'
 import { ALL_PAGES, INITIAL_PAGES } from '../../lib/types'
 import { recordSignedCopyHash, recordSigningEvent } from '../../lib/cloud'
 import type { PhoneAttestation } from '../../lib/phoneAttest'
-import { useT, type MessageKey } from '../../i18n'
+import { useT } from '../../i18n'
 import DropWatermark from './DropWatermark'
 import { useCoarsePointer } from '../../lib/useCoarsePointer'
 import InitialsPanel, { type InitialsChoice } from './InitialsPanel'
@@ -15,18 +15,12 @@ import SendForSigning from './SendForSigning'
 
 // pdf-lib (~500 kB), pdf.js (+ its 1.3 MB worker) and the QR encoder are only
 // needed once a PDF is in play, so they load on demand rather than in the
-// first-load bundle. The picker pulls pdf.js in with it, and pdf.js spins up
+// first-load bundle. The page preview pulls pdf.js in with it, and pdf.js spins up
 // its worker the moment its module runs — before this split, every visit to
 // the studio started that worker whether or not a PDF was ever opened.
-const PositionPicker = lazy(() => import('./PositionPicker'))
+const PagePlacer = lazy(() => import('./PagePlacer'))
 const loadPdf = () => import('../../lib/pdf')
 const loadQr = () => import('../../lib/qr')
-
-const ANCHORS: { id: Anchor; label: MessageKey }[] = [
-  { id: 'top-left', label: 'sign.anchor_top_left' }, { id: 'top-center', label: 'sign.anchor_top_center' }, { id: 'top-right', label: 'sign.anchor_top_right' },
-  { id: 'mid-left', label: 'sign.anchor_mid_left' }, { id: 'mid-center', label: 'sign.anchor_mid_center' }, { id: 'mid-right', label: 'sign.anchor_mid_right' },
-  { id: 'bottom-left', label: 'sign.anchor_bottom_left' }, { id: 'bottom-center', label: 'sign.anchor_bottom_center' }, { id: 'bottom-right', label: 'sign.anchor_bottom_right' },
-]
 
 // Only its origin is used, by the in-app sign-in's "manage your account" link.
 // Sign-in itself happens in <SignInDialog /> right here: linking to the hub's
@@ -93,9 +87,9 @@ export default function ApplyToPdf() {
   const [file, setFile] = useState<File | null>(null)
   const [pages, setPages] = useState(0)
   const [pageIndex, setPageIndex] = useState(0)
-  const [anchor, setAnchor] = useState<Anchor>('bottom-right')
+  // Where the signature goes: null is signPdf's bottom-right corner, which
+  // the page preview shows it in until it is dragged somewhere else.
   const [pos, setPos] = useState<PlacePoint | null>(null)
-  const [pickerOpen, setPickerOpen] = useState(false)
   const [widthPct, setWidthPct] = useState(25)
   // For "initials on every page, signature on the last".
   const [initials, setInitials] = useState<InitialsChoice>({ png: null, anchor: 'bottom-right', widthPct: 10, includeLast: false })
@@ -110,9 +104,8 @@ export default function ApplyToPdf() {
   // The file name of the last download, for the "Signed" confirmation.
   const [savedAs, setSavedAs] = useState<string | null>(null)
 
-  // Not while the position picker is up (it would swap the document behind a
-  // modal still showing the old one), and not mid-signing.
-  const accepting = !pickerOpen && !busy
+  // Not mid-signing.
+  const accepting = !busy
 
   // `pageWide`: the circle is where to aim, not where you have to land. It also
   // closes a real trap in this app specifically — a PDF let go just outside the
@@ -242,7 +235,7 @@ export default function ApplyToPdf() {
       const { signPdf } = await loadPdf()
       const sigPng = stampImage ?? await trimToInk(currentImage)
       const bytes = await signPdf(buf, sigPng, {
-        pageIndex, anchor, widthPct, pos: pos ?? undefined, qrPng, audit, phoneAttest,
+        pageIndex, anchor: 'bottom-right', widthPct, pos: pos ?? undefined, qrPng, audit, phoneAttest,
         initials: initialling && initials.png
           ? { png: initials.png, anchor: initials.anchor, widthPct: initials.widthPct, includeLast: initials.includeLast }
           : undefined,
@@ -389,69 +382,44 @@ export default function ApplyToPdf() {
               {pages > 1 && <option value={ALL_PAGES}>{t('sign.page_every', { count: pages })}</option>}
               {pages > 1 && <option value={INITIAL_PAGES}>{t('sign.page_initial_each')}</option>}
             </select>
-            <label htmlFor="sig-size" className="mt-3 mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.size_label', { pct: widthPct })}</label>
-            <input id="sig-size" type="range" min={8} max={50} value={widthPct} onChange={(e) => setWidthPct(Number(e.target.value))} className="w-full accent-orange-600" />
           </div>
           <div>
-            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              {initialling ? t('sign.position_label_initials') : t('sign.position_label')}
-            </div>
-            <div role="group" aria-label={t('sign.position_group_label')} className={`grid grid-cols-3 gap-1.5 transition ${pos ? 'opacity-40' : ''}`}>
-              {ANCHORS.map((a) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  onClick={() => { setPos(null); setAnchor(a.id) }}
-                  aria-label={t(a.label)}
-                  aria-pressed={!pos && anchor === a.id}
-                  title={t(a.label)}
-                  className={`h-9 rounded-md ring-1 transition ${!pos && anchor === a.id ? 'bg-orange-600 ring-orange-600' : 'bg-white ring-slate-200 hover:bg-slate-50'}`}
-                >
-                  <span className={`mx-auto block h-2 w-2 rounded-full ${!pos && anchor === a.id ? 'bg-white' : 'bg-slate-300'}`} />
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => setPickerOpen(true)}
-              disabled={!currentImage}
-              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-orange-400 hover:bg-orange-50/40 disabled:opacity-50"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" />
-              </svg>
-              {pos ? t('sign.position_custom') : t('sign.position_choose')}
-            </button>
-            {pos && (
-              <div className="mt-1.5 flex items-center justify-between text-[11px] text-emerald-700">
-                <span>{t('sign.position_custom_set')}</span>
-                <button type="button" onClick={() => setPos(null)} className="font-medium text-slate-500 hover:text-rose-600">{t('sign.position_use_grid')}</button>
-              </div>
-            )}
-            {!currentImage && (
-              <p className="mt-1 text-[11px] text-slate-400">{t('sign.position_needs_signature')}</p>
-            )}
+            <label htmlFor="sig-size" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.size_label', { pct: widthPct })}</label>
+            <input id="sig-size" type="range" min={8} max={50} value={widthPct} onChange={(e) => setWidthPct(Number(e.target.value))} className="mt-2 w-full accent-orange-600" />
           </div>
         </div>
       )}
 
-      {file && initialling && <InitialsPanel value={initials} onChange={setInitials} />}
-
-      {pickerOpen && file && currentImage && (
-        <Suspense fallback={null}>
-        <PositionPicker
-          file={file}
-          // Every page: preview the first. Initials mode: the signature goes on the last.
-          pageIndex={pageIndex === ALL_PAGES ? 0 : pageIndex === INITIAL_PAGES ? -1 : pageIndex}
-          sigPng={stampImage ?? currentImage}
-          widthPct={widthPct}
-          onWidthChange={setWidthPct}
-          initialPos={pos}
-          onConfirm={(p) => { setPos(p); setPickerOpen(false) }}
-          onClose={() => setPickerOpen(false)}
-        />
-        </Suspense>
+      {/* The page itself, straight away, with the signature on it to drag
+          where it goes (James, 2026-11-03) — no grid of corners, no dialog. */}
+      {file && (
+        <div className="mt-4">
+          <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-2 text-xs">
+            <span className="font-semibold uppercase tracking-wide text-slate-500">
+              {initialling ? t('sign.position_label_initials') : t('sign.position_label')}
+            </span>
+            {pos && (
+              <button type="button" onClick={() => setPos(null)} className="font-medium text-slate-500 hover:text-orange-700">{t('sign.position_reset')}</button>
+            )}
+          </div>
+          <Suspense fallback={<div className="aspect-[1/1.414] w-full animate-pulse rounded-lg bg-slate-100" />}>
+            <PagePlacer
+              file={file}
+              // Every page: preview the first. Initials mode: the signature goes on the last.
+              pageIndex={pageIndex === ALL_PAGES ? 0 : pageIndex === INITIAL_PAGES ? -1 : pageIndex}
+              sigPng={currentImage ? stampImage ?? currentImage : null}
+              widthPct={widthPct}
+              pos={pos}
+              onChange={setPos}
+            />
+          </Suspense>
+          <p className="mt-1.5 text-center text-[11px] text-slate-400">
+            {currentImage ? t('sign.placer_hint') : t('sign.position_needs_signature')}
+          </p>
+        </div>
       )}
+
+      {file && initialling && <InitialsPanel value={initials} onChange={setInitials} />}
 
       {file && hasExtras && (
         <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-lg border border-slate-200 bg-slate-50/60 p-3">

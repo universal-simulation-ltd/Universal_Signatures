@@ -41,21 +41,9 @@ export default {
   'size_label': 'Size ({pct}%)', // {pct} is the signature width as a percentage of the page
   'position_label': 'Position',
   'position_label_initials': 'Signature position (last page)',
-  'position_group_label': 'Position on the page', // aria-label of the 3×3 grid of positions
-  'anchor_top_left': 'Top left',
-  'anchor_top_center': 'Top centre',
-  'anchor_top_right': 'Top right',
-  'anchor_mid_left': 'Middle left',
-  'anchor_mid_center': 'Centre',
-  'anchor_mid_right': 'Middle right',
-  'anchor_bottom_left': 'Bottom left',
-  'anchor_bottom_center': 'Bottom centre',
-  'anchor_bottom_right': 'Bottom right',
-  'position_custom': 'Custom position', // button label once a position was picked on the page
-  'position_choose': 'Choose position…', // opens the visual position picker
-  'position_custom_set': '✓ Custom position set',
-  'position_use_grid': 'Use grid', // drops the custom position and goes back to the 3×3 grid
   'position_needs_signature': 'Create a signature to preview placement.',
+  'placer_hint': 'Drag your signature to where it goes, or tap the page to move it there.', // under the page preview, once there is a signature to drag
+  'position_reset': 'Back to the corner', // drops a dragged position: the signature goes back to the bottom-right corner
 
   // ── Options ──────────────────────────────────────────────────────────────
   'omit_extras': '{bold} — sign this document with the signature alone, without what you added in "Create your signature".', // {bold} is sign.omit_extras_bold

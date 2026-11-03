@@ -90,8 +90,11 @@ function check(label, condition, detail) {
   }
 }
 
-// Drive the studio far enough to have a signature and a loaded PDF, which is
-// what the "Choose position…" button needs before it will open.
+// Drive the studio far enough to have a signature and a loaded PDF. Since
+// 2026-11-03 that alone shows the page with the signature on it — no
+// "Choose position…" button, no dialog. The dialog is Send to be signed's
+// only now, which needs a signed-in Universal ID this harness doesn't have,
+// so the nav-bar checks below are on the inline preview instead.
 async function openPositionPicker(page) {
   await page.goto(BASE, { waitUntil: 'domcontentloaded' })
   await page.getByRole('heading', { name: 'Create your signature' }).waitFor({ timeout: 20000 })
@@ -101,49 +104,8 @@ async function openPositionPicker(page) {
   await page.waitForFunction(() => !!document.querySelector('input[type=file][accept*="pdf"]'))
   await page.waitForTimeout(1200)
   await page.locator('input[type=file][accept*="pdf"]').first().setInputFiles(PDF)
-  const choose = page.getByRole('button', { name: /Choose position/ })
-  await choose.waitFor({ state: 'visible', timeout: 10000 })
-  await choose.scrollIntoViewIfNeeded()
-  await choose.click()
   await page.locator('img[alt="PDF page"]').waitFor({ state: 'visible', timeout: 20000 })
-}
-
-// Everything measured with the page scrolled back to the top, because that is
-// where the nav bar is on screen and therefore where it can cover the dialog.
-// The overlay is fixed, so a user scrolling behind an open dialog gets here.
-async function measureDialog(page) {
-  await page.evaluate(() => window.scrollTo(0, 0))
-  await page.waitForTimeout(300)
-  return page.evaluate(() => {
-    const dialog = document.querySelector('[role="dialog"]')
-    const title = [...document.querySelectorAll('h2')].find((e) =>
-      e.textContent.includes('Choose signature position'))
-    const close = document.querySelector('button[aria-label="Close"]')
-    const confirm = [...document.querySelectorAll('button')].find((e) =>
-      e.textContent.trim() === 'Use this position')
-    const hitAt = (el) => {
-      if (!el) return null
-      const r = el.getBoundingClientRect()
-      return document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)
-    }
-    const box = (el) => (el ? (({ top, bottom, left, right }) =>
-      ({ top, bottom, left, right }))(el.getBoundingClientRect()) : null)
-    return {
-      innerHeight: window.innerHeight,
-      portalled: dialog?.parentElement === document.body,
-      overlayZ: dialog ? Number(getComputedStyle(dialog).zIndex) : null,
-      navZ: Number(getComputedStyle(document.querySelector('header').parentElement).zIndex),
-      title: box(title),
-      close: box(close),
-      confirm: box(confirm),
-      closeReachable: !!close && close.contains(hitAt(close)),
-      confirmReachable: !!confirm && confirm.contains(hitAt(confirm)),
-      // The one element inside the panel that is allowed to scroll.
-      scrollers: [...document.querySelectorAll('[role="dialog"] *')]
-        .filter((e) => e.scrollHeight > e.clientHeight + 1 &&
-          /auto|scroll/.test(getComputedStyle(e).overflowY)).length,
-    }
-  })
+  await page.locator('img[alt="Signature preview"]').waitFor({ state: 'visible', timeout: 10000 })
 }
 
 const playwright = await loadPlaywright()
@@ -151,13 +113,10 @@ const browser = await playwright.chromium.launch()
 
 try {
   // ────────────────────────────────────────────────────────────────────────
-  console.log('\nPosition picker — stays inside the viewport, above the nav bar')
+  console.log('\nPage preview — shows on its own, and the signature drags')
 
-  // Landscape is where this first went wrong: the viewport is short enough that
-  // a centred dialog's top edge lands under the 64px-tall bar.
   for (const vp of [
     { label: 'phone portrait 390×844', width: 390, height: 844 },
-    { label: 'phone landscape 844×390', width: 844, height: 390 },
     { label: 'desktop 1440×900', width: 1440, height: 900 },
   ]) {
     const ctx = await browser.newContext({
@@ -167,22 +126,19 @@ try {
     })
     const page = await ctx.newPage()
     await openPositionPicker(page)
-    const m = await measureDialog(page)
-
-    check(`${vp.label}: the dialog outranks the nav bar`,
-      m.overlayZ > m.navZ, `dialog z-index ${m.overlayZ}, nav bar ${m.navZ}`)
-    check(`${vp.label}: it is portalled to <body>`, m.portalled === true)
-    check(`${vp.label}: the title is on screen`,
-      m.title && m.title.top >= 0 && m.title.bottom <= m.innerHeight,
-      JSON.stringify(m.title))
-    check(`${vp.label}: the × is clickable, not buried under the bar`,
-      m.closeReachable, `elementFromPoint over the × was outside it`)
-    check(`${vp.label}: "Use this position" is on screen and clickable`,
-      m.confirmReachable && m.confirm.bottom <= m.innerHeight,
-      JSON.stringify(m.confirm))
-    check(`${vp.label}: exactly one scrolling region (the body, not the panel)`,
-      m.scrollers <= 1, `${m.scrollers} scrollers`)
-
+    check(`${vp.label}: no dialog opened`, (await page.locator('[role="dialog"]').count()) === 0)
+    const sig = page.locator('img[alt="Signature preview"]')
+    await sig.scrollIntoViewIfNeeded()
+    const before = await sig.boundingBox()
+    await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(before.x - 120, before.y - 200, { steps: 8 })
+    await page.mouse.up()
+    const after = await sig.boundingBox()
+    check(`${vp.label}: dragging moves the signature up and left`,
+      after.x < before.x - 40 && after.y < before.y - 40, JSON.stringify({ before, after }))
+    check(`${vp.label}: "Back to the corner" appears once it has moved`,
+      await page.getByRole('button', { name: 'Back to the corner' }).isVisible())
     await ctx.close()
   }
 
