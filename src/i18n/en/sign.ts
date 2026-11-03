@@ -14,7 +14,7 @@ export default {
   'drop_label_another': 'Drop another PDF here, or click to choose one', // same, once a PDF is loaded
   'drop_pages_one': '{count} page',
   'drop_pages_other': '{count} pages',
-  'drop_change': 'drop another, or click to change',
+  'change_pdf': 'Change PDF', // the button beside the loaded PDF's name: choose another
   'drop_over': 'Drop to open', // shown while a file is dragged over the circle
   'drop_here': 'Drop a PDF here',
   'drop_stays_local': 'it stays on your device',
@@ -33,14 +33,22 @@ export default {
   'error_sign': 'Could not sign the PDF.',
 
   // ── Page, size and position ──────────────────────────────────────────────
+  'layout_label': 'How to sign', // heading over the four ways to sign a PDF of more than one page
+  'layout_once': 'Sign once',
+  'layout_once_hint': 'Your signature on one page',
+  'layout_every': 'Sign every page',
+  'layout_every_hint': 'Your signature in the same place on each page',
+  'layout_initial_once': 'Initial all pages, sign once',
+  'layout_initial_once_hint': 'Your initials on each page, your signature on the last',
+  'layout_initial_every': 'Initial and sign all pages',
+  'layout_initial_every_hint': 'Your initials and your signature on every page',
   'page_label': 'Page',
   'page_option': 'Page {n}', // an entry in the page list; {n} is the page number
   'page_option_last': 'Page {n} (last)',
-  'page_every': 'Every page ({count})', // {count} is the number of pages
-  'page_initial_each': 'Initial each page, sign the last',
   'size_label': 'Size ({pct}%)', // {pct} is the signature width as a percentage of the page
   'position_label': 'Position',
   'position_label_initials': 'Signature position (last page)',
+  'position_label_every': 'Signature position (every page)',
   'position_needs_signature': 'Create a signature to preview placement.',
   'placer_hint': 'Drag your signature to where it goes, or tap the page to move it there.', // under the page preview, once there is a signature to drag
   'position_reset': 'Back to the corner', // drops a dragged position: the signature goes back to the bottom-right corner

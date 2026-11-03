@@ -13,6 +13,12 @@ export const ALL_PAGES = -2
  */
 export const INITIAL_PAGES = -3
 
+/**
+ * Sign a PDF's `pageIndex` value for initials AND the signature on every page,
+ * the signature in the same place on each.
+ */
+export const INITIAL_ALL_PAGES = -4
+
 // The create-signature tab. 'phone' is a capture method (draw on your phone via
 // a QR handoff) that yields a drawn image — once received the studio drops back
 // to 'draw', so a saved signature's `style` is only ever 'draw' | 'type'.

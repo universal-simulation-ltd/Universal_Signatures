@@ -125,7 +125,10 @@ export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onC
       aria-describedby={sigPng ? liveId : undefined}
       onKeyDown={onKeyDown}
       className={`relative mx-auto select-none rounded-lg shadow ring-1 ring-slate-200 outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${sigPng ? 'cursor-crosshair' : ''}`}
-      style={{ width: displayWidth, maxWidth: '100%' }}
+      // Not `width: displayWidth` + `maxWidth: 100%`: in the studio's one-column
+      // grid on a phone, a fixed 520px width sized the grid track itself, and the
+      // whole page laid out 578px wide.
+      style={{ width: '100%', maxWidth: displayWidth }}
       onPointerDown={(e) => {
         if (!sigPng) return
         const onSig = (e.target as HTMLElement).dataset.handle === 'sig'

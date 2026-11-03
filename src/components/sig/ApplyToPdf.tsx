@@ -4,10 +4,10 @@ import { DropAnywhere, DropRing, SignInDialog, useFileDrop, useUniversal, useUse
 import { useSigStore } from '../../stores/sigStore'
 import type { PlacePoint } from '../../lib/pdf'
 import { sha256Bytes, trimToInk } from '../../lib/signature'
-import { ALL_PAGES, INITIAL_PAGES } from '../../lib/types'
+import { ALL_PAGES, INITIAL_ALL_PAGES, INITIAL_PAGES } from '../../lib/types'
 import { recordSignedCopyHash, recordSigningEvent } from '../../lib/cloud'
 import type { PhoneAttestation } from '../../lib/phoneAttest'
-import { useT } from '../../i18n'
+import { useT, type MessageKey } from '../../i18n'
 import DropWatermark from './DropWatermark'
 import { useCoarsePointer } from '../../lib/useCoarsePointer'
 import InitialsPanel, { type InitialsChoice } from './InitialsPanel'
@@ -27,6 +27,16 @@ const loadQr = () => import('../../lib/qr')
 // /login navigated away from the signature (and PDF) being worked on, and the
 // hub then sent a newcomer on to the Assess portal, not back here.
 const SIGNUP_URL = 'https://app.unisim.co.uk/login'
+
+// How the signature goes on (James, 2026-11-03), sign once first as the
+// default. Each maps to a signPdf `pageIndex`; a one-page PDF only gets once.
+type Layout = 'once' | 'every' | 'initial-once' | 'initial-every'
+const LAYOUTS: { id: Layout; label: MessageKey; hint: MessageKey }[] = [
+  { id: 'once', label: 'sign.layout_once', hint: 'sign.layout_once_hint' },
+  { id: 'every', label: 'sign.layout_every', hint: 'sign.layout_every_hint' },
+  { id: 'initial-once', label: 'sign.layout_initial_once', hint: 'sign.layout_initial_once_hint' },
+  { id: 'initial-every', label: 'sign.layout_initial_every', hint: 'sign.layout_initial_every_hint' },
+]
 
 const verifyUrlFor = (certId: string | null) => (certId ? `${location.origin}${import.meta.env.BASE_URL}verify/${certId}` : null)
 
@@ -86,14 +96,21 @@ export default function ApplyToPdf() {
   }, [mode])
   const [file, setFile] = useState<File | null>(null)
   const [pages, setPages] = useState(0)
-  const [pageIndex, setPageIndex] = useState(0)
+  const [layout, setLayout] = useState<Layout>('once')
+  // The page for "Sign once".
+  const [onePage, setOnePage] = useState(0)
+  const shownLayout: Layout = pages > 1 ? layout : 'once'
+  const pageIndex = shownLayout === 'every' ? ALL_PAGES
+    : shownLayout === 'initial-once' ? INITIAL_PAGES
+      : shownLayout === 'initial-every' ? INITIAL_ALL_PAGES
+        : onePage
   // Where the signature goes: null is signPdf's bottom-right corner, which
   // the page preview shows it in until it is dragged somewhere else.
   const [pos, setPos] = useState<PlacePoint | null>(null)
   const [widthPct, setWidthPct] = useState(25)
   // For "initials on every page, signature on the last".
   const [initials, setInitials] = useState<InitialsChoice>({ png: null, anchor: 'bottom-right', widthPct: 10, includeLast: false })
-  const initialling = pageIndex === INITIAL_PAGES
+  const initialling = shownLayout === 'initial-once' || shownLayout === 'initial-every'
   const needsInitials = initialling && !initials.png
   const [makeRecord, setMakeRecord] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -148,7 +165,7 @@ export default function ApplyToPdf() {
       const { pageCount } = await loadPdf()
       const n = await pageCount(await f.arrayBuffer())
       setPages(n)
-      setPageIndex(0)
+      setOnePage(0)
       setPos(null)
     } catch (err) {
       setError(
@@ -291,7 +308,7 @@ export default function ApplyToPdf() {
           : t('sign.intro_send')}
       </p>
 
-      {/* The suite's shared drop circle (`DropRing` + `useFileDrop` from
+      {/* Until there is a PDF: the suite's shared drop circle (`DropRing` + `useFileDrop` from
           @unisim/sdk), not a dashed rectangle of this app's own: Universal PDF,
           Images, Compress and Video all take a document through this same ring,
           and someone arriving from one of them shouldn't have to learn a second
@@ -303,7 +320,28 @@ export default function ApplyToPdf() {
              whole circle is the control ("or click to browse" is words, not a
              link), and the accessible name lives on the ring.
            • The interior is painted `#ffffff` by the SDK, so the text inside is
-             fixed dark and carries no `dark:` variant. */}
+             fixed dark and carries no `dark:` variant.
+          Once a PDF is in, the circle goes and the page itself shows (James,
+          2026-11-03); another PDF is still taken by a drop anywhere on the
+          page, or "Change PDF". */}
+      {file ? (
+        <div className="mt-4 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2">
+          <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+            <path d="M14 3v5h5" />
+          </svg>
+          <span className="min-w-0 truncate text-xs font-semibold text-slate-900" title={file.name}>{file.name}</span>
+          <span className="shrink-0 text-[11px] tabular-nums text-slate-500">{t.plural('sign.drop_pages', pages)}</span>
+          <button
+            type="button"
+            onClick={drop.open}
+            disabled={!accepting}
+            className="ml-auto shrink-0 rounded-md px-2 py-1 text-xs font-medium text-orange-700 hover:bg-orange-50 disabled:opacity-50"
+          >
+            {t('sign.change_pdf')}
+          </button>
+        </div>
+      ) : (
       <div className="mt-4 flex flex-col items-center">
         <div
           {...drop.dropzoneProps}
@@ -311,23 +349,7 @@ export default function ApplyToPdf() {
             over ? 'scale-[1.02]' : ''
           }`}
         >
-          {/* `still` once a document is loaded: neither the idle twinkle ("alive
-              and waiting") nor the busy chase ("working") is true then. */}
-          <DropRing size="100%" over={over} motion={busy ? 'busy' : file ? 'still' : 'idle'} watermark={file ? false : <DropWatermark />}>
-            {file ? (
-              <>
-                <span className="w-full truncate text-[13px] font-bold text-slate-900" title={file.name}>
-                  {file.name}
-                </span>
-                <span className="text-[11.5px] tabular-nums text-slate-500">
-                  {t.plural('sign.drop_pages', pages)}
-                </span>
-                <span className="mt-1 text-[11px] text-slate-400">
-                  {busy ? t('sign.signing') : t('sign.drop_change')}
-                </span>
-              </>
-            ) : (
-              <>
+          <DropRing size="100%" over={over} motion="idle" watermark={<DropWatermark />}>
                 <svg
                   viewBox="0 0 24 24"
                   className={`mb-1 h-9 w-9 ${over ? 'text-orange-500' : 'text-slate-400'}`}
@@ -352,13 +374,12 @@ export default function ApplyToPdf() {
                   {mode === 'self' ? t('sign.drop_stays_local') : t('sign.drop_uploaded_on_send')}
                 </span>
                 <span className="mt-1 text-[11px] text-slate-400">{touch ? t('sign.drop_browse_tap') : t('sign.drop_browse')}</span>
-              </>
-            )}
           </DropRing>
         </div>
-        {/* Outside the ring, so the picker is never the thing a drop lands on. */}
-        <input {...drop.inputProps} className="hidden" />
       </div>
+      )}
+      {/* Outside the ring, so the picker is never the thing a drop lands on. */}
+      <input {...drop.inputProps} className="hidden" />
 
       {/* The drop circle's own errors (not a PDF, password-protected) belong
           to both modes; the rest of this card's are the sign-it-myself ones. */}
@@ -366,23 +387,50 @@ export default function ApplyToPdf() {
       {mode === 'send' && <SendForSigning file={file} pages={pages} />}
 
       {mode === 'self' && (<>
+      {file && pages > 1 && (
+        <div className="mt-4" role="radiogroup" aria-label={t('sign.layout_label')}>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.layout_label')}</div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {LAYOUTS.map((l) => (
+              <label
+                key={l.id}
+                className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition ${layout === l.id ? 'border-orange-500 bg-orange-50/60 ring-1 ring-orange-500' : 'border-slate-200 bg-white hover:bg-slate-50'}`}
+              >
+                <input
+                  type="radio"
+                  name="sig-layout"
+                  value={l.id}
+                  checked={layout === l.id}
+                  onChange={() => setLayout(l.id)}
+                  className="mt-0.5 h-4 w-4 accent-orange-600"
+                />
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-slate-900">{t(l.label)}</span>
+                  <span className="block text-[11px] text-slate-500">{t(l.hint)}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
       {file && (
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="sig-page" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.page_label')}</label>
-            <select
-              id="sig-page"
-              value={pageIndex}
-              onChange={(e) => setPageIndex(Number(e.target.value))}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm bg-white outline-none"
-            >
-              {Array.from({ length: pages }).map((_, i) => (
-                <option key={i} value={i}>{t(i === pages - 1 && pages > 1 ? 'sign.page_option_last' : 'sign.page_option', { n: i + 1 })}</option>
-              ))}
-              {pages > 1 && <option value={ALL_PAGES}>{t('sign.page_every', { count: pages })}</option>}
-              {pages > 1 && <option value={INITIAL_PAGES}>{t('sign.page_initial_each')}</option>}
-            </select>
-          </div>
+          {shownLayout === 'once' && pages > 1 && (
+            <div>
+              <label htmlFor="sig-page" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.page_label')}</label>
+              <select
+                id="sig-page"
+                value={onePage}
+                onChange={(e) => setOnePage(Number(e.target.value))}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm bg-white outline-none"
+              >
+                {Array.from({ length: pages }).map((_, i) => (
+                  <option key={i} value={i}>{t(i === pages - 1 ? 'sign.page_option_last' : 'sign.page_option', { n: i + 1 })}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label htmlFor="sig-size" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.size_label', { pct: widthPct })}</label>
             <input id="sig-size" type="range" min={8} max={50} value={widthPct} onChange={(e) => setWidthPct(Number(e.target.value))} className="mt-2 w-full accent-orange-600" />
@@ -396,7 +444,7 @@ export default function ApplyToPdf() {
         <div className="mt-4">
           <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-2 text-xs">
             <span className="font-semibold uppercase tracking-wide text-slate-500">
-              {initialling ? t('sign.position_label_initials') : t('sign.position_label')}
+              {t(shownLayout === 'initial-once' ? 'sign.position_label_initials' : shownLayout === 'once' ? 'sign.position_label' : 'sign.position_label_every')}
             </span>
             {pos && (
               <button type="button" onClick={() => setPos(null)} className="font-medium text-slate-500 hover:text-orange-700">{t('sign.position_reset')}</button>
@@ -405,8 +453,8 @@ export default function ApplyToPdf() {
           <Suspense fallback={<div className="aspect-[1/1.414] w-full animate-pulse rounded-lg bg-slate-100" />}>
             <PagePlacer
               file={file}
-              // Every page: preview the first. Initials mode: the signature goes on the last.
-              pageIndex={pageIndex === ALL_PAGES ? 0 : pageIndex === INITIAL_PAGES ? -1 : pageIndex}
+              // Every page: preview the first. Initial all, sign once: the signature goes on the last.
+              pageIndex={shownLayout === 'once' ? onePage : shownLayout === 'initial-once' ? -1 : 0}
               sigPng={currentImage ? stampImage ?? currentImage : null}
               widthPct={widthPct}
               pos={pos}
@@ -419,7 +467,7 @@ export default function ApplyToPdf() {
         </div>
       )}
 
-      {file && initialling && <InitialsPanel value={initials} onChange={setInitials} />}
+      {file && initialling && <InitialsPanel value={initials} onChange={setInitials} everyPage={shownLayout === 'initial-every'} />}
 
       {file && hasExtras && (
         <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-lg border border-slate-200 bg-slate-50/60 p-3">

@@ -23,9 +23,11 @@ export interface InitialsChoice {
  * Initials for "initials on every page, signature on the last". Typed in the
  * font chosen for the typed signature (pre-filled from the name, when there is
  * one) or drawn on a small pad of their own — the main pad holds the full
- * signature, which is still what goes on the last page.
+ * signature, which is still what goes on the last page. `everyPage`: the
+ * signature goes on every page too, so every page is initialled and the
+ * "initial the last page too" box has nothing to ask.
  */
-export default function InitialsPanel({ value, onChange }: { value: InitialsChoice; onChange: (v: InitialsChoice) => void }) {
+export default function InitialsPanel({ value, onChange, everyPage = false }: { value: InitialsChoice; onChange: (v: InitialsChoice) => void; everyPage?: boolean }) {
   const t = useT()
   const signerName = useSigStore((s) => s.signerName)
   const fontId = useSigStore((s) => s.fontId)
@@ -154,7 +156,7 @@ export default function InitialsPanel({ value, onChange }: { value: InitialsChoi
         </div>
       </div>
 
-      <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-slate-600">
+      {!everyPage && <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-slate-600">
         <input
           type="checkbox"
           checked={value.includeLast}
@@ -162,7 +164,7 @@ export default function InitialsPanel({ value, onChange }: { value: InitialsChoi
           className="mt-0.5 h-4 w-4 accent-orange-600"
         />
         <span>{t('create.initials_include_last')}</span>
-      </label>
+      </label>}
     </div>
   )
 }
