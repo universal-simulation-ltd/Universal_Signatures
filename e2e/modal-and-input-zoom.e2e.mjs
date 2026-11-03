@@ -157,6 +157,64 @@ try {
   }
 
   // ────────────────────────────────────────────────────────────────────────
+  console.log('\nPage viewer — a tap places the signature once, then it only drags')
+
+  // James, 2026-11-03: "after the initial placement then click to select not
+  // click to place so they have to click and drag".
+  for (const vp of [
+    { label: 'phone', width: 390, height: 844, touch: true },
+    { label: 'desktop', width: 1440, height: 900, touch: false },
+  ]) {
+    const ctx = await browser.newContext({
+      viewport: { width: vp.width, height: vp.height }, hasTouch: vp.touch, isMobile: vp.touch,
+    })
+    const page = await ctx.newPage()
+    await openPositionPicker(page)
+    await page.locator('input[type=file][accept*="pdf"]').first().setInputFiles(PDF_3)
+    await page.locator('[data-page="2"]').waitFor({ timeout: 20000 })
+    await page.locator('[data-page="0"] > img').first().waitFor({ state: 'visible', timeout: 20000 })
+    const sig = page.locator('img[data-handle="sig"]')
+    const page0 = page.locator('[data-page="0"]')
+    await page0.scrollIntoViewIfNeeded()
+    const tapAt = async (fx, fy) => {
+      const b = await page0.boundingBox()
+      const x = b.x + b.width * fx, y = b.y + b.height * fy
+      if (vp.touch) await page.touchscreen.tap(x, y)
+      else await page.mouse.click(x, y)
+    }
+    const centre = async () => {
+      const b = await page0.boundingBox(), s = await sig.boundingBox()
+      return { x: (s.x + s.width / 2 - b.x) / b.width, y: (s.y + s.height / 2 - b.y) / b.height }
+    }
+    await tapAt(0.3, 0.3)
+    const placed = await centre()
+    check(`${vp.label}: the first tap puts the signature there`,
+      Math.abs(placed.x - 0.3) < 0.03 && Math.abs(placed.y - 0.3) < 0.03, JSON.stringify(placed))
+    await tapAt(0.7, 0.6)
+    const still = await centre()
+    check(`${vp.label}: a second tap on the page does not move it`,
+      Math.abs(still.x - placed.x) < 0.005 && Math.abs(still.y - placed.y) < 0.005, JSON.stringify(still))
+    check(`${vp.label}: …and deselects it (no corner to pull)`, (await page.locator('[data-handle="size"]').count()) === 0)
+    const s = await sig.boundingBox()
+    if (vp.touch) await page.touchscreen.tap(s.x + s.width / 2, s.y + s.height / 2)
+    else await page.mouse.click(s.x + s.width / 2, s.y + s.height / 2)
+    check(`${vp.label}: a tap on the signature selects it (the corner shows)`, (await page.locator('[data-handle="size"]').count()) === 1)
+    if (!vp.touch) {
+      // Sign once: dragged onto the next page, the signature goes with it.
+      const p1 = await page.locator('[data-page="1"]').boundingBox()
+      const from = await sig.boundingBox()
+      await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(p1.x + p1.width / 2, p1.y + p1.height / 2, { steps: 12 })
+      await page.mouse.up()
+      check(`${vp.label}: dragged onto page 2, the signature is on page 2`,
+        (await page.locator('[data-page="1"] img[data-handle="sig"]').count()) === 1 &&
+          (await page.locator('[data-page="0"] img[data-handle="sig"]').count()) === 0)
+    }
+    await ctx.close()
+  }
+
+  // ────────────────────────────────────────────────────────────────────────
   console.log('\nPosition picker — the placement preview tracks the page image')
 
   {

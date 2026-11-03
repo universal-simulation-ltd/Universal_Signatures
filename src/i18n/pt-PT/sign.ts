@@ -43,7 +43,7 @@ const sign: Messages['sign'] = {
   'viewer_sig_label': 'A sua assinatura: arraste-a ou use as setas; + e − mudam o tamanho',
   'viewer_prev': 'Página anterior',
   'viewer_next': 'Página seguinte',
-  'viewer_hint': 'Deslize pelas páginas. Toque onde vai a sua assinatura, arraste-a para a mover e puxe o canto para mudar o tamanho.',
+  'viewer_hint': 'Deslize pelas páginas e toque onde vai a sua assinatura. Depois, arraste-a para a mover, ou toque nela e puxe o canto para mudar o tamanho.',
   'size_label': 'Tamanho ({pct}%)',
   'position_needs_signature': 'Crie uma assinatura para pré-visualizar a colocação.',
 
@@ -69,7 +69,7 @@ const sign: Messages['sign'] = {
 
   // ── Position picker (dialog) ─────────────────────────────────────────────
   'picker_title': 'Escolher a posição da assinatura',
-  'picker_hint': 'Clique ou arraste na página para colocar a assinatura, ou use as teclas de seta.',
+  'picker_hint': 'Clique na página para colocar a assinatura e depois arraste-a para a mover, ou use as teclas de seta.',
   'picker_close': 'Fechar',
   'picker_error': 'Não foi possível apresentar esta página.',
   'picker_rendering': 'A apresentar a página…',

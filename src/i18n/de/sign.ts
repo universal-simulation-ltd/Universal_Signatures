@@ -43,7 +43,7 @@ const sign: Messages['sign'] = {
   'viewer_sig_label': 'Ihre Unterschrift: ziehen oder mit den Pfeiltasten verschieben; + und − ändern die Größe',
   'viewer_prev': 'Vorherige Seite',
   'viewer_next': 'Nächste Seite',
-  'viewer_hint': 'Blättern Sie durch die Seiten. Tippen Sie dorthin, wo Ihre Unterschrift hingehört, ziehen Sie sie zum Verschieben und ziehen Sie an ihrer Ecke, um die Größe zu ändern.',
+  'viewer_hint': 'Blättern Sie durch die Seiten und tippen Sie dorthin, wo Ihre Unterschrift hingehört. Danach ziehen Sie sie zum Verschieben, oder tippen Sie sie an und ziehen Sie an ihrer Ecke, um die Größe zu ändern.',
   'size_label': 'Größe ({pct} %)',
   'position_needs_signature': 'Erstelle eine Unterschrift, um die Platzierung in der Vorschau zu sehen.',
 
@@ -69,7 +69,7 @@ const sign: Messages['sign'] = {
 
   // ── Position picker (dialog) ─────────────────────────────────────────────
   'picker_title': 'Position der Unterschrift wählen',
-  'picker_hint': 'Klicke oder ziehe auf der Seite, um deine Unterschrift zu platzieren, oder verwende die Pfeiltasten.',
+  'picker_hint': 'Klicke auf die Seite, um deine Unterschrift zu platzieren, und ziehe sie dann zum Verschieben, oder verwende die Pfeiltasten.',
   'picker_close': 'Schließen',
   'picker_error': 'Diese Seite konnte nicht dargestellt werden.',
   'picker_rendering': 'Seite wird dargestellt…',

@@ -436,7 +436,7 @@ export default function ApplyToPdf() {
 
       {/* The whole document, to swipe through and sign where it goes (James,
           2026-11-03): no page list, no size slider — tap a page to put the
-          signature there, drag it, pull its corner to size it. */}
+          signature there, then drag it, pull its corner to size it. */}
       {file && (
         <div className="mt-4">
           <Suspense fallback={<div className="h-80 w-full animate-pulse rounded-lg bg-slate-100" />}>

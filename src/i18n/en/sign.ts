@@ -43,7 +43,7 @@ export default {
   'viewer_sig_label': 'Your signature: drag it, or use the arrow keys; + and − resize it',
   'viewer_prev': 'Previous page',
   'viewer_next': 'Next page',
-  'viewer_hint': 'Swipe through the pages. Tap where your signature goes, drag it to move it, and pull its corner to resize it.', // under the page viewer, once there is a signature
+  'viewer_hint': 'Swipe through the pages and tap where your signature goes. Then drag it to move it, or tap it and pull its corner to resize it.', // under the page viewer, once there is a signature
   'size_label': 'Size ({pct}%)', // {pct} is the signature width as a percentage of the page
   'position_needs_signature': 'Create a signature to preview placement.',
 
@@ -69,7 +69,7 @@ export default {
 
   // ── Position picker (dialog) ─────────────────────────────────────────────
   'picker_title': 'Choose signature position',
-  'picker_hint': 'Click or drag on the page to place your signature, or use the arrow keys.',
+  'picker_hint': 'Click the page to place your signature, then drag it to move it, or use the arrow keys.',
   'picker_close': 'Close',
   'picker_error': 'Could not render this page.',
   'picker_rendering': 'Rendering page…',

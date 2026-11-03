@@ -43,7 +43,7 @@ const sign: Messages['sign'] = {
   'viewer_sig_label': 'Tu firma: arrástrala o usa las flechas; + y − cambian su tamaño',
   'viewer_prev': 'Página anterior',
   'viewer_next': 'Página siguiente',
-  'viewer_hint': 'Desliza por las páginas. Toca donde va tu firma, arrástrala para moverla y tira de su esquina para cambiar su tamaño.',
+  'viewer_hint': 'Desliza por las páginas y toca donde va tu firma. Después, arrástrala para moverla, o tócala y tira de su esquina para cambiar su tamaño.',
   'size_label': 'Tamaño ({pct}%)',
   'position_needs_signature': 'Crea una firma para ver dónde se coloca.',
 
@@ -69,7 +69,7 @@ const sign: Messages['sign'] = {
 
   // ── Position picker (dialog) ─────────────────────────────────────────────
   'picker_title': 'Elegir la posición de la firma',
-  'picker_hint': 'Haz clic o arrastra en la página para colocar tu firma, o usa las teclas de flecha.',
+  'picker_hint': 'Haz clic en la página para colocar tu firma y luego arrástrala para moverla, o usa las teclas de flecha.',
   'picker_close': 'Cerrar',
   'picker_error': 'No se ha podido mostrar esta página.',
   'picker_rendering': 'Mostrando la página…',

@@ -38,9 +38,15 @@ const MAX_WIDTH = 50
 // size it. Not Universal PDF's own viewer: that is ~2,400 lines bound to its
 // stores and annotation layer, for a job this does in one file.
 //
+// A tap places the signature only the first time (`pos` still null). After
+// that a tap selects it (its corner to pull shows) or, off it, deselects it,
+// and it moves only by dragging — onto another page too with the sign-once
+// layouts (James, 2026-11-03: "after the initial placement then click to
+// select not click to place so they have to click and drag").
+//
 // ⚠️ A finger only drags from the signature or its handle (`touch-none` is on
-// those alone); everywhere else a finger swipes the row, and a tap (a click
-// with no swipe) places the signature.
+// those alone); everywhere else a finger swipes the row. A drag listens on the
+// window, not the signature: dropping it on another page remounts it there.
 export default function PageStrip({ file, layout, sigPng, sigPage, pos, widthPct, initials, includeSigned, onPlace, onResize }: Props) {
   const t = useT()
   const rowRef = useRef<HTMLDivElement>(null)
@@ -54,6 +60,12 @@ export default function PageStrip({ file, layout, sigPng, sigPage, pos, widthPct
   // While dragging: what (move or resize), on which page, and where in the
   // signature it was picked up (page fractions from its centre).
   const drag = useRef<{ kind: 'move' | 'size'; page: number; dx: number; dy: number } | null>(null)
+  // When the last drag ended: the click that follows it is not a tap.
+  const dragEnded = useRef(0)
+  const [selected, setSelected] = useState(true)
+  // The window's listeners outlive the render that started the drag.
+  const live = useRef({ layout, pos, widthPct, sigAspect, onPlace, onResize })
+  live.current = { layout, pos, widthPct, sigAspect, onPlace, onResize }
 
   useEffect(() => {
     let cancelled = false
@@ -161,7 +173,61 @@ export default function PageStrip({ file, layout, sigPng, sigPage, pos, widthPct
     const r = el.getBoundingClientRect()
     return { xPct: (x - r.left) / r.width, yPct: (y - r.top) / r.height }
   }
-  const pageEl = (target: EventTarget) => (target as HTMLElement).closest<HTMLElement>('[data-page]')
+  const pageAt = (i: number) => rowRef.current?.querySelector<HTMLElement>(`[data-page="${i}"]`) ?? null
+  // The page under a pointer's x, or null over a gap.
+  const pageUnder = (x: number) => {
+    for (const el of rowRef.current?.querySelectorAll<HTMLElement>('[data-page]') ?? []) {
+      const r = el.getBoundingClientRect()
+      if (x >= r.left && x <= r.right) return Number(el.dataset.page)
+    }
+    return null
+  }
+
+  function startDrag(e: React.PointerEvent, kind: 'move' | 'size', page: number, centre: PlacePoint) {
+    e.preventDefault()
+    e.stopPropagation()
+    setSelected(true)
+    const p = pointIn(pageAt(page)!, e.clientX, e.clientY)
+    drag.current = kind === 'move' ? { kind, page, dx: p.xPct - centre.xPct, dy: p.yPct - centre.yPct } : { kind, page, dx: 0, dy: 0 }
+    const id = e.pointerId
+    const move = (ev: PointerEvent) => {
+      const d = drag.current
+      if (ev.pointerId !== id || !d || !doc) return
+      const { layout, pos, widthPct, sigAspect, onPlace, onResize } = live.current
+      if (d.kind === 'size') {
+        const size = doc.sizes[d.page]
+        const c = sigCentre(size.width, size.height, widthPct, sigAspect, pos)
+        const q = pointIn(pageAt(d.page)!, ev.clientX, ev.clientY)
+        onResize(Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, Math.round(Math.abs(q.xPct - c.xPct) * 200))))
+        return
+      }
+      const once = layout === 'once' || layout === 'initial-once'
+      if (once) d.page = pageUnder(ev.clientX) ?? d.page
+      const el = pageAt(d.page)
+      if (!el) return
+      const size = doc.sizes[d.page]
+      const q = pointIn(el, ev.clientX, ev.clientY)
+      onPlace(d.page, sigCentre(size.width, size.height, widthPct, sigAspect, { xPct: q.xPct - d.dx, yPct: q.yPct - d.dy }))
+      // Held near the row's edge, the row carries on, so a page off screen can be reached.
+      const row = rowRef.current
+      if (once && row) {
+        const r = row.getBoundingClientRect()
+        if (ev.clientX > r.right - 32) row.scrollLeft += 16
+        else if (ev.clientX < r.left + 32) row.scrollLeft -= 16
+      }
+    }
+    const end = (ev: PointerEvent) => {
+      if (ev.pointerId !== id) return
+      drag.current = null
+      dragEnded.current = Date.now()
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', end)
+      window.removeEventListener('pointercancel', end)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', end)
+    window.addEventListener('pointercancel', end)
+  }
 
   return (
     <div>
@@ -187,11 +253,13 @@ export default function PageStrip({ file, layout, sigPng, sigPage, pos, widthPct
               data-page={i}
               role="img"
               aria-label={t('sign.viewer_page', { n: i + 1, total })}
-              className={`relative shrink-0 select-none overflow-hidden rounded-sm bg-white shadow ring-1 ring-slate-200 ${sigPng ? 'cursor-crosshair' : ''}`}
+              className={`relative shrink-0 select-none overflow-hidden rounded-sm bg-white shadow ring-1 ring-slate-200 ${sigPng && !pos ? 'cursor-crosshair' : ''}`}
               style={{ width: widthOf(i), height: rowHeight }}
               onClick={(e) => {
-                if (!sigPng || (e.target as HTMLElement).dataset.handle) return
+                if (!sigPng || (e.target as HTMLElement).dataset.handle || Date.now() - dragEnded.current < 300) return
+                if (pos) { setSelected(false); return }
                 onPlace(i, sigCentre(size.width, size.height, widthPct, sigAspect, pointIn(e.currentTarget, e.clientX, e.clientY)))
+                setSelected(true)
               }}
             >
               {images[i] && <img src={images[i]} alt="" className="block h-full w-full" draggable={false} />}
@@ -215,7 +283,8 @@ export default function PageStrip({ file, layout, sigPng, sigPage, pos, widthPct
                     data-handle="sig"
                     tabIndex={i === focusPage ? 0 : -1}
                     draggable={false}
-                    className="block h-full w-full cursor-grab touch-none rounded-sm ring-1 ring-orange-400/70 outline-none focus-visible:ring-2 focus-visible:ring-orange-600 active:cursor-grabbing"
+                    className={`block h-full w-full cursor-grab touch-none rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-orange-600 active:cursor-grabbing ${selected ? 'ring-2 ring-orange-500' : 'ring-1 ring-orange-400/70'}`}
+                    onFocus={() => setSelected(true)}
                     onKeyDown={(e) => {
                       // Arrows move it 1% of the page (10% with Shift); + and − size it.
                       const step = e.shiftKey ? 0.1 : 0.01
@@ -228,41 +297,17 @@ export default function PageStrip({ file, layout, sigPng, sigPage, pos, widthPct
                         onResize(Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, widthPct + (e.key === '-' || e.key === '−' ? -1 : 1))))
                       }
                     }}
-                    onPointerDown={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      const p = pointIn(pageEl(e.currentTarget)!, e.clientX, e.clientY)
-                      drag.current = { kind: 'move', page: i, dx: p.xPct - centre.xPct, dy: p.yPct - centre.yPct }
-                      e.currentTarget.setPointerCapture(e.pointerId)
-                    }}
-                    onPointerMove={(e) => {
-                      if (drag.current?.kind !== 'move') return
-                      const p = pointIn(pageEl(e.currentTarget)!, e.clientX, e.clientY)
-                      onPlace(i, sigCentre(size.width, size.height, widthPct, sigAspect, { xPct: p.xPct - drag.current.dx, yPct: p.yPct - drag.current.dy }))
-                    }}
-                    onPointerUp={() => { drag.current = null }}
-                    onPointerCancel={() => { drag.current = null }}
+                    onPointerDown={(e) => startDrag(e, 'move', i, centre)}
                   />
-                  {/* The corner to pull: the signature grows or shrinks about its centre. */}
-                  <span
-                    data-handle="size"
-                    role="presentation"
-                    className="absolute -bottom-2 -right-2 h-5 w-5 cursor-nwse-resize touch-none rounded-full border-2 border-white bg-orange-600 shadow"
-                    onPointerDown={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      drag.current = { kind: 'size', page: i, dx: 0, dy: 0 }
-                      e.currentTarget.setPointerCapture(e.pointerId)
-                    }}
-                    onPointerMove={(e) => {
-                      if (drag.current?.kind !== 'size') return
-                      const p = pointIn(pageEl(e.currentTarget)!, e.clientX, e.clientY)
-                      const pct = Math.round(Math.abs(p.xPct - centre.xPct) * 200)
-                      onResize(Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, pct)))
-                    }}
-                    onPointerUp={() => { drag.current = null }}
-                    onPointerCancel={() => { drag.current = null }}
-                  />
+                  {/* The corner to pull, once it is selected: the signature grows or shrinks about its centre. */}
+                  {selected && (
+                    <span
+                      data-handle="size"
+                      role="presentation"
+                      className="absolute -bottom-2 -right-2 h-5 w-5 cursor-nwse-resize touch-none rounded-full border-2 border-white bg-orange-600 shadow"
+                      onPointerDown={(e) => startDrag(e, 'size', i, centre)}
+                    />
+                  )}
                 </div>
               )}
             </div>

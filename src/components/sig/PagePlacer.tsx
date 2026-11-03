@@ -28,8 +28,9 @@ interface Props {
 //
 // ⚠️ A finger only drags from the signature itself (`touch-none` is on it
 // alone) and a tap on the page moves it there: inline, a page-sized
-// `touch-none` surface would be a dead patch the phone cannot scroll past. A
-// mouse drags from anywhere on the page, as the dialog always did.
+// `touch-none` surface would be a dead patch the phone cannot scroll past.
+// Only the first press on the page places it (`pos` still null); after that it
+// moves only by dragging the signature itself (James, 2026-11-03, as PageStrip).
 export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onChange, displayWidth = 520, initials = null }: Props) {
   const t = useT()
   const [page, setPage] = useState<{ url: string; w: number; h: number; ptW: number; ptH: number } | null>(null)
@@ -123,7 +124,7 @@ export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onC
       aria-label={sigPng ? t('sign.picker_surface_label') : undefined}
       aria-describedby={sigPng ? liveId : undefined}
       onKeyDown={onKeyDown}
-      className={`relative mx-auto select-none rounded-lg shadow ring-1 ring-slate-200 outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${sigPng ? 'cursor-crosshair' : ''}`}
+      className={`relative mx-auto select-none rounded-lg shadow ring-1 ring-slate-200 outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${sigPng && !pos ? 'cursor-crosshair' : ''}`}
       // Not `width: displayWidth` + `maxWidth: 100%`: in the studio's one-column
       // grid on a phone, a fixed 520px width sized the grid track itself, and the
       // whole page laid out 578px wide.
@@ -131,7 +132,7 @@ export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onC
       onPointerDown={(e) => {
         if (!sigPng) return
         const onSig = (e.target as HTMLElement).dataset.handle === 'sig'
-        if (!onSig && e.pointerType !== 'mouse') return
+        if (!onSig && (pos || e.pointerType !== 'mouse')) return
         e.preventDefault()
         const p = pointAt(e.clientX, e.clientY)
         // From the signature: it keeps where it was picked up. From the page: its centre jumps to the pointer.
@@ -146,10 +147,10 @@ export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onC
       }}
       onPointerUp={() => { grab.current = null }}
       onPointerCancel={() => { grab.current = null }}
-      // A tap on the page (not a scroll) moves the signature there. A mouse
-      // already placed it on the way down, and a drag ends where it was let go.
+      // The first tap on the page (not a scroll) puts the signature there. A
+      // mouse already placed it on the way down, and a drag ends where it was let go.
       onClick={(e) => {
-        if (!sigPng || (e.target as HTMLElement).dataset.handle === 'sig') return
+        if (!sigPng || pos || (e.target as HTMLElement).dataset.handle === 'sig') return
         if (e.nativeEvent instanceof PointerEvent && e.nativeEvent.pointerType === 'mouse') return
         onChange(clampPos(pointAt(e.clientX, e.clientY)))
       }}

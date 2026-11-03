@@ -43,7 +43,7 @@ const sign: Messages['sign'] = {
   'viewer_sig_label': 'İmzanız: sürükleyin veya ok tuşlarını kullanın; + ve − boyutunu değiştirir',
   'viewer_prev': 'Önceki sayfa',
   'viewer_next': 'Sonraki sayfa',
-  'viewer_hint': 'Sayfalar arasında kaydırın. İmzanızın gideceği yere dokunun, taşımak için sürükleyin, boyutunu değiştirmek için köşesinden çekin.',
+  'viewer_hint': 'Sayfalar arasında kaydırın ve imzanızın gideceği yere dokunun. Ardından taşımak için sürükleyin ya da ona dokunup boyutunu değiştirmek için köşesinden çekin.',
   'size_label': 'Boyut (%{pct})',
   'position_needs_signature': 'Yerleşimi önizlemek için bir imza oluşturun.',
 
@@ -69,7 +69,7 @@ const sign: Messages['sign'] = {
 
   // Position picker (dialog)
   'picker_title': 'İmza konumunu seçin',
-  'picker_hint': 'İmzanızı yerleştirmek için sayfaya tıklayın veya sürükleyin ya da ok tuşlarını kullanın.',
+  'picker_hint': 'İmzanızı yerleştirmek için sayfaya tıklayın, ardından taşımak için sürükleyin ya da ok tuşlarını kullanın.',
   'picker_close': 'Kapat',
   'picker_error': 'Bu sayfa görüntülenemedi.',
   'picker_rendering': 'Sayfa görüntüleniyor…',

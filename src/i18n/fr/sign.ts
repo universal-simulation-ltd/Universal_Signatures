@@ -43,7 +43,7 @@ const sign: Messages['sign'] = {
   'viewer_sig_label': 'Votre signature : faites-la glisser ou utilisez les flèches ; + et − la redimensionnent',
   'viewer_prev': 'Page précédente',
   'viewer_next': 'Page suivante',
-  'viewer_hint': 'Faites défiler les pages. Touchez l’endroit où va votre signature, faites-la glisser pour la déplacer et tirez sur son coin pour la redimensionner.',
+  'viewer_hint': 'Faites défiler les pages et touchez l’endroit où va votre signature. Ensuite, faites-la glisser pour la déplacer, ou touchez-la et tirez sur son coin pour la redimensionner.',
   'size_label': 'Taille ({pct} %)',
   'position_needs_signature': 'Créez une signature pour prévisualiser son emplacement.',
 
@@ -69,7 +69,7 @@ const sign: Messages['sign'] = {
 
   // Position picker (dialog)
   'picker_title': 'Choisir la position de la signature',
-  'picker_hint': 'Cliquez ou faites glisser sur la page pour placer votre signature, ou utilisez les touches fléchées.',
+  'picker_hint': 'Cliquez sur la page pour placer votre signature, puis faites-la glisser pour la déplacer, ou utilisez les touches fléchées.',
   'picker_close': 'Fermer',
   'picker_error': 'Impossible d’afficher cette page.',
   'picker_rendering': 'Affichage de la page…',

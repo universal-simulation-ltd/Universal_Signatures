@@ -43,7 +43,7 @@ const sign: Messages['sign'] = {
   'viewer_sig_label': 'La tua firma: trascinala o usa le frecce; + e − la ridimensionano',
   'viewer_prev': 'Pagina precedente',
   'viewer_next': 'Pagina successiva',
-  'viewer_hint': 'Scorri le pagine. Tocca dove va la tua firma, trascinala per spostarla e tira il suo angolo per ridimensionarla.',
+  'viewer_hint': 'Scorri le pagine e tocca dove va la tua firma. Poi trascinala per spostarla, oppure toccala e tira il suo angolo per ridimensionarla.',
   'size_label': 'Dimensione ({pct}%)',
   'position_needs_signature': 'Crea una firma per vedere l’anteprima della posizione.',
 
@@ -69,7 +69,7 @@ const sign: Messages['sign'] = {
 
   // ── Position picker (dialog) ─────────────────────────────────────────────
   'picker_title': 'Scegli la posizione della firma',
-  'picker_hint': 'Fai clic o trascina sulla pagina per posizionare la firma, oppure usa i tasti freccia.',
+  'picker_hint': 'Fai clic sulla pagina per posizionare la firma, poi trascinala per spostarla, oppure usa i tasti freccia.',
   'picker_close': 'Chiudi',
   'picker_error': 'Impossibile visualizzare questa pagina.',
   'picker_rendering': 'Visualizzazione della pagina…',
