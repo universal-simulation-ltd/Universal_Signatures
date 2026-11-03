@@ -17,7 +17,7 @@ const save: Messages['save'] = {
 
   // Save on this device
   'local_title': 'Bu cihaza kaydet',
-  'local_no_account': 'Hesap gerekmez',
+  'local_on_device': 'Bu cihazda',
   'local_intro': 'İmzanızı bu tarayıcıda saklayın ve daha sonra yeniden kullanın — ücretsiz, giriş yapmadan. Hiçbir şey yüklenmez. Bu tarayıcının verileri temizlenirse silinir; bir kopyasını istiyorsanız bir dosyaya kaydedin.',
   'local_name_placeholder': 'Bu imzaya ad verin (isteğe bağlı)',
   'local_saved': '✓ Bu cihaza kaydedildi',

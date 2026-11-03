@@ -16,7 +16,7 @@ const save: Messages['save'] = {
 
   // ── Save on this device ─────────────────────────────────────────────────────
   'local_title': 'Salvar neste dispositivo',
-  'local_no_account': 'Sem conta',
+  'local_on_device': 'Neste dispositivo',
   'local_intro': 'Guarde sua assinatura neste navegador e use-a de novo depois — de graça, sem entrar. Nada é enviado. Ao limpar os dados deste navegador, ela é apagada, então salve-a em um arquivo se quiser uma cópia.',
   'local_name_placeholder': 'Dê um nome a esta assinatura (opcional)',
   'local_saved': '✓ Salva neste dispositivo',

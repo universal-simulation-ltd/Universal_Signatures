@@ -17,7 +17,7 @@ const save: Messages['save'] = {
 
   // ── Save on this device ─────────────────────────────────────────────────────
   'local_title': 'Auf diesem Gerät speichern',
-  'local_no_account': 'Kein Konto',
+  'local_on_device': 'Auf diesem Gerät',
   'local_intro': 'Bewahre deine Unterschrift in diesem Browser auf und verwende sie später wieder – kostenlos, ohne Anmeldung. Es wird nichts hochgeladen. Wenn du die Browserdaten löschst, ist sie weg – speichere sie also in einer Datei, wenn du eine Kopie möchtest.',
   'local_name_placeholder': 'Name der Unterschrift (optional)',
   'local_saved': '✓ Auf diesem Gerät gespeichert',

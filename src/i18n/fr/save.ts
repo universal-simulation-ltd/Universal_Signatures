@@ -17,7 +17,7 @@ const save: Messages['save'] = {
 
   // Save on this device
   'local_title': 'Enregistrer sur cet appareil',
-  'local_no_account': 'Sans compte',
+  'local_on_device': 'Sur cet appareil',
   'local_intro': 'Conservez votre signature dans ce navigateur pour la réutiliser plus tard — gratuitement, sans connexion. Rien n’est envoyé en ligne. Effacer les données de ce navigateur la supprime : enregistrez-la dans un fichier si vous voulez en garder une copie.',
   'local_name_placeholder': 'Nommer cette signature (facultatif)',
   'local_saved': '✓ Enregistrée sur cet appareil',

@@ -17,7 +17,7 @@ export default {
 
   // ── Save on this device ─────────────────────────────────────────────────────
   'local_title': 'Save on this device',
-  'local_no_account': 'No account', // small chip beside the heading
+  'local_on_device': 'On this device', // small chip beside the heading: where it is kept — not "No account", which read as a sign-in status to someone signed in (James, 2026-11-03)
   'local_intro': 'Keep your signature in this browser and reuse it later — free, no sign-in. Nothing is uploaded. Clearing this browser’s data removes it, so save it to a file if you want a copy.',
   'local_name_placeholder': 'Name this signature (optional)',
   'local_saved': '✓ Saved to this device',

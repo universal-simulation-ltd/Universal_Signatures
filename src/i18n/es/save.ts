@@ -17,7 +17,7 @@ const save: Messages['save'] = {
 
   // ── Save on this device ─────────────────────────────────────────────────────
   'local_title': 'Guardar en este dispositivo',
-  'local_no_account': 'Sin cuenta',
+  'local_on_device': 'En este dispositivo',
   'local_intro': 'Conserva tu firma en este navegador y vuelve a usarla más tarde: gratis y sin iniciar sesión. No se sube nada. Si borras los datos de este navegador, se elimina, así que guárdala en un archivo si quieres una copia.',
   'local_name_placeholder': 'Ponle nombre a esta firma (opcional)',
   'local_saved': '✓ Guardada en este dispositivo',

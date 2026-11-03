@@ -111,7 +111,7 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
       {!bare && (
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-bold text-slate-900">{t('save.local_title')}</h2>
-          <Chip size="sm">{t('save.local_no_account')}</Chip>
+          <Chip size="sm">{t('save.local_on_device')}</Chip>
         </div>
       )}
       <p className={`text-xs text-slate-500 ${bare ? '' : 'mt-1'}`}>

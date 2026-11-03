@@ -39,7 +39,7 @@ export default function SaveTabs() {
             <path d="M6 9l6 6 6-6" />
           </svg>
         </button>
-        <Chip size="sm">{t('save.local_no_account')}</Chip>
+        <Chip size="sm">{t('save.local_on_device')}</Chip>
       </div>
       {open && (
         <div id={panelId} className="mt-4">
