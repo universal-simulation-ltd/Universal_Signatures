@@ -17,6 +17,7 @@ import TypeSignature from './TypeSignature'
 import PhoneSignPanel from './PhoneSignPanel'
 import { CONTAINER } from '../../lib/layout'
 import { getT, useT, type MessageKey } from '../../i18n'
+import { btnPrimary, btnSecondarySm, btnSoft, Key, PenIcon } from '../ui'
 
 const loadPdf = () => import('../../lib/pdf')
 const loadPdfjs = () => import('../../lib/pdfjs')
@@ -144,7 +145,7 @@ export default function SignRequestPage({ token }: { token: string }) {
           <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-800">
             {phase.message}
             {phase.retry && (
-              <button type="button" onClick={() => setAttempt((n) => n + 1)} className="mt-3 block rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-rose-900 ring-1 ring-rose-200 hover:bg-rose-100">
+              <button type="button" onClick={() => setAttempt((n) => n + 1)} className={`${btnSecondarySm} mt-3`}>
                 {t('send.req_try_again')}
               </button>
             )}
@@ -258,7 +259,7 @@ function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedE
             placeholder={t('send.gate_email_placeholder')}
             className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
           />
-          <button type="button" onClick={sendCode} disabled={busy || !email.trim()} className="rounded-md bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800 disabled:opacity-50">
+          <button type="button" onClick={sendCode} disabled={busy || !email.trim()} className={btnPrimary}>
             {busy ? t('send.gate_sending') : t('send.gate_send_code')}
           </button>
         </div>
@@ -277,7 +278,7 @@ function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedE
               placeholder="123456"
               className="w-40 rounded-md border border-slate-300 px-3 py-2 text-sm tracking-widest outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
             />
-            <button type="button" onClick={checkCode} disabled={busy || code.length < 6} className="rounded-md bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800 disabled:opacity-50">
+            <button type="button" onClick={checkCode} disabled={busy || code.length < 6} className={btnPrimary}>
               {busy ? t('send.gate_checking') : t('send.gate_open')}
             </button>
           </div>
@@ -425,16 +426,16 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-bold text-slate-900">{t('send.doc_your_signature')}</h2>
-          <div className="inline-flex rounded-md bg-slate-100 p-0.5">
+          <div className="u-tabs inline-flex max-w-full">
             {MODES.map((m) => (
               <button
                 key={m.id}
                 type="button"
                 onClick={() => setMode(m.id)}
                 aria-pressed={mode === m.id}
-                className={`rounded px-3 py-1 text-xs font-semibold ${mode === m.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                className="u-tab"
               >
                 {t(m.label)}
               </button>
@@ -458,7 +459,7 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
           <button
             type="button"
             onClick={() => scrollTo(nextOpen)}
-            className="mt-3 w-full rounded-lg border border-orange-300 bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-800 hover:bg-orange-100"
+            className={`${btnSoft} mt-3 w-full`}
           >
             {t('send.doc_next_field', { done: doneCount, total: spots.length })}
           </button>
@@ -468,8 +469,9 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
           type="button"
           onClick={sign}
           disabled={!sig || !agree || !allDone || busy}
-          className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
+          className={`${btnPrimary} mt-3 w-full justify-start`}
         >
+          <Key><PenIcon /></Key>
           {busy ? t('send.doc_btn_signing') : !sig ? t('send.doc_btn_add_first') : !allDone ? t('send.doc_btn_fill_all', { done: doneCount, total: spots.length }) : !agree ? t('send.doc_btn_tick') : t('send.doc_btn_sign')}
         </button>
         <p className="mt-2 text-[11px] text-slate-500">
@@ -491,7 +493,7 @@ function Signed({ phase }: { phase: { certId: string | null; completed: boolean 
           : t('send.signed_partial')}
       </p>
       {phase.certId && (
-        <a href={certificateLink(phase.certId)} className="mt-3 inline-flex rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">
+        <a href={certificateLink(phase.certId)} className={`${btnPrimary} mt-3`}>
           {t('send.signed_open_cert')}
         </a>
       )}

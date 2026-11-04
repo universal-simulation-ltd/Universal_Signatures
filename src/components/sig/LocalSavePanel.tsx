@@ -12,6 +12,7 @@ import {
 } from '../../lib/localSignatures'
 import { packSavedSignatures, readSavedSignatures } from '../../lib/signatureFile'
 import { useT } from '../../i18n'
+import { btnSecondary, btnSecondarySm, Key, SaveIcon, UploadIcon } from '../ui'
 
 // Free, no-account "Save on this device": keep a few signatures in this
 // browser and reuse them later. "Save to a file" / "Open a file" carry them to
@@ -128,8 +129,9 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
         <button
           onClick={onSave}
           disabled={!currentImage}
-          className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
+          className={`${btnSecondary} w-full justify-start`}
         >
+          <Key><SaveIcon /></Key>
           {justSaved ? t('save.local_saved') : !currentImage ? t('save.create_first') : t('save.local_save')}
         </button>
       </div>
@@ -176,7 +178,7 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
               ) : (
                 <button
                   onClick={() => onUse(sig)}
-                  className="shrink-0 rounded-md bg-orange-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-800"
+                  className={`${btnSecondarySm} shrink-0`}
                 >
                   {t('save.local_use')}
                 </button>
@@ -301,16 +303,18 @@ function SignatureFile({ saved, onImported }: { saved: LocalSignature[]; onImpor
           type="button"
           onClick={save}
           disabled={saved.length === 0 || busy !== null}
-          className="rounded-lg bg-white px-3.5 py-2 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-50 disabled:opacity-50"
+          className={btnSecondary}
         >
+          <Key><SaveIcon /></Key>
           {busy === 'save' ? t('save.saving') : saved.length === 0 ? t('save.file_nothing_to_save') : t('save.file_save')}
         </button>
         <button
           type="button"
           onClick={drop.open}
           disabled={busy !== null}
-          className="rounded-lg bg-white px-3.5 py-2 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-50 disabled:opacity-50"
+          className={btnSecondary}
         >
+          <Key><UploadIcon /></Key>
           {busy === 'open' ? t('save.file_opening') : t('save.file_open')}
         </button>
         {pending && (
@@ -318,7 +322,7 @@ function SignatureFile({ saved, onImported }: { saved: LocalSignature[]; onImpor
             type="button"
             onClick={() => void open(pending)}
             disabled={busy !== null || !password}
-            className="rounded-lg bg-orange-700 px-3.5 py-2 text-sm font-semibold text-white hover:bg-orange-800 disabled:opacity-50"
+            className={btnSecondary}
           >
             {t('save.file_try_again')}
           </button>

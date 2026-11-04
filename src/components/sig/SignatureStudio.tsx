@@ -111,7 +111,7 @@ export default function SignatureStudio() {
             the folded card kept a 24px margin under it for nothing. */}
         <div className="flex flex-col gap-6">
         <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-bold text-slate-900">
               {sending ? (
                 // `aria-expanded` + `aria-controls`: the SDK's reveal-on-expand
@@ -130,13 +130,13 @@ export default function SignatureStudio() {
                 </button>
               ) : t('create.studio_title')}
             </h2>
-            <div className={`${folded ? 'hidden' : 'inline-flex'} rounded-md bg-slate-100 p-0.5`}>
+            <div className={`u-tabs max-w-full ${folded ? 'hidden' : 'inline-flex'}`}>
               {modes.map((m) => {
                 const label = t(m.label)
+                // The suite's tray tabs (SDK 0.216, BRANDING.md → Tabs):
+                // aria-pressed selects, and buttonProps' data-default-view draws
+                // the opens-here dot (it was an orange fill / outline).
                 const dvProps = dv.buttonProps(m.id, label)
-                // The mode it opens on is orange: filled while you are on it,
-                // outlined while you are not — Jukebox's library tabs.
-                const isDefault = dvProps['data-default-view'] === 'true'
                 return (
                   <button
                     key={m.id}
@@ -144,15 +144,7 @@ export default function SignatureStudio() {
                     aria-pressed={mode === m.id}
                     {...dvProps}
                     onClick={() => { dv.tap(m.id); setMode(m.id) }}
-                    className={`rounded px-3 py-1 text-xs font-semibold ${
-                      mode === m.id
-                        ? isDefault
-                          ? 'bg-gradient-to-br from-[#FE8C01] to-[#E05504] text-white shadow-sm'
-                          : 'bg-white text-slate-900 shadow-sm'
-                        : isDefault
-                          ? 'text-orange-700 ring-1 ring-inset ring-orange-400/70'
-                          : 'text-slate-500'
-                    }`}
+                    className="u-tab"
                   >
                     {label}
                   </button>
@@ -193,14 +185,14 @@ export default function SignatureStudio() {
             {hasLabels && (
               <div className="flex items-center gap-2 pt-0.5">
                 <span className="text-[11px] font-medium text-slate-500">{t('create.labels_align')}</span>
-                <div className="inline-flex rounded-md bg-slate-100 p-0.5">
+                <div className="u-tabs inline-flex">
                   {(['left', 'center', 'right'] as LabelAlign[]).map((a) => (
                     <button
                       key={a}
                       type="button"
                       onClick={() => setLabelAlign(a)}
                       aria-pressed={labelAlign === a}
-                      className={`rounded px-2.5 py-1 text-xs font-semibold ${labelAlign === a ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                      className="u-tab"
                     >
                       {t(ALIGN_LABELS[a])}
                     </button>

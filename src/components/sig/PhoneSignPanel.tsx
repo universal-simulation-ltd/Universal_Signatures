@@ -15,6 +15,7 @@ import {
   type MobileSignResult,
 } from '../../lib/mobileSign'
 import { formatAttestLocal, verifyPhoneAttestation } from '../../lib/phoneAttest'
+import { btnSecondarySm } from '../ui'
 
 // The "Sign on phone" tab of Create your signature. Shows a QR + PIN; the phone
 // opens the URL, draws, and broadcasts the image back over a Supabase Realtime
@@ -167,7 +168,7 @@ export default function PhoneSignPanel() {
         <button
           type="button"
           onClick={signAgain}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-orange-400 hover:bg-orange-50/40"
+          className={btnSecondarySm}
         >
           {t('create.phone_sign_again')}
         </button>
@@ -194,7 +195,7 @@ export default function PhoneSignPanel() {
         <button
           type="button"
           onClick={refresh}
-          className="rounded-md bg-orange-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-800"
+          className={btnSecondarySm}
         >
           {t('create.phone_get_new_code')}
         </button>

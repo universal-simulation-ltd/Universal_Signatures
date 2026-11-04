@@ -7,6 +7,7 @@ import BadgeEmbed from './BadgeEmbed'
 import RequestCertificate from './RequestCertificate'
 import Row from './Row'
 import { intlLocale, useT } from '../../i18n'
+import { btnSecondarySm, Key, UploadIcon } from '../ui'
 
 // Public certificate verification: anyone with a cert link (typically by
 // scanning the QR on a signed PDF) can confirm the record is genuine, via a
@@ -93,7 +94,7 @@ export default function VerifyPage({ certId }: { certId: string }) {
             <button
               type="button"
               onClick={() => setAttempt((n) => n + 1)}
-              className="mt-2 block rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 ring-1 ring-amber-200 hover:bg-amber-100"
+              className={`${btnSecondarySm} mt-2`}
             >
               {t('verify.try_again')}
             </button>
@@ -153,8 +154,9 @@ function CheckPdf({ original, signed }: { original: string; signed: string | nul
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={state.kind === 'busy'}
-        className="mt-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-orange-400 hover:bg-orange-50/40 disabled:opacity-60"
+        className={`${btnSecondarySm} mt-2`}
       >
+        <Key><UploadIcon /></Key>
         {state.kind === 'busy' ? t('verify.check_busy') : t('verify.check_button')}
       </button>
       <input

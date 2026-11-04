@@ -12,6 +12,7 @@ import DropWatermark from './DropWatermark'
 import { useCoarsePointer } from '../../lib/useCoarsePointer'
 import InitialsPanel, { InitialsPlacement, type InitialsChoice } from './InitialsPanel'
 import SendForSigning from './SendForSigning'
+import { btnPrimary, btnSecondarySm, btnSoftSm, Key, PenIcon } from '../ui'
 
 // pdf-lib (~500 kB), pdf.js (+ its 1.3 MB worker) and the QR encoder are only
 // needed once a PDF is in play, so they load on demand rather than in the
@@ -308,14 +309,14 @@ export default function ApplyToPdf() {
     <div className="rounded-xl border border-slate-200 bg-white p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-bold text-slate-900">{t('sign.title')}</h2>
-        <div ref={switchRef} className="inline-flex rounded-md bg-slate-100 p-0.5" role="group" aria-label={t('sign.mode_group_label')}>
+        <div ref={switchRef} className="u-tabs inline-flex" role="group" aria-label={t('sign.mode_group_label')}>
           {([['self', t('sign.mode_self')], ['send', t('sign.mode_send')]] as const).map(([id, label]) => (
             <button
               key={id}
               type="button"
               onClick={() => setMode(id)}
               aria-pressed={mode === id}
-              className={`rounded px-3 py-1 text-xs font-semibold ${mode === id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+              className="u-tab"
             >
               {label}
             </button>
@@ -356,7 +357,7 @@ export default function ApplyToPdf() {
             type="button"
             onClick={drop.open}
             disabled={!accepting}
-            className="ml-auto shrink-0 rounded-md px-2 py-1 text-xs font-medium text-orange-700 hover:bg-orange-50 disabled:opacity-50"
+            className={`${btnSoftSm} ml-auto shrink-0`}
           >
             {t('sign.change_pdf')}
           </button>
@@ -505,8 +506,9 @@ export default function ApplyToPdf() {
       <button
         onClick={onSign}
         disabled={!file || !currentImage || needsInitials || busy}
-        className="mt-4 w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
+        className={`${btnPrimary} mt-4 w-full justify-start`}
       >
+        <Key><PenIcon /></Key>
         {busy ? t('sign.signing') : !currentImage ? t('sign.button_needs_signature') : needsInitials ? t('sign.button_needs_initials') : t(EMBEDDED ? 'sign.button_sign_embedded' : 'sign.button_sign')}
       </button>
 
@@ -523,7 +525,7 @@ export default function ApplyToPdf() {
             <input readOnly value={verifyUrl} className="flex-1 rounded-md border border-emerald-200 bg-white px-2 py-1.5 text-[11px] text-slate-700" />
             <button
               onClick={() => navigator.clipboard?.writeText(verifyUrl)}
-              className="shrink-0 rounded-md bg-emerald-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-700"
+              className={`${btnSecondarySm} shrink-0`}
             >
               {t('sign.record_copy')}
             </button>

@@ -5,6 +5,7 @@ import { mobileSignChannel, type MobileSignResult } from '../../lib/mobileSign'
 import { randomHex } from '../../lib/signature'
 import { useInkCanvas } from '../../lib/useInkCanvas'
 import { useT, type MessageKey } from '../../i18n'
+import { btnPrimary, Key, SendIcon } from '../ui'
 
 type Status = 'idle' | 'sending' | 'sent' | 'unconfirmed' | 'invalid' | 'wrongPin' | 'refused' | 'error' | 'expired'
 
@@ -174,8 +175,11 @@ export default function SignMobilePage({ token, expiresAt = null }: { token: str
         type="button"
         onClick={submit}
         disabled={status === 'sending'}
-        className="mt-1 rounded-xl bg-orange-700 py-3 text-sm font-semibold hover:bg-orange-800 disabled:opacity-60"
+        // The page is dark, so the key button takes its dark ground.
+        data-u-ground="dark"
+        className={`${btnPrimary} mt-1 w-full justify-start`}
       >
+        <Key><SendIcon /></Key>
         {status === 'sending' ? t('create.mobile_sending') : t('create.mobile_send')}
       </button>
     </main>

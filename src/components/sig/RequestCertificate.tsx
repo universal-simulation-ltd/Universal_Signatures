@@ -5,6 +5,7 @@ import { certificateDownload } from '../../lib/signRequests'
 import BadgeEmbed from './BadgeEmbed'
 import Row from './Row'
 import { intlLocale, useT, type MessageKey } from '../../i18n'
+import { btnPrimarySm } from '../ui'
 
 // Activity-log actions → their label's key (translated at render).
 const ACTIONS: Record<string, MessageKey> = {
@@ -113,7 +114,7 @@ export default function RequestCertificate({
             type="button"
             onClick={onDownload}
             disabled={downloading}
-            className="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black disabled:opacity-60"
+            className={btnPrimarySm}
           >
             {downloading ? t('verify.download_busy') : t('verify.download_button')}
           </button>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { PlacePoint } from '../../lib/pdf'
 import { useT } from '../../i18n'
+import { btnPrimary, btnQuiet } from '../ui'
 import PagePlacer from './PagePlacer'
 
 interface Props {
@@ -68,10 +69,10 @@ export default function PositionPicker({
         </div>
 
         <div className="flex shrink-0 justify-end gap-2 border-t border-slate-100 px-5 py-3">
-          <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">{t('sign.picker_cancel')}</button>
+          <button onClick={onClose} className={btnQuiet}>{t('sign.picker_cancel')}</button>
           <button
             onClick={() => onConfirm(pos)}
-            className="rounded-lg bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800 disabled:opacity-50"
+            className={btnPrimary}
           >
             {t('sign.picker_confirm')}
           </button>

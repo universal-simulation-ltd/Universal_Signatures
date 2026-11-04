@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { UniversalProvider } from '@unisim/sdk'
+import { UniversalProvider, installButtonStyles, installTabStyles } from '@unisim/sdk'
 import type { ProductCode } from '@unisim/sdk'
 import App from './App'
 import { UsageTracker } from '@unisim/sdk'
@@ -39,6 +39,10 @@ const universalConfig = {
   // also hard-guards this off whenever cookieDomain is set).
   mockAuth: import.meta.env.DEV && import.meta.env.VITE_REAL_AUTH !== '1',
 }
+
+// The suite's key buttons and tray tabs, used as class strings (components/ui.tsx).
+installButtonStyles()
+installTabStyles()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

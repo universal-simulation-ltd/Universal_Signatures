@@ -1,5 +1,6 @@
 import { useEffect, useId, useState } from 'react'
 import { useT, type MessageKey } from '../../i18n'
+import { btnSecondarySm } from '../ui'
 
 type Format = 'live' | 'image' | 'markdown'
 
@@ -91,14 +92,14 @@ export default function BadgeEmbed({ certId }: { certId: string }) {
       </summary>
 
       <div className="mt-3">
-        <div className="inline-flex rounded-md bg-slate-100 p-0.5" role="group" aria-label={t('verify.badge_format_aria')}>
+        <div className="u-tabs inline-flex" role="group" aria-label={t('verify.badge_format_aria')}>
           {TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => { setFormat(tab.id); setCopied(false) }}
               aria-pressed={format === tab.id}
-              className={`rounded px-2.5 py-1 text-xs font-semibold ${format === tab.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+              className="u-tab"
             >
               {t(tab.label)}
             </button>
@@ -142,7 +143,7 @@ export default function BadgeEmbed({ certId }: { certId: string }) {
         <button
           type="button"
           onClick={copy}
-          className="mt-1.5 rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black"
+          className={`${btnSecondarySm} mt-1.5`}
         >
           {copied ? t('verify.badge_copied') : t('verify.badge_copy')}
         </button>

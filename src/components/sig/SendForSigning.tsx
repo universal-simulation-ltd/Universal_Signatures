@@ -13,6 +13,7 @@ import {
   type SignField,
 } from '../../lib/signRequests'
 import { intlLocale, useT, type MessageKey } from '../../i18n'
+import { btnDangerSm, btnPrimary, btnQuietSm, btnSecondarySm, Key, SendIcon } from '../ui'
 
 const PositionPicker = lazy(() => import('./PositionPicker'))
 const loadPdf = () => import('../../lib/pdf')
@@ -131,7 +132,7 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
         <p className="text-sm text-slate-700">
           {t.rich('send.signed_out_intro', { id: <strong>Universal ID</strong> })}
         </p>
-        <button type="button" onClick={() => setSignInOpen(true)} className="mt-3 inline-flex rounded-lg bg-orange-700 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-800">
+        <button type="button" onClick={() => setSignInOpen(true)} className={`${btnPrimary} mt-3`}>
           {t('send.signed_out_cta')}
         </button>
         <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} hubLoginHref={SIGNUP_URL} initialMode="signup" />
@@ -273,7 +274,7 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
               <button
                 type="button"
                 onClick={() => setPickerOpen(true)}
-                className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-orange-400 hover:bg-orange-50/40"
+                className={`${btnSecondarySm} mt-2 w-full`}
               >
                 {pos ? t('send.custom_position') : t('send.choose_on_page')}
               </button>
@@ -341,8 +342,9 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
             type="button"
             onClick={onSend}
             disabled={busy || !validEmail || !owner}
-            className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
+            className={`${btnPrimary} mt-3 w-full justify-start`}
           >
+            <Key><SendIcon /></Key>
             {busy ? t('send.btn_sending') : !validEmail ? t('send.btn_enter_email') : t('send.btn_send')}
           </button>
         </>
@@ -362,7 +364,7 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
             </p>
             <div className="mt-2 flex items-center gap-2">
               <input readOnly value={sent.link} aria-label={t('send.link_aria')} className="min-w-0 flex-1 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-[11px] text-slate-700" />
-              <button type="button" onClick={() => copy(sent.link, 'new')} className="shrink-0 rounded-md bg-emerald-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-700">
+              <button type="button" onClick={() => copy(sent.link, 'new')} className={`${btnSecondarySm} shrink-0`}>
                 {copied === 'new' ? t('send.copied') : t('send.copy_link')}
               </button>
             </div>
@@ -458,11 +460,11 @@ function SentList({
                       type="button"
                       disabled={working === r.id}
                       onClick={async () => { setWorking(r.id); await onRevoke(r); refresh(); setWorking(null); setConfirming(null) }}
-                      className="rounded-md bg-rose-600 px-2 py-1 font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
+                      className={btnDangerSm}
                     >
                       {working === r.id ? t('send.withdrawing') : t('send.withdraw')}
                     </button>
-                    <button type="button" onClick={() => setConfirming(null)} className="rounded-md px-2 py-1 font-semibold text-slate-600 hover:bg-slate-100">
+                    <button type="button" onClick={() => setConfirming(null)} className={btnQuietSm}>
                       {t('send.keep_it')}
                     </button>
                   </div>

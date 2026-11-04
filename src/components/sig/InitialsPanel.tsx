@@ -66,16 +66,16 @@ export default function InitialsPanel({ value, onChange }: { value: InitialsChoi
 
   return (
     <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50/60 p-3" data-testid="initials-panel">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('create.initials_title')}</div>
-        <div className="inline-flex rounded-md bg-slate-200/70 p-0.5">
+        <div className="u-tabs inline-flex">
           {(['type', 'draw'] as const).map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => setMode(m)}
               aria-pressed={mode === m}
-              className={`rounded px-2.5 py-1 text-xs font-semibold ${mode === m ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+              className="u-tab"
             >
               {m === 'type' ? t('create.initials_mode_type') : t('create.initials_mode_draw')}
             </button>

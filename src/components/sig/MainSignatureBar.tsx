@@ -1,6 +1,7 @@
 import { useSigStore } from '../../stores/sigStore'
 import type { MainSignature } from '../../lib/cloud'
 import { useT } from '../../i18n'
+import { btnSecondarySm } from '../ui'
 
 // "Your main signature" — the one kept on your Universal ID (platform 0224),
 // saved here or on the hub's Me page. One tap loads it into the studio as the
@@ -26,7 +27,7 @@ export default function MainSignatureBar({ main }: { main: MainSignature }) {
         type="button"
         onClick={() => { setMode('draw'); setDrawn(main.image_data, { signatureId: main.id }) }}
         disabled={inUse}
-        className="shrink-0 rounded-md bg-orange-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-800 disabled:bg-emerald-600 disabled:opacity-100"
+        className={`${btnSecondarySm} shrink-0`}
       >
         {inUse ? t('create.main_in_use') : t('create.main_use')}
       </button>
