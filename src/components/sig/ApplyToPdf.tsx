@@ -518,7 +518,10 @@ export default function ApplyToPdf() {
       </div>
 
       {verifyUrl && (
-        <div className="mt-3 rounded-lg bg-emerald-50 p-3">
+        // The verifiable record just made: the suite's Key box (BRANDING.md →
+        // Boxes, C), its tab neutral; the green fill and words carry the news.
+        <div className="u-box u-box--key mt-5 bg-emerald-50 px-3 pb-3 pt-5">
+          <span className="u-box__key">{t('send.certificate')}</span>
           <p className="text-xs font-semibold text-emerald-800">{t('sign.record_created')}</p>
           <p className="mt-1 text-[11px] text-emerald-700">{t('sign.record_qr_links_here')}</p>
           <div className="mt-2 flex items-center gap-2">

@@ -76,20 +76,24 @@ export default function RequestCertificate({
           <span className="text-sm font-semibold text-amber-800">{t('verify.request_waiting')}</span>
         </div>
       )}
-      <dl className="mt-4 divide-y divide-slate-100 text-sm">
-        <Row k={t('verify.row_document')} v={data.doc_name} />
-        <Row k={t('verify.row_sent')} v={fmt(data.created_at)} />
-        {data.parties.map((p, i) => (
-          <Row
-            key={i}
-            k={p.status === 'signed' ? t('verify.row_signed_by') : t('verify.row_waiting_for')}
-            v={`${p.email ?? '—'}${p.signed_at ? ` · ${fmt(p.signed_at)}` : ''}`}
-          />
-        ))}
-        {data.original_sha256 && <Row k={t('verify.row_sent_hash')} v={data.original_sha256} mono />}
-        {done && data.latest_sha256 && <Row k={t('verify.row_signed_hash')} v={data.latest_sha256} mono />}
-        {done && keptUntil && <Row k={t('verify.row_kept_until')} v={keptUntil} />}
-      </dl>
+      {/* The record itself: the suite's Key box (BRANDING.md → Boxes, C). */}
+      <div className="u-box u-box--key mt-6 px-4 pb-1 pt-3 text-sm">
+        <span className="u-box__key">{t('send.certificate')} · SHA-256</span>
+        <dl className="divide-y divide-slate-100">
+          <Row k={t('verify.row_document')} v={data.doc_name} />
+          <Row k={t('verify.row_sent')} v={fmt(data.created_at)} />
+          {data.parties.map((p, i) => (
+            <Row
+              key={i}
+              k={p.status === 'signed' ? t('verify.row_signed_by') : t('verify.row_waiting_for')}
+              v={`${p.email ?? '—'}${p.signed_at ? ` · ${fmt(p.signed_at)}` : ''}`}
+            />
+          ))}
+          {data.original_sha256 && <Row k={t('verify.row_sent_hash')} v={data.original_sha256} mono />}
+          {done && data.latest_sha256 && <Row k={t('verify.row_signed_hash')} v={data.latest_sha256} mono />}
+          {done && keptUntil && <Row k={t('verify.row_kept_until')} v={keptUntil} />}
+        </dl>
+      </div>
       {done && keptUntil && <p className="mt-2 text-xs text-slate-500">{t('verify.kept_until_note')}</p>}
 
       {data.events.length > 0 && (

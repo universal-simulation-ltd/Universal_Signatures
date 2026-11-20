@@ -434,7 +434,8 @@ function SentList({
       {loading && requests.length === 0 ? (
         <p className="mt-2 text-xs text-slate-400">{t('send.list_loading')}</p>
       ) : requests.length === 0 ? (
-        <p className="mt-2 text-xs text-slate-400">{t('send.list_empty')}</p>
+        // An empty state: nothing in frame (Boxes D · frame, empty).
+        <p className="u-box u-box--frame u-box--empty mt-2 px-4 py-4 text-xs text-slate-500">{t('send.list_empty')}</p>
       ) : (
         <ul className="mt-2 space-y-2">
           {requests.map((r) => {

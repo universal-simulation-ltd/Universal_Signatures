@@ -53,14 +53,19 @@ export default function VerifyPage({ certId }: { certId: string }) {
               <span className="text-lg" aria-hidden="true">✓</span>
               <span className="text-sm font-semibold text-emerald-800">{t('verify.verified_signing')}</span>
             </div>
-            <dl className="mt-4 divide-y divide-slate-100 text-sm">
-              <Row k={t('verify.row_signed_by')} v={result.data.signer_email} />
-              <Row k={t('verify.row_organisation')} v={result.data.org_name ?? '—'} />
-              <Row k={t('verify.row_document')} v={result.data.original_filename} />
-              <Row k={t('verify.row_signed')} v={fmt(result.data.created_at)} />
-              <Row k={t('verify.row_original_hash')} v={result.data.document_hash} mono />
-              {result.data.signed_hash && <Row k={t('verify.row_signed_hash')} v={result.data.signed_hash} mono />}
-            </dl>
+            {/* The record itself: the suite's Key box (BRANDING.md → Boxes,
+                C), its tab naming it and the fingerprint standard. */}
+            <div className="u-box u-box--key mt-6 px-4 pb-1 pt-3 text-sm">
+              <span className="u-box__key">{t('send.certificate')} · SHA-256</span>
+              <dl className="divide-y divide-slate-100">
+                <Row k={t('verify.row_signed_by')} v={result.data.signer_email} />
+                <Row k={t('verify.row_organisation')} v={result.data.org_name ?? '—'} />
+                <Row k={t('verify.row_document')} v={result.data.original_filename} />
+                <Row k={t('verify.row_signed')} v={fmt(result.data.created_at)} />
+                <Row k={t('verify.row_original_hash')} v={result.data.document_hash} mono />
+                {result.data.signed_hash && <Row k={t('verify.row_signed_hash')} v={result.data.signed_hash} mono />}
+              </dl>
+            </div>
             <p className="mt-4 text-xs text-slate-500">
               {result.data.signed_hash
                 ? t.rich('verify.hash_note_both', {
@@ -80,12 +85,15 @@ export default function VerifyPage({ certId }: { certId: string }) {
               <span className="text-lg" aria-hidden="true">✓</span>
               <span className="text-sm font-semibold text-emerald-800">{t('verify.verified_signature')}</span>
             </div>
-            <dl className="mt-4 divide-y divide-slate-100 text-sm">
-              <Row k={t('verify.row_signer')} v={result.data.signer_name ?? '—'} />
-              <Row k={t('verify.row_organisation')} v={result.data.org_name ?? '—'} />
-              <Row k={t('verify.row_saved')} v={fmt(result.data.created_at)} />
-              <Row k={t('verify.row_signature_hash')} v={result.data.signature_hash} mono />
-            </dl>
+            <div className="u-box u-box--key mt-6 px-4 pb-1 pt-3 text-sm">
+              <span className="u-box__key">{t('send.certificate')} · SHA-256</span>
+              <dl className="divide-y divide-slate-100">
+                <Row k={t('verify.row_signer')} v={result.data.signer_name ?? '—'} />
+                <Row k={t('verify.row_organisation')} v={result.data.org_name ?? '—'} />
+                <Row k={t('verify.row_saved')} v={fmt(result.data.created_at)} />
+                <Row k={t('verify.row_signature_hash')} v={result.data.signature_hash} mono />
+              </dl>
+            </div>
             <BadgeEmbed certId={certId.toLowerCase()} />
           </div>
         ) : failed ? (

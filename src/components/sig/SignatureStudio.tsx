@@ -205,7 +205,9 @@ export default function SignatureStudio() {
             {hasLabels && (
               <div className="pt-1">
                 <div className="mb-1 text-[11px] font-medium text-slate-500">{t('create.labels_preview')}</div>
-                <div className="flex min-h-[76px] items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 p-3">
+                {/* What gets stamped, in frame (Boxes D · frame): muted
+                    corners until there is a signature to show. */}
+                <div className={`u-box u-box--frame u-box--row flex min-h-[76px] items-center justify-center rounded-md bg-slate-50 p-3 ${composedDataUrl ? '' : 'u-box--empty'}`}>
                   {composedDataUrl ? (
                     <img
                       src={composedDataUrl}

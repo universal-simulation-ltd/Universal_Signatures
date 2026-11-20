@@ -36,7 +36,11 @@ export default function SignaturePad() {
 
   return (
     <div>
-      <div className="relative rounded-lg border-2 border-dashed border-slate-300 bg-white">
+      {/* Where the signature is captured: the suite's Viewfinder box
+          (BRANDING.md → Boxes, D) in place of a dashed outline. All four
+          corners muted while it is empty; the leading one lit once there is
+          ink in frame. */}
+      <div className={`u-box u-box--frame relative rounded-lg bg-white p-0 ${ink.hasInk ? '' : 'u-box--empty'}`}>
         <canvas
           ref={ink.canvasRef}
           role="img"

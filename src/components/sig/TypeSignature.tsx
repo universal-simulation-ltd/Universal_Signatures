@@ -121,12 +121,17 @@ export default function TypeSignature() {
         <input {...fontPicker.inputProps} className="hidden" />
       </div>
       {importError && <p className="text-xs text-rose-600">{importError}</p>}
-      <div ref={previewBoxRef} className="flex h-44 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-slate-300 bg-white px-3">
-        {signerName.trim() ? (
-          <span ref={previewTextRef} style={{ fontFamily: fontFamilyCss(font) }} className="whitespace-nowrap leading-tight text-slate-900">{signerName}</span>
-        ) : (
-          <span className="text-sm text-slate-300">{t('create.type_preview_empty')}</span>
-        )}
+      {/* The typed signature in frame: the suite's Viewfinder box
+          (BRANDING.md → Boxes, D), muted corners until there is a name. The
+          clipping sits on an inner box, so it can't cut the corners off. */}
+      <div ref={previewBoxRef} className={`u-box u-box--frame h-44 rounded-lg bg-white px-3 py-0 ${signerName.trim() ? '' : 'u-box--empty'}`}>
+        <div className="flex h-full w-full items-center justify-center overflow-hidden">
+          {signerName.trim() ? (
+            <span ref={previewTextRef} style={{ fontFamily: fontFamilyCss(font) }} className="whitespace-nowrap leading-tight text-slate-900">{signerName}</span>
+          ) : (
+            <span className="text-sm text-slate-400">{t('create.type_preview_empty')}</span>
+          )}
+        </div>
       </div>
     </div>
   )

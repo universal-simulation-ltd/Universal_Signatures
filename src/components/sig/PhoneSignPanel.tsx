@@ -153,7 +153,8 @@ export default function PhoneSignPanel() {
 
   if (status === 'received' && drawnDataUrl) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-lg border-2 border-dashed border-emerald-300 bg-emerald-50/40 p-4 text-center">
+      // The signature has arrived: in frame (Boxes D · frame, leading corner lit).
+      <div className="u-box u-box--frame flex flex-col items-center gap-3 rounded-lg bg-emerald-50/40 p-4 text-center">
         <img src={drawnDataUrl} alt={t('create.phone_received_alt')} className="h-32 w-full rounded-lg bg-white object-contain p-2 ring-1 ring-slate-200" />
         <p className="text-xs font-semibold text-emerald-700">{t('create.phone_received')}</p>
         {attest && (
@@ -181,7 +182,8 @@ export default function PhoneSignPanel() {
 
   if (expired) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-lg border-2 border-dashed border-slate-300 bg-white p-4 text-center">
+      // The code ran out: nothing in frame (Boxes D · frame, empty).
+      <div className="u-box u-box--frame u-box--empty flex flex-col items-center gap-3 rounded-lg bg-white p-4 text-center">
         {/* Same footprint as the code, so the panel doesn't jump. */}
         <div className="flex h-[176px] w-[176px] flex-col items-center justify-center gap-2 rounded-lg bg-slate-50 ring-1 ring-slate-200">
           <svg viewBox="0 0 24 24" className="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -205,7 +207,9 @@ export default function PhoneSignPanel() {
 
   return (
     <>
-      <div className="flex flex-col items-center gap-3 rounded-lg border-2 border-dashed border-slate-300 bg-white p-4 text-center">
+      {/* The code to scan, live: the suite's Viewfinder box (BRANDING.md →
+          Boxes, D) in place of a dashed outline, as on the drawing pad. */}
+      <div className="u-box u-box--frame flex flex-col items-center gap-3 rounded-lg bg-white p-4 text-center">
         {/* The SDK code enlarges itself on click, but this panel wraps it in a
             button of its own for the hover caption — and a button inside a
             button is not markup — so the code is inert and the lightbox opens
