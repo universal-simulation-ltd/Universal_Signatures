@@ -8,6 +8,8 @@ const app: Messages['app'] = {
   'about_subject': 'Ihre Unterschrift',
   'about_except': 'auf Ihrem Handy unterschreiben oder ein Dokument zum Unterschreiben senden',
   'pref_opens_on': 'Öffnet mit',
+  'personal_title': 'Unterschriften von {name}',
+  'personal_title_mine': 'Meine Unterschriften',
 }
 
 export default app

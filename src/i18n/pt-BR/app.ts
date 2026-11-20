@@ -6,5 +6,7 @@ const app: Messages['app'] = {
   'about_subject': 'Sua assinatura',
   'about_except': 'assinar no celular ou enviar um documento para assinatura',
   'pref_opens_on': 'Abre em',
+  'personal_title': 'Assinaturas de {name}',
+  'personal_title_mine': 'Minhas assinaturas',
 }
 export default app

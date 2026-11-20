@@ -7,6 +7,8 @@ const app: Messages['app'] = {
   'about_subject': 'Votre signature',
   'about_except': 'signer sur votre téléphone ou envoyer un document à signer',
   'pref_opens_on': 'S’ouvre sur',
+  'personal_title': 'Les signatures de {name}',
+  'personal_title_mine': 'Mes signatures',
 }
 
 export default app

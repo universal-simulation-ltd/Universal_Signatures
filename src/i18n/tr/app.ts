@@ -7,6 +7,8 @@ const app: Messages['app'] = {
   'about_subject': 'İmzanız',
   'about_except': 'telefonunuzda imzalamak veya bir belgeyi imzaya göndermek',
   'pref_opens_on': 'Açılış sekmesi',
+  'personal_title': '{name} · İmzalar',
+  'personal_title_mine': 'İmzalarım',
 }
 
 export default app

@@ -7,4 +7,6 @@ export default {
   'about_subject': 'Your signature', // "About this app" privacy line: what stays on the device. Shown as "<subject> stays on your device…"
   'about_except': 'signing on your phone, or sending a document to be signed', // "About this app": the exceptions to the line above, lower case, continues a sentence ("…except when …")
   'pref_opens_on': 'Opens on', // Tune this app row: which way to create a signature (Draw / Type / Sign on phone) the app opens on
+  'personal_title': '{name}’s Signatures', // the bar's name for the app once signed in; {name} is the person's first name
+  'personal_title_mine': 'My Signatures', // signed in, no name known
 }
