@@ -15,13 +15,13 @@ export default function MainSignatureBar({ main }: { main: MainSignature }) {
   const inUse = drawnDataUrl === main.image_data
 
   return (
-    <div className="mb-4 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2" data-testid="main-signature">
-      <span className="flex h-12 w-24 shrink-0 items-center justify-center overflow-hidden rounded bg-white ring-1 ring-slate-200">
+    <div className="mb-4 flex items-center gap-3 rounded-lg border border-line bg-surface-2 p-2" data-testid="main-signature">
+      <span className="paper flex h-12 w-24 shrink-0 items-center justify-center overflow-hidden rounded bg-surface ring-1 ring-line">
         <img src={main.image_data} alt={t('create.main_alt')} className="max-h-11 max-w-[5.5rem] object-contain" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-xs font-semibold text-slate-700">{t('create.main_title')}</span>
-        <span className="block text-[11px] text-slate-500">{t('create.main_saved')}</span>
+        <span className="block text-xs font-semibold text-ink-2">{t('create.main_title')}</span>
+        <span className="block text-[11px] text-muted">{t('create.main_saved')}</span>
       </span>
       <button
         type="button"

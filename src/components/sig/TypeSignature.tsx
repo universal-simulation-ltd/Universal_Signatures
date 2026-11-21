@@ -91,7 +91,7 @@ export default function TypeSignature() {
         value={signerName}
         onChange={(e) => setSignerName(e.target.value)}
         placeholder={t('create.type_placeholder')}
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+        className="w-full rounded-md border border-line-strong px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-accent-ring outline-none"
       />
       <div className="flex flex-wrap gap-2">
         {fonts.map((f) => (
@@ -100,7 +100,7 @@ export default function TypeSignature() {
             onClick={() => setFontId(f.id)}
             style={{ fontFamily: fontFamilyCss(f) }}
             className={`rounded-md px-3 py-1.5 text-base ring-1 transition ${
-              fontId === f.id ? 'bg-orange-700 text-white ring-orange-600' : 'bg-white text-slate-700 ring-slate-200 hover:bg-slate-50'
+              fontId === f.id ? 'bg-orange-700 text-white ring-orange-600' : 'bg-surface text-ink-2 ring-line hover:bg-surface-2'
             }`}
             title={fontLabel(f, t)}
           >
@@ -110,7 +110,7 @@ export default function TypeSignature() {
         {/* Import a custom font from the user's device. */}
         <button
           onClick={fontPicker.open}
-          className="inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:border-orange-400 hover:text-orange-700"
+          className="inline-flex items-center gap-1 rounded-md border border-dashed border-line-strong px-3 py-1.5 text-xs font-medium text-muted hover:border-orange-400 hover:text-accent"
           title={t('create.type_import_title')}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -120,16 +120,16 @@ export default function TypeSignature() {
         </button>
         <input {...fontPicker.inputProps} className="hidden" />
       </div>
-      {importError && <p className="text-xs text-rose-600">{importError}</p>}
+      {importError && <p className="text-xs text-bad">{importError}</p>}
       {/* The typed signature in frame: the suite's Viewfinder box
           (BRANDING.md → Boxes, D), muted corners until there is a name. The
           clipping sits on an inner box, so it can't cut the corners off. */}
-      <div ref={previewBoxRef} className={`u-box u-box--frame h-44 rounded-lg bg-white px-3 py-0 ${signerName.trim() ? '' : 'u-box--empty'}`}>
+      <div ref={previewBoxRef} data-u-ground="light" className={`paper u-box u-box--frame h-44 rounded-lg bg-surface px-3 py-0 ${signerName.trim() ? '' : 'u-box--empty'}`}>
         <div className="flex h-full w-full items-center justify-center overflow-hidden">
           {signerName.trim() ? (
-            <span ref={previewTextRef} style={{ fontFamily: fontFamilyCss(font) }} className="whitespace-nowrap leading-tight text-slate-900">{signerName}</span>
+            <span ref={previewTextRef} style={{ fontFamily: fontFamilyCss(font) }} className="whitespace-nowrap leading-tight text-ink">{signerName}</span>
           ) : (
-            <span className="text-sm text-slate-400">{t('create.type_preview_empty')}</span>
+            <span className="text-sm text-faint">{t('create.type_preview_empty')}</span>
           )}
         </div>
       </div>

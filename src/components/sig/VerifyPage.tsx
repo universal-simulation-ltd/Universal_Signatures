@@ -39,25 +39,25 @@ export default function VerifyPage({ certId }: { certId: string }) {
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 sm:px-6 py-10">
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
-        <h1 className="text-lg font-bold text-slate-900">{t('verify.title')}</h1>
-        <p className="mt-1 text-xs text-slate-500">{t.rich('verify.certificate_id', { id: <code>{certId}</code> })}</p>
+      <div className="rounded-xl border border-line bg-surface p-6">
+        <h1 className="text-lg font-bold text-ink">{t('verify.title')}</h1>
+        <p className="mt-1 text-xs text-muted">{t.rich('verify.certificate_id', { id: <code>{certId}</code> })}</p>
 
         {loading ? (
-          <div className="mt-6 flex items-center gap-2 text-sm text-slate-500">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-orange-500" /> {t('verify.verifying')}
+          <div className="mt-6 flex items-center gap-2 text-sm text-muted">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-line border-t-orange-500" /> {t('verify.verifying')}
           </div>
         ) : result?.kind === 'signing' ? (
           <div className="mt-6">
-            <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-3">
+            <div className="flex items-center gap-2 rounded-lg bg-good-soft px-4 py-3">
               <span className="text-lg" aria-hidden="true">✓</span>
-              <span className="text-sm font-semibold text-emerald-800">{t('verify.verified_signing')}</span>
+              <span className="text-sm font-semibold text-good-strong">{t('verify.verified_signing')}</span>
             </div>
             {/* The record itself: the suite's Key box (BRANDING.md → Boxes,
                 C), its tab naming it and the fingerprint standard. */}
             <div className="u-box u-box--key mt-6 px-4 pb-1 pt-3 text-sm">
               <span className="u-box__key">{t('send.certificate')} · SHA-256</span>
-              <dl className="divide-y divide-slate-100">
+              <dl className="divide-y divide-line-soft">
                 <Row k={t('verify.row_signed_by')} v={result.data.signer_email} />
                 <Row k={t('verify.row_organisation')} v={result.data.org_name ?? '—'} />
                 <Row k={t('verify.row_document')} v={result.data.original_filename} />
@@ -66,7 +66,7 @@ export default function VerifyPage({ certId }: { certId: string }) {
                 {result.data.signed_hash && <Row k={t('verify.row_signed_hash')} v={result.data.signed_hash} mono />}
               </dl>
             </div>
-            <p className="mt-4 text-xs text-slate-500">
+            <p className="mt-4 text-xs text-muted">
               {result.data.signed_hash
                 ? t.rich('verify.hash_note_both', {
                     original: <strong>{t('verify.hash_note_original')}</strong>,
@@ -81,13 +81,13 @@ export default function VerifyPage({ certId }: { certId: string }) {
           <RequestCertificate data={result.data} fmt={fmt} checkPdf={(o, sg) => <CheckPdf original={o} signed={sg} />} />
         ) : result?.kind === 'signature' ? (
           <div className="mt-6">
-            <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-3">
+            <div className="flex items-center gap-2 rounded-lg bg-good-soft px-4 py-3">
               <span className="text-lg" aria-hidden="true">✓</span>
-              <span className="text-sm font-semibold text-emerald-800">{t('verify.verified_signature')}</span>
+              <span className="text-sm font-semibold text-good-strong">{t('verify.verified_signature')}</span>
             </div>
             <div className="u-box u-box--key mt-6 px-4 pb-1 pt-3 text-sm">
               <span className="u-box__key">{t('send.certificate')} · SHA-256</span>
-              <dl className="divide-y divide-slate-100">
+              <dl className="divide-y divide-line-soft">
                 <Row k={t('verify.row_signer')} v={result.data.signer_name ?? '—'} />
                 <Row k={t('verify.row_organisation')} v={result.data.org_name ?? '—'} />
                 <Row k={t('verify.row_saved')} v={fmt(result.data.created_at)} />
@@ -97,7 +97,7 @@ export default function VerifyPage({ certId }: { certId: string }) {
             <BadgeEmbed certId={certId.toLowerCase()} />
           </div>
         ) : failed ? (
-          <div role="alert" className="mt-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <div role="alert" className="mt-6 rounded-lg bg-warn-soft px-4 py-3 text-sm text-warn-strong">
             {t('verify.lookup_failed')}
             <button
               type="button"
@@ -108,12 +108,12 @@ export default function VerifyPage({ certId }: { certId: string }) {
             </button>
           </div>
         ) : (
-          <div className="mt-6 rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="mt-6 rounded-lg bg-bad-soft px-4 py-3 text-sm text-bad">
             {t('verify.not_found')}
           </div>
         )}
 
-        <a href={import.meta.env.BASE_URL} className="mt-6 inline-block text-sm font-medium text-orange-700 hover:underline">
+        <a href={import.meta.env.BASE_URL} className="mt-6 inline-block text-sm font-medium text-accent hover:underline">
           {t('verify.back_home')}
         </a>
       </div>
@@ -152,8 +152,8 @@ function CheckPdf({ original, signed }: { original: string; signed: string | nul
   }
 
   return (
-    <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
-      <p className="text-xs text-slate-600">
+    <div className="mt-4 rounded-lg border border-line bg-surface-2 p-3">
+      <p className="text-xs text-soft">
         {signed
           ? t('verify.check_intro_both')
           : t('verify.check_intro_original')}
@@ -176,23 +176,23 @@ function CheckPdf({ original, signed }: { original: string; signed: string | nul
       />
       <div role="status" className="text-xs [&>p]:mt-2" data-testid="check-result">
         {state.kind === 'done' && state.match === 'signed' && (
-          <p className="font-semibold text-emerald-700">
+          <p className="font-semibold text-good">
             {t('verify.check_match_signed', { name: state.name })}
           </p>
         )}
         {state.kind === 'done' && state.match === 'original' && (
-          <p className="font-semibold text-emerald-700">
+          <p className="font-semibold text-good">
             {t('verify.check_match_original', { name: state.name })}
           </p>
         )}
         {state.kind === 'done' && state.match === 'none' && (
-          <p className="text-rose-700">
+          <p className="text-bad">
             {signed
               ? t('verify.check_no_match_both', { name: state.name })
               : t('verify.check_no_match_original', { name: state.name })}
           </p>
         )}
-        {state.kind === 'error' && <p className="text-rose-700">{t('verify.check_read_error')}</p>}
+        {state.kind === 'error' && <p className="text-bad">{t('verify.check_read_error')}</p>}
       </div>
     </div>
   )

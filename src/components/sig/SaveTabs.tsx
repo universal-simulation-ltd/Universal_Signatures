@@ -14,14 +14,14 @@ export default function SaveTabs() {
   const panelId = useId()
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-xl border border-line bg-surface p-5">
       <div className="flex items-center justify-between gap-2">
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-controls={panelId}
-          className="-m-1 flex items-center gap-1.5 rounded p-1 text-sm font-bold text-slate-900"
+          className="-m-1 flex items-center gap-1.5 rounded p-1 text-sm font-bold text-ink"
         >
           {t('save.tabs_title')}
           <svg
@@ -34,7 +34,7 @@ export default function SaveTabs() {
             strokeLinecap="round"
             strokeLinejoin="round"
             aria-hidden="true"
-            className={`text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+            className={`text-faint transition-transform ${open ? 'rotate-180' : ''}`}
           >
             <path d="M6 9l6 6 6-6" />
           </svg>

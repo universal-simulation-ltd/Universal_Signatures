@@ -154,18 +154,18 @@ export default function PhoneSignPanel() {
   if (status === 'received' && drawnDataUrl) {
     return (
       // The signature has arrived: in frame (Boxes D · frame, leading corner lit).
-      <div className="u-box u-box--frame flex flex-col items-center gap-3 rounded-lg bg-emerald-50/40 p-4 text-center">
-        <img src={drawnDataUrl} alt={t('create.phone_received_alt')} className="h-32 w-full rounded-lg bg-white object-contain p-2 ring-1 ring-slate-200" />
-        <p className="text-xs font-semibold text-emerald-700">{t('create.phone_received')}</p>
+      <div className="u-box u-box--frame flex flex-col items-center gap-3 rounded-lg bg-good-soft/40 p-4 text-center">
+        <img src={drawnDataUrl} alt={t('create.phone_received_alt')} className="paper h-32 w-full rounded-lg bg-surface object-contain p-2 ring-1 ring-line" />
+        <p className="text-xs font-semibold text-good">{t('create.phone_received')}</p>
         {attest && (
-          <p className="text-[11px] text-emerald-800" data-testid="phone-attested">
+          <p className="text-[11px] text-good-strong" data-testid="phone-attested">
             {t('sign.attest_line', { email: attest.signerEmail, time: formatAttestLocal(attest.signedAt, language) })}{' '}
-            <a href={attest.checkUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-orange-700 hover:underline">
+            <a href={attest.checkUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-accent hover:underline">
               {t('create.phone_attested_check')}
             </a>
           </p>
         )}
-        <p className="text-[11px] text-slate-500">{t('create.phone_received_hint')}</p>
+        <p className="text-[11px] text-muted">{t('create.phone_received_hint')}</p>
         <button
           type="button"
           onClick={signAgain}
@@ -183,15 +183,15 @@ export default function PhoneSignPanel() {
   if (expired) {
     return (
       // The code ran out: nothing in frame (Boxes D · frame, empty).
-      <div className="u-box u-box--frame u-box--empty flex flex-col items-center gap-3 rounded-lg bg-white p-4 text-center">
+      <div className="u-box u-box--frame u-box--empty flex flex-col items-center gap-3 rounded-lg bg-surface p-4 text-center">
         {/* Same footprint as the code, so the panel doesn't jump. */}
-        <div className="flex h-[176px] w-[176px] flex-col items-center justify-center gap-2 rounded-lg bg-slate-50 ring-1 ring-slate-200">
-          <svg viewBox="0 0 24 24" className="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <div className="flex h-[176px] w-[176px] flex-col items-center justify-center gap-2 rounded-lg bg-surface-2 ring-1 ring-line">
+          <svg viewBox="0 0 24 24" className="h-8 w-8 text-faint" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 2.5" /><path d="M9 2h6" />
           </svg>
-          <p className="px-3 text-xs font-semibold text-slate-700">{t('create.phone_expired')}</p>
+          <p className="px-3 text-xs font-semibold text-ink-2">{t('create.phone_expired')}</p>
         </div>
-        <p role="status" className="text-xs text-slate-500">
+        <p role="status" className="text-xs text-muted">
           {t.plural('create.phone_codes_last', Math.round(CODE_TTL_MS / 60000))}
         </p>
         <button
@@ -209,7 +209,7 @@ export default function PhoneSignPanel() {
     <>
       {/* The code to scan, live: the suite's Viewfinder box (BRANDING.md →
           Boxes, D) in place of a dashed outline, as on the drawing pad. */}
-      <div className="u-box u-box--frame flex flex-col items-center gap-3 rounded-lg bg-white p-4 text-center">
+      <div className="u-box u-box--frame flex flex-col items-center gap-3 rounded-lg bg-surface p-4 text-center">
         {/* The SDK code enlarges itself on click, but this panel wraps it in a
             button of its own for the hover caption — and a button inside a
             button is not markup — so the code is inert and the lightbox opens
@@ -231,29 +231,29 @@ export default function PhoneSignPanel() {
             {t('create.phone_tap_to_enlarge')}
           </span>
         </button>
-        <p className="text-xs text-slate-600">{t('create.phone_scan_then_pin')}</p>
-        <p className="text-2xl font-bold tracking-[0.3em] text-slate-900">{pin}</p>
+        <p className="text-xs text-soft">{t('create.phone_scan_then_pin')}</p>
+        <p className="text-2xl font-bold tracking-[0.3em] text-ink">{pin}</p>
         {/* The countdown ticks every second, so it is NOT a live region — a
             screen reader would read it out sixty times a minute. The expired
             state above is the one that announces itself. */}
-        <div className="flex items-center gap-2 text-xs text-slate-500">
+        <div className="flex items-center gap-2 text-xs text-muted">
           <span data-testid="code-countdown">
-            {t.rich('create.phone_expires_in', { time: <span className="font-semibold tabular-nums text-slate-700">{left}</span> })}
+            {t.rich('create.phone_expires_in', { time: <span className="font-semibold tabular-nums text-ink-2">{left}</span> })}
           </span>
           <span aria-hidden="true">·</span>
-          <button type="button" onClick={refresh} className="font-semibold text-orange-700 hover:underline">
+          <button type="button" onClick={refresh} className="font-semibold text-accent hover:underline">
             {t('create.phone_new_code')}
           </button>
         </div>
         {replaced && (
-          <p className="text-xs text-amber-700" role="status">
+          <p className="text-xs text-warn" role="status">
             {t('create.phone_too_many_pins')}
           </p>
         )}
         {canRealtime ? (
-          <p className="text-xs text-slate-500">{t('create.phone_waiting')}</p>
+          <p className="text-xs text-muted">{t('create.phone_waiting')}</p>
         ) : (
-          <p className="text-xs text-amber-600">
+          <p className="text-xs text-warn">
             {t('create.phone_offline_demo')}
           </p>
         )}

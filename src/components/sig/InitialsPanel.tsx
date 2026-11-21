@@ -65,9 +65,9 @@ export default function InitialsPanel({ value, onChange }: { value: InitialsChoi
   }, [mode, text, drawn, font.family])
 
   return (
-    <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50/60 p-3" data-testid="initials-panel">
+    <div className="mt-4 rounded-lg border border-line bg-surface-2/60 p-3" data-testid="initials-panel">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('create.initials_title')}</div>
+        <div className="text-xs font-semibold uppercase tracking-wide text-muted">{t('create.initials_title')}</div>
         <div className="u-tabs inline-flex">
           {(['type', 'draw'] as const).map((m) => (
             <button
@@ -94,14 +94,14 @@ export default function InitialsPanel({ value, onChange }: { value: InitialsChoi
           maxLength={6}
           onChange={(e) => { edited.current = true; setText(e.target.value) }}
           placeholder={t('create.initials_placeholder')}
-          className="w-24 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+          className="w-24 rounded-md border border-line-strong bg-surface px-3 py-2 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-accent-ring"
         />
         <span
-          className="flex h-12 min-w-0 flex-1 items-center justify-center overflow-hidden rounded-md border border-dashed border-slate-300 bg-white px-2 text-3xl text-slate-900"
+          className="paper flex h-12 min-w-0 flex-1 items-center justify-center overflow-hidden rounded-md border border-dashed border-line-strong bg-surface px-2 text-3xl text-ink"
           style={{ fontFamily: fontFamilyCss(font) }}
           aria-hidden="true"
         >
-          {text.trim() || <span className="font-sans text-xs text-slate-300">{t('create.initials_preview')}</span>}
+          {text.trim() || <span className="font-sans text-xs text-faint">{t('create.initials_preview')}</span>}
         </span>
       </div>
       <div className={`mt-2 ${mode === 'draw' ? '' : 'hidden'}`}>
@@ -109,12 +109,12 @@ export default function InitialsPanel({ value, onChange }: { value: InitialsChoi
           ref={ink.canvasRef}
           role="img"
           aria-label={t('create.initials_pad_aria')}
-          className="block h-20 w-full touch-none rounded-md border border-dashed border-slate-300 bg-white"
+          className="paper block h-20 w-full touch-none rounded-md border border-dashed border-line-strong bg-surface"
           {...ink.handlers}
         />
         <div className="mt-1 flex justify-end gap-1">
-          <button type="button" onClick={ink.undo} disabled={!ink.canUndo} className="rounded-md px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40">{t('create.initials_undo')}</button>
-          <button type="button" onClick={ink.clear} disabled={!ink.hasInk} className="rounded-md px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40">{t('create.initials_clear')}</button>
+          <button type="button" onClick={ink.undo} disabled={!ink.canUndo} className="rounded-md px-2.5 py-1 text-xs font-medium text-soft hover:bg-surface-3 disabled:opacity-40">{t('create.initials_undo')}</button>
+          <button type="button" onClick={ink.clear} disabled={!ink.hasInk} className="rounded-md px-2.5 py-1 text-xs font-medium text-soft hover:bg-surface-3 disabled:opacity-40">{t('create.initials_clear')}</button>
         </div>
       </div>
     </div>
@@ -133,10 +133,10 @@ export function InitialsPlacement({ value, onChange, everyPage = false }: { valu
   const set = (patch: Partial<InitialsChoice>) => onChange({ ...value, ...patch })
 
   return (
-    <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50/60 p-3" data-testid="initials-placement">
+    <div className="mt-4 rounded-lg border border-line bg-surface-2/60 p-3" data-testid="initials-placement">
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{t('create.initials_position')}</div>
+          <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted">{t('create.initials_position')}</div>
           <div role="group" aria-label={t('create.initials_position_aria')} className="grid grid-cols-3 gap-1.5">
             {CORNERS.map((c) => (
               <button
@@ -146,15 +146,15 @@ export function InitialsPlacement({ value, onChange, everyPage = false }: { valu
                 aria-label={t(c.label)}
                 aria-pressed={value.anchor === c.id}
                 title={t(c.label)}
-                className={`h-7 rounded-md ring-1 transition ${value.anchor === c.id ? 'bg-orange-600 ring-orange-600' : 'bg-white ring-slate-200 hover:bg-slate-50'}`}
+                className={`h-7 rounded-md ring-1 transition ${value.anchor === c.id ? 'bg-orange-600 ring-orange-600' : 'bg-surface ring-line hover:bg-surface-2'}`}
               >
-                <span className={`mx-auto block h-1.5 w-1.5 rounded-full ${value.anchor === c.id ? 'bg-white' : 'bg-slate-300'}`} />
+                <span className={`mx-auto block h-1.5 w-1.5 rounded-full ${value.anchor === c.id ? 'bg-surface' : 'bg-line-strong'}`} />
               </button>
             ))}
           </div>
         </div>
         <div>
-          <label htmlFor="initials-size" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+          <label htmlFor="initials-size" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-muted">
             {t('create.initials_size', { pct: value.widthPct })}
           </label>
           <input
@@ -169,7 +169,7 @@ export function InitialsPlacement({ value, onChange, everyPage = false }: { valu
         </div>
       </div>
 
-      {!everyPage && <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-slate-600">
+      {!everyPage && <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-soft">
         <input
           type="checkbox"
           checked={value.includeLast}

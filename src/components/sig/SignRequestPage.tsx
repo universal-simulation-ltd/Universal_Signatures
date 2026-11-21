@@ -137,12 +137,12 @@ export default function SignRequestPage({ token }: { token: string }) {
     <div className={`${CONTAINER} py-6`}>
       <div className="mx-auto max-w-3xl">
         {phase.kind === 'starting' || phase.kind === 'loading' ? (
-          <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-orange-500" />
+          <div className="flex items-center gap-2 rounded-xl border border-line bg-surface p-6 text-sm text-muted">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-line border-t-orange-500" />
             {phase.kind === 'starting' ? t('send.req_opening_link') : t('send.req_opening_doc')}
           </div>
         ) : phase.kind === 'failed' ? (
-          <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-800">
+          <div role="alert" className="rounded-xl border border-bad-line bg-bad-soft p-6 text-sm text-bad-strong">
             {phase.message}
             {phase.retry && (
               <button type="button" onClick={() => setAttempt((n) => n + 1)} className={`${btnSecondarySm} mt-3`}>
@@ -151,7 +151,7 @@ export default function SignRequestPage({ token }: { token: string }) {
             )}
           </div>
         ) : phase.kind === 'done-before' ? (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6 text-sm text-emerald-800">
+          <div className="rounded-xl border border-good-line bg-good-soft p-6 text-sm text-good-strong">
             {t('send.req_done_before')}
           </div>
         ) : phase.kind === 'verify' ? (
@@ -238,9 +238,9 @@ function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedE
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6" data-testid="verify-gate">
-      <h1 className="text-lg font-bold text-slate-900">{t('send.gate_title')}</h1>
-      <p className="mt-1 text-sm text-slate-600">
+    <div className="rounded-xl border border-line bg-surface p-6" data-testid="verify-gate">
+      <h1 className="text-lg font-bold text-ink">{t('send.gate_title')}</h1>
+      <p className="mt-1 text-sm text-soft">
         {maskedEmail
           ? t.rich('send.gate_intro_masked', { email: <span className="font-mono">{maskedEmail}</span> })
           : t('send.gate_intro')}
@@ -257,7 +257,7 @@ function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedE
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') void sendCode() }}
             placeholder={t('send.gate_email_placeholder')}
-            className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+            className="min-w-0 flex-1 rounded-md border border-line-strong px-3 py-2 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-accent-ring"
           />
           <button type="button" onClick={sendCode} disabled={busy || !email.trim()} className={btnPrimary}>
             {busy ? t('send.gate_sending') : t('send.gate_send_code')}
@@ -265,7 +265,7 @@ function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedE
         </div>
       ) : (
         <div className="mt-4">
-          <p className="text-sm text-slate-700">{t.rich('send.gate_code_sent', { email: <span className="font-mono">{sentTo}</span> })}</p>
+          <p className="text-sm text-ink-2">{t.rich('send.gate_code_sent', { email: <span className="font-mono">{sentTo}</span> })}</p>
           <div className="mt-2 flex flex-col gap-2 sm:flex-row">
             <label htmlFor="gate-code" className="sr-only">{t('send.gate_code_label')}</label>
             <input
@@ -276,18 +276,18 @@ function VerifyGate({ token, maskedEmail, onVerified }: { token: string; maskedE
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               onKeyDown={(e) => { if (e.key === 'Enter') void checkCode() }}
               placeholder="123456"
-              className="w-40 rounded-md border border-slate-300 px-3 py-2 text-sm tracking-widest outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+              className="w-40 rounded-md border border-line-strong px-3 py-2 text-sm tracking-widest outline-none focus:border-orange-500 focus:ring-2 focus:ring-accent-ring"
             />
             <button type="button" onClick={checkCode} disabled={busy || code.length < 6} className={btnPrimary}>
               {busy ? t('send.gate_checking') : t('send.gate_open')}
             </button>
           </div>
-          <button type="button" onClick={() => { setSentTo(null); setCode('') }} className="mt-2 text-xs font-medium text-slate-500 hover:text-orange-700">
+          <button type="button" onClick={() => { setSentTo(null); setCode('') }} className="mt-2 text-xs font-medium text-muted hover:text-accent">
             {t('send.gate_send_another')}
           </button>
         </div>
       )}
-      {error && <p role="alert" className="mt-3 text-sm text-rose-700">{error}</p>}
+      {error && <p role="alert" className="mt-3 text-sm text-bad">{error}</p>}
     </div>
   )
 }
@@ -351,22 +351,22 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
 
   return (
     <div className="space-y-5">
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <h1 className="text-lg font-bold text-slate-900">{t('send.doc_title', { name: doc.name })}</h1>
-        <p className="mt-1 text-sm text-slate-600">
+      <div className="rounded-xl border border-line bg-surface p-5">
+        <h1 className="text-lg font-bold text-ink">{t('send.doc_title', { name: doc.name })}</h1>
+        <p className="mt-1 text-sm text-soft">
           {t.rich('send.doc_intro', {
             link: (
-              <button type="button" onClick={() => scrollTo(0)} className="font-semibold text-orange-700 hover:underline">
+              <button type="button" onClick={() => scrollTo(0)} className="font-semibold text-accent hover:underline">
                 {t('send.doc_intro_link', { page: firstPage + 1 })}
               </button>
             ),
           })}
         </p>
-        {many && <p className="mt-1 text-sm text-slate-600">{t('send.doc_fields_many', { n: spots.length })}</p>}
+        {many && <p className="mt-1 text-sm text-soft">{t('send.doc_fields_many', { n: spots.length })}</p>}
         <button
           type="button"
           onClick={() => download(new Uint8Array(doc.bytes), doc.name)}
-          className="mt-2 text-xs font-medium text-slate-500 hover:text-orange-700"
+          className="mt-2 text-xs font-medium text-muted hover:text-accent"
         >
           {t('send.doc_download')}
         </button>
@@ -374,7 +374,7 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
 
       <div className="space-y-4" aria-label={t('send.doc_aria')}>
         {doc.pages.map((p, i) => (
-          <div key={i} className="relative mx-auto overflow-hidden rounded-lg bg-white shadow ring-1 ring-slate-200" style={{ maxWidth: p.width }}>
+          <div key={i} className="paper relative mx-auto overflow-hidden rounded-lg bg-surface shadow ring-1 ring-line" style={{ maxWidth: p.width }}>
             <img src={p.src} alt={t('send.doc_page_alt', { n: i + 1, total: doc.pageCount })} className="block w-full" draggable={false} />
             {spots.map((sp, j) => {
               if (sp.pageIndex !== i) return null
@@ -389,9 +389,9 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
               const face = shown ? (
                 <img src={stamp} alt={t('send.doc_stamp_alt')} className="max-h-full max-w-full object-contain" />
               ) : (
-                <span className="text-[11px] font-bold text-orange-800">{many && stamp ? t('send.doc_tap_to_sign') : t('send.sign_here')}</span>
+                <span className="text-[11px] font-bold text-accent-strong">{many && stamp ? t('send.doc_tap_to_sign') : t('send.sign_here')}</span>
               )
-              const box = `absolute flex items-center justify-center rounded-md border-2 border-dashed ${isDone(j) && many ? 'border-emerald-500 bg-emerald-50/50' : 'border-orange-500 bg-orange-100/60'}`
+              const box = `absolute flex items-center justify-center rounded-md border-2 border-dashed ${isDone(j) && many ? 'border-emerald-500 bg-good-soft/50' : 'border-orange-500 bg-accent-soft/60'}`
               return many ? (
                 <button
                   key={j}
@@ -416,18 +416,18 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
           </div>
         ))}
         {doc.pageCount > doc.pages.length && (
-          <p className="text-center text-xs text-slate-500">
+          <p className="text-center text-xs text-muted">
             {t('send.doc_showing_first', { shown: doc.pages.length, total: doc.pageCount })}
           </p>
         )}
         {hiddenPages.map((pg) => (
-          <p key={pg} className="text-center text-xs text-slate-500">{t('send.doc_field_page', { page: pg })}</p>
+          <p key={pg} className="text-center text-xs text-muted">{t('send.doc_field_page', { page: pg })}</p>
         ))}
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
+      <div className="rounded-xl border border-line bg-surface p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-bold text-slate-900">{t('send.doc_your_signature')}</h2>
+          <h2 className="text-sm font-bold text-ink">{t('send.doc_your_signature')}</h2>
           <div className="u-tabs inline-flex max-w-full">
             {MODES.map((m) => (
               <button
@@ -446,14 +446,14 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
           {mode === 'type' ? <TypeSignature /> : mode === 'phone' ? <PhoneSignPanel /> : <SignaturePad />}
         </div>
 
-        <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+        <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-lg border border-line bg-surface-2/60 p-3">
           <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 h-4 w-4 accent-orange-600" />
-          <span className="text-xs text-slate-700">
+          <span className="text-xs text-ink-2">
             {t('send.doc_agree')}
           </span>
         </label>
 
-        {error && <p role="alert" className="mt-3 text-sm text-rose-700">{error}</p>}
+        {error && <p role="alert" className="mt-3 text-sm text-bad">{error}</p>}
 
         {many && stamp && nextOpen >= 0 && (
           <button
@@ -474,7 +474,7 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
           <Key><PenIcon /></Key>
           {busy ? t('send.doc_btn_signing') : !sig ? t('send.doc_btn_add_first') : !allDone ? t('send.doc_btn_fill_all', { done: doneCount, total: spots.length }) : !agree ? t('send.doc_btn_tick') : t('send.doc_btn_sign')}
         </button>
-        <p className="mt-2 text-[11px] text-slate-500">
+        <p className="mt-2 text-[11px] text-muted">
           {t('send.doc_privacy')}
         </p>
       </div>
@@ -485,9 +485,9 @@ function SignDocument({ doc, onSigned }: { doc: Doc; onSigned: (bytes: Uint8Arra
 function Signed({ phase }: { phase: { certId: string | null; completed: boolean } }) {
   const t = useT()
   return (
-    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6" data-testid="signed">
-      <h1 className="text-lg font-bold text-emerald-900">{t('send.signed_title')}</h1>
-      <p className="mt-1 text-sm text-emerald-800">
+    <div className="rounded-xl border border-good-line bg-good-soft p-6" data-testid="signed">
+      <h1 className="text-lg font-bold text-good-strong">{t('send.signed_title')}</h1>
+      <p className="mt-1 text-sm text-good-strong">
         {phase.completed
           ? t('send.signed_completed')
           : t('send.signed_partial')}

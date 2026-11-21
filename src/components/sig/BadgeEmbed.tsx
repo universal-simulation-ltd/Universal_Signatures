@@ -78,15 +78,15 @@ export default function BadgeEmbed({ certId }: { certId: string }) {
   ]
 
   return (
-    <details className="group mt-4 rounded-lg border border-slate-200 bg-white p-3" data-testid="badge-embed">
-      <summary className="cursor-pointer list-none text-sm font-semibold text-slate-800 [&::-webkit-details-marker]:hidden">
+    <details className="group mt-4 rounded-lg border border-line bg-surface p-3" data-testid="badge-embed">
+      <summary className="cursor-pointer list-none text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
         <span className="inline-flex items-center gap-1.5">
           {t('verify.badge_summary')}
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="text-slate-400 transition-transform group-open:rotate-180">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="text-faint transition-transform group-open:rotate-180">
             <path d="M6 9l6 6 6-6" />
           </svg>
         </span>
-        <span className="mt-0.5 block text-xs font-normal text-slate-500">
+        <span className="mt-0.5 block text-xs font-normal text-muted">
           {t('verify.badge_summary_hint')}
         </span>
       </summary>
@@ -106,7 +106,7 @@ export default function BadgeEmbed({ certId }: { certId: string }) {
           ))}
         </div>
 
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-muted">
           {format === 'live'
             ? t('verify.badge_desc_live')
             : format === 'image'
@@ -114,13 +114,13 @@ export default function BadgeEmbed({ certId }: { certId: string }) {
               : t('verify.badge_desc_markdown')}
         </p>
 
-        <div className="mt-3 flex min-h-[52px] items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 p-3" aria-label={t('verify.badge_preview_aria')}>
+        <div className="paper mt-3 flex min-h-[52px] items-center justify-center rounded-md border border-dashed border-line-strong bg-surface-2 p-3" aria-label={t('verify.badge_preview_aria')}>
           {format === 'live' ? (
             // badge.js puts its badge in BESIDE the link, in DOM React doesn't
             // know about — so the link sits in a wrapper of its own, and leaving
             // this tab removes the wrapper and the badge with it.
             <span key={`live-${certId}`}>
-              <a className="unisim-sig-badge text-xs text-orange-700 underline" data-cert={certId} href={verifyUrl}>
+              <a className="unisim-sig-badge text-xs text-accent underline" data-cert={certId} href={verifyUrl}>
                 {linkText}
               </a>
             </span>
@@ -129,7 +129,7 @@ export default function BadgeEmbed({ certId }: { certId: string }) {
           )}
         </div>
 
-        <label htmlFor={codeId} className="mt-3 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+        <label htmlFor={codeId} className="mt-3 block text-[11px] font-semibold uppercase tracking-wide text-muted">
           {t('verify.badge_paste_label')}
         </label>
         <textarea
@@ -138,7 +138,7 @@ export default function BadgeEmbed({ certId }: { certId: string }) {
           value={snippets[format]}
           rows={format === 'live' ? 5 : 3}
           onFocus={(e) => e.currentTarget.select()}
-          className="mt-1 w-full resize-none rounded-md border border-slate-300 bg-white px-2 py-1.5 font-mono text-[11px] text-slate-700"
+          className="mt-1 w-full resize-none rounded-md border border-line-strong bg-surface px-2 py-1.5 font-mono text-[11px] text-ink-2"
         />
         <button
           type="button"

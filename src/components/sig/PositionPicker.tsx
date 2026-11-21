@@ -45,20 +45,20 @@ export default function PositionPicker({
       aria-label={t('sign.picker_title')}
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="uni-modal-panel w-full max-w-2xl rounded-xl bg-white shadow-2xl">
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-5 py-3">
+      <div className="uni-modal-panel w-full max-w-2xl rounded-xl bg-surface shadow-2xl">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-line-soft px-5 py-3">
           <div>
-            <h2 className="text-sm font-bold text-slate-900">{t('sign.picker_title')}</h2>
-            <p className="text-xs text-slate-500">{t('sign.picker_hint')}</p>
+            <h2 className="text-sm font-bold text-ink">{t('sign.picker_title')}</h2>
+            <p className="text-xs text-muted">{t('sign.picker_hint')}</p>
           </div>
-          <button onClick={onClose} aria-label={t('sign.picker_close')} className="-mr-1 flex h-8 w-8 shrink-0 items-center justify-center text-xl leading-none text-slate-400 hover:text-slate-700">×</button>
+          <button onClick={onClose} aria-label={t('sign.picker_close')} className="-mr-1 flex h-8 w-8 shrink-0 items-center justify-center text-xl leading-none text-faint hover:text-ink-2">×</button>
         </div>
 
         <div className="uni-modal-body px-5 py-4">
           <PagePlacer file={file} pageIndex={pageIndex} sigPng={sigPng} widthPct={widthPct} pos={pos} onChange={setPos} />
 
           <div className="mt-4 flex flex-col gap-1">
-            <label htmlFor="picker-size" className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.size_label', { pct: widthPct })}</label>
+            <label htmlFor="picker-size" className="text-xs font-semibold uppercase tracking-wide text-muted">{t('sign.size_label', { pct: widthPct })}</label>
             <input
               id="picker-size"
               type="range" min={8} max={50} value={widthPct}
@@ -68,7 +68,7 @@ export default function PositionPicker({
           </div>
         </div>
 
-        <div className="flex shrink-0 justify-end gap-2 border-t border-slate-100 px-5 py-3">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-line-soft px-5 py-3">
           <button onClick={onClose} className={btnQuiet}>{t('sign.picker_cancel')}</button>
           <button
             onClick={() => onConfirm(pos)}

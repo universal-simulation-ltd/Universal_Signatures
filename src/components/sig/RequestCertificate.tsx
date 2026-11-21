@@ -66,20 +66,20 @@ export default function RequestCertificate({
   return (
     <div className="mt-6" data-testid="request-certificate">
       {done ? (
-        <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-3">
+        <div className="flex items-center gap-2 rounded-lg bg-good-soft px-4 py-3">
           <span className="text-lg" aria-hidden="true">✓</span>
-          <span className="text-sm font-semibold text-emerald-800">{t('verify.verified_request')}</span>
+          <span className="text-sm font-semibold text-good-strong">{t('verify.verified_request')}</span>
         </div>
       ) : (
-        <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-3">
+        <div className="flex items-center gap-2 rounded-lg bg-warn-soft px-4 py-3">
           <span className="text-lg" aria-hidden="true">…</span>
-          <span className="text-sm font-semibold text-amber-800">{t('verify.request_waiting')}</span>
+          <span className="text-sm font-semibold text-warn-strong">{t('verify.request_waiting')}</span>
         </div>
       )}
       {/* The record itself: the suite's Key box (BRANDING.md → Boxes, C). */}
       <div className="u-box u-box--key mt-6 px-4 pb-1 pt-3 text-sm">
         <span className="u-box__key">{t('send.certificate')} · SHA-256</span>
-        <dl className="divide-y divide-slate-100">
+        <dl className="divide-y divide-line-soft">
           <Row k={t('verify.row_document')} v={data.doc_name} />
           <Row k={t('verify.row_sent')} v={fmt(data.created_at)} />
           {data.parties.map((p, i) => (
@@ -94,18 +94,18 @@ export default function RequestCertificate({
           {done && keptUntil && <Row k={t('verify.row_kept_until')} v={keptUntil} />}
         </dl>
       </div>
-      {done && keptUntil && <p className="mt-2 text-xs text-slate-500">{t('verify.kept_until_note')}</p>}
+      {done && keptUntil && <p className="mt-2 text-xs text-muted">{t('verify.kept_until_note')}</p>}
 
       {data.events.length > 0 && (
         <div className="mt-4">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('verify.activity')}</h2>
-          <ol className="mt-2 space-y-1 text-xs text-slate-600">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('verify.activity')}</h2>
+          <ol className="mt-2 space-y-1 text-xs text-soft">
             {data.events.map((e, i) => (
               <li key={i} className="flex flex-wrap gap-x-2">
-                <span className="tabular-nums text-slate-400">{fmt(e.occurred_at)}</span>
-                <span className="font-medium text-slate-700">{Object.prototype.hasOwnProperty.call(ACTIONS, e.action) ? t(ACTIONS[e.action]) : e.action}</span>
+                <span className="tabular-nums text-faint">{fmt(e.occurred_at)}</span>
+                <span className="font-medium text-ink-2">{Object.prototype.hasOwnProperty.call(ACTIONS, e.action) ? t(ACTIONS[e.action]) : e.action}</span>
                 {e.actor_email && <span>{e.actor_email}</span>}
-                {e.ip_country && <span className="text-slate-400">({e.ip_country})</span>}
+                {e.ip_country && <span className="text-faint">({e.ip_country})</span>}
               </li>
             ))}
           </ol>
@@ -122,7 +122,7 @@ export default function RequestCertificate({
           >
             {downloading ? t('verify.download_busy') : t('verify.download_button')}
           </button>
-          {downloadError && <p role="alert" className="mt-1 text-xs text-rose-700">{downloadError}</p>}
+          {downloadError && <p role="alert" className="mt-1 text-xs text-bad">{downloadError}</p>}
         </div>
       )}
 

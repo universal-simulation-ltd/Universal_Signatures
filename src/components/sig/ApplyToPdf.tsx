@@ -306,9 +306,9 @@ export default function ApplyToPdf() {
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-xl border border-line bg-surface p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-bold text-slate-900">{t('sign.title')}</h2>
+        <h2 className="text-sm font-bold text-ink">{t('sign.title')}</h2>
         <div ref={switchRef} className="u-tabs inline-flex" role="group" aria-label={t('sign.mode_group_label')}>
           {([['self', t('sign.mode_self')], ['send', t('sign.mode_send')]] as const).map(([id, label]) => (
             <button
@@ -323,7 +323,7 @@ export default function ApplyToPdf() {
           ))}
         </div>
       </div>
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="mt-1 text-xs text-muted">
         {mode === 'self'
           ? t('sign.intro_self')
           : t('sign.intro_send')}
@@ -346,13 +346,13 @@ export default function ApplyToPdf() {
           2026-11-03); another PDF is still taken by a drop anywhere on the
           page, or "Change PDF". */}
       {file ? (
-        <div className="mt-4 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2">
-          <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <div className="mt-4 flex items-center gap-2 rounded-lg border border-line bg-surface-2/60 px-3 py-2">
+          <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-faint" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
             <path d="M14 3v5h5" />
           </svg>
-          <span className="min-w-0 truncate text-xs font-semibold text-slate-900" title={file.name}>{file.name}</span>
-          <span className="shrink-0 text-[11px] tabular-nums text-slate-500">{t.plural('sign.drop_pages', pages)}</span>
+          <span className="min-w-0 truncate text-xs font-semibold text-ink" title={file.name}>{file.name}</span>
+          <span className="shrink-0 text-[11px] tabular-nums text-muted">{t.plural('sign.drop_pages', pages)}</span>
           <button
             type="button"
             onClick={drop.open}
@@ -374,7 +374,7 @@ export default function ApplyToPdf() {
           <DropRing size="100%" over={over} motion={signatureFirst ? 'still' : 'idle'} watermark={<DropWatermark />}>
                 <svg
                   viewBox="0 0 24 24"
-                  className={`mb-1 h-9 w-9 ${over ? 'text-orange-500' : 'text-slate-400'}`}
+                  className={`mb-1 h-9 w-9 ${over ? 'text-orange-500' : 'text-faint'}`}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.8"
@@ -389,13 +389,13 @@ export default function ApplyToPdf() {
                   <path d="M9 13h6" />
                   <path d="M9 17h4" />
                 </svg>
-                <span className="text-[15px] font-bold text-slate-900">
+                <span className="text-[15px] font-bold text-ink">
                   {over ? t('sign.drop_over') : t('sign.drop_here')}
                 </span>
-                <span className="text-[11.5px] leading-relaxed text-slate-500">
+                <span className="text-[11.5px] leading-relaxed text-muted">
                   {mode === 'self' ? t('sign.drop_stays_local') : t('sign.drop_uploaded_on_send')}
                 </span>
-                {!signatureFirst && <span className="mt-1 text-[11px] text-slate-400">{touch ? t('sign.drop_browse_tap') : t('sign.drop_browse')}</span>}
+                {!signatureFirst && <span className="mt-1 text-[11px] text-faint">{touch ? t('sign.drop_browse_tap') : t('sign.drop_browse')}</span>}
           </DropRing>
         </div>
       </div>
@@ -403,7 +403,7 @@ export default function ApplyToPdf() {
       {/* Outside the greyed-out circle so it reads at full strength; red once
           a PDF has been dropped on it anyway. */}
       {!file && signatureFirst && (
-        <p role={turnedAway ? 'alert' : undefined} className={`mt-3 text-center text-sm font-medium ${turnedAway ? 'text-rose-700' : 'text-slate-600'}`}>
+        <p role={turnedAway ? 'alert' : undefined} className={`mt-3 text-center text-sm font-medium ${turnedAway ? 'text-bad' : 'text-soft'}`}>
           {t('sign.signature_first')}
         </p>
       )}
@@ -412,18 +412,18 @@ export default function ApplyToPdf() {
 
       {/* The drop circle's own errors (not a PDF, password-protected) belong
           to both modes; the rest of this card's are the sign-it-myself ones. */}
-      {mode === 'send' && error && <p role="alert" className="mt-3 text-sm text-rose-700">{error}</p>}
+      {mode === 'send' && error && <p role="alert" className="mt-3 text-sm text-bad">{error}</p>}
       {mode === 'send' && <SendForSigning file={file} pages={pages} />}
 
       {mode === 'self' && (<>
       {file && pages > 1 && (
         <div className="mt-4">
-          <label htmlFor="sig-layout" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('sign.layout_label')}</label>
+          <label htmlFor="sig-layout" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted">{t('sign.layout_label')}</label>
           <select
             id="sig-layout"
             value={layout}
             onChange={(e) => setLayout(e.target.value as Layout)}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none"
+            className="w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-sm outline-none"
           >
             {LAYOUTS.map((l) => <option key={l.id} value={l.id}>{t(l.label)}</option>)}
           </select>
@@ -440,7 +440,7 @@ export default function ApplyToPdf() {
           signature there, then drag it, pull its corner to size it. */}
       {file && (
         <div className="mt-4">
-          <Suspense fallback={<div className="h-80 w-full animate-pulse rounded-lg bg-slate-100" />}>
+          <Suspense fallback={<div className="h-80 w-full animate-pulse rounded-lg bg-surface-3" />}>
             <PageStrip
               file={file}
               layout={shownLayout}
@@ -454,7 +454,7 @@ export default function ApplyToPdf() {
               onResize={setWidthPct}
             />
           </Suspense>
-          <p className="mt-1 text-center text-[11px] text-slate-400">
+          <p className="mt-1 text-center text-[11px] text-faint">
             {currentImage ? t('sign.viewer_hint') : t('sign.position_needs_signature')}
           </p>
         </div>
@@ -463,21 +463,21 @@ export default function ApplyToPdf() {
       {file && initialling && <InitialsPlacement value={initials} onChange={setInitials} everyPage={shownLayout === 'initial-every'} />}
 
       {file && hasExtras && (
-        <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+        <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-lg border border-line bg-surface-2/60 p-3">
           <input
             type="checkbox"
             checked={omitExtras}
             onChange={(e) => setOmitExtras(e.target.checked)}
             className="mt-0.5 h-4 w-4 accent-orange-600"
           />
-          <span className="text-xs text-slate-600">
-            {t.rich('sign.omit_extras', { bold: <span className="font-semibold text-slate-800">{t('sign.omit_extras_bold')}</span> })}
+          <span className="text-xs text-soft">
+            {t.rich('sign.omit_extras', { bold: <span className="font-semibold text-ink">{t('sign.omit_extras_bold')}</span> })}
           </span>
         </label>
       )}
 
       {file && (
-        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+        <div className="mt-4 rounded-lg border border-line bg-surface-2/60 p-3">
           <label className={`flex items-start gap-2.5 ${signedIn ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}`}>
             <input
               type="checkbox"
@@ -486,14 +486,14 @@ export default function ApplyToPdf() {
               onChange={(e) => setMakeRecord(e.target.checked)}
               className="mt-0.5 h-4 w-4 accent-orange-600"
             />
-            <span className="text-xs text-slate-600">
-              {t.rich('sign.certificate', { bold: <span className="font-semibold text-slate-800">{t('sign.certificate_bold')}</span> })}
+            <span className="text-xs text-soft">
+              {t.rich('sign.certificate', { bold: <span className="font-semibold text-ink">{t('sign.certificate_bold')}</span> })}
             </span>
           </label>
           {!signedIn && (
             <>
-              <p className="mt-2 pl-6 text-[11px] text-slate-500">
-                {t.rich('sign.certificate_sign_in', { link: <button type="button" onClick={() => setSignInOpen(true)} className="font-medium text-orange-700 hover:underline">{t('sign.certificate_sign_in_link')}</button> })}
+              <p className="mt-2 pl-6 text-[11px] text-muted">
+                {t.rich('sign.certificate_sign_in', { link: <button type="button" onClick={() => setSignInOpen(true)} className="font-medium text-accent hover:underline">{t('sign.certificate_sign_in_link')}</button> })}
               </p>
               <SignInDialog open={signInOpen} onClose={() => setSignInOpen(false)} hubLoginHref={SIGNUP_URL} />
             </>
@@ -501,7 +501,7 @@ export default function ApplyToPdf() {
         </div>
       )}
 
-      {error && <p role="alert" className="mt-3 text-sm text-rose-700">{error}</p>}
+      {error && <p role="alert" className="mt-3 text-sm text-bad">{error}</p>}
 
       <button
         onClick={onSign}
@@ -513,19 +513,19 @@ export default function ApplyToPdf() {
       </button>
 
       {/* Always in the tree (not empty:hidden) so screen readers announce it. */}
-      <div role="status" className="text-center text-xs text-emerald-700">
+      <div role="status" className="text-center text-xs text-good">
         {savedAs && !busy && <p className="mt-2">{t('sign.signed_as', { name: savedAs })}</p>}
       </div>
 
       {verifyUrl && (
         // The verifiable record just made: the suite's Key box (BRANDING.md →
         // Boxes, C), its tab neutral; the green fill and words carry the news.
-        <div className="u-box u-box--key mt-5 bg-emerald-50 px-3 pb-3 pt-5">
+        <div className="u-box u-box--key mt-5 bg-good-soft px-3 pb-3 pt-5">
           <span className="u-box__key">{t('send.certificate')}</span>
-          <p className="text-xs font-semibold text-emerald-800">{t('sign.record_created')}</p>
-          <p className="mt-1 text-[11px] text-emerald-700">{t('sign.record_qr_links_here')}</p>
+          <p className="text-xs font-semibold text-good-strong">{t('sign.record_created')}</p>
+          <p className="mt-1 text-[11px] text-good">{t('sign.record_qr_links_here')}</p>
           <div className="mt-2 flex items-center gap-2">
-            <input readOnly value={verifyUrl} className="flex-1 rounded-md border border-emerald-200 bg-white px-2 py-1.5 text-[11px] text-slate-700" />
+            <input readOnly value={verifyUrl} className="flex-1 rounded-md border border-good-line bg-surface px-2 py-1.5 text-[11px] text-ink-2" />
             <button
               onClick={() => navigator.clipboard?.writeText(verifyUrl)}
               className={`${btnSecondarySm} shrink-0`}
@@ -534,7 +534,7 @@ export default function ApplyToPdf() {
             </button>
           </div>
           {copyRecorded && (
-            <p className="mt-2 text-[11px] text-emerald-700">
+            <p className="mt-2 text-[11px] text-good">
               {t('sign.record_copy_hash')}
             </p>
           )}

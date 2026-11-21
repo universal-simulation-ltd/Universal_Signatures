@@ -161,7 +161,7 @@ export default function PageStrip({ file, layout, sigPng, sigPage, pos, widthPct
     row.scrollTo({ left: x, behavior: 'smooth' })
   }
 
-  if (error) return <p className="py-16 text-center text-sm text-rose-600">{error}</p>
+  if (error) return <p className="py-16 text-center text-sm text-bad">{error}</p>
 
   const total = doc?.sizes.length ?? 0
   const sigOn = (i: number) => !!sigPng && (layout === 'every' || layout === 'initial-every' || i === sigPage)
@@ -234,14 +234,14 @@ export default function PageStrip({ file, layout, sigPng, sigPage, pos, widthPct
       <div
         ref={rowRef}
         onScroll={onScroll}
-        className="flex overflow-x-auto overscroll-x-contain rounded-lg bg-slate-100 p-3"
+        className="flex overflow-x-auto overscroll-x-contain rounded-lg bg-surface-3 p-3"
         // `width: 0; min-width: 100%`: a scroll box still offers its content's
         // full width when the layout around it is sized to content, and the
         // studio's grid is — the whole row of pages widened the page on a
         // phone. At 0 it offers nothing and still fills its column.
         style={{ gap: GAP, minHeight: rowHeight ? rowHeight + 24 : 320, width: 0, minWidth: '100%' }}
       >
-        {!doc && <div className="flex w-full animate-pulse items-center justify-center text-sm text-slate-400">{t('sign.picker_rendering')}</div>}
+        {!doc && <div className="flex w-full animate-pulse items-center justify-center text-sm text-faint">{t('sign.picker_rendering')}</div>}
         {doc && rowHeight > 0 && doc.sizes.map((size, i) => {
           const centre = sigCentre(size.width, size.height, widthPct, sigAspect, pos)
           const box = initialsOn(i) && initials
@@ -253,7 +253,7 @@ export default function PageStrip({ file, layout, sigPng, sigPage, pos, widthPct
               data-page={i}
               role="img"
               aria-label={t('sign.viewer_page', { n: i + 1, total })}
-              className={`relative shrink-0 select-none overflow-hidden rounded-sm bg-white shadow ring-1 ring-slate-200 ${sigPng && !pos ? 'cursor-crosshair' : ''}`}
+              className={`paper relative shrink-0 select-none overflow-hidden rounded-sm bg-surface shadow ring-1 ring-line ${sigPng && !pos ? 'cursor-crosshair' : ''}`}
               style={{ width: widthOf(i), height: rowHeight }}
               onClick={(e) => {
                 if (!sigPng || (e.target as HTMLElement).dataset.handle || Date.now() - dragEnded.current < 300) return
@@ -316,10 +316,10 @@ export default function PageStrip({ file, layout, sigPng, sigPage, pos, widthPct
       </div>
 
       {total > 1 && (
-        <div className="mt-2 flex items-center justify-center gap-3 text-xs text-slate-500">
-          <button type="button" onClick={() => goTo(current - 1)} disabled={current === 0} aria-label={t('sign.viewer_prev')} className="rounded-md px-2 py-1 hover:bg-slate-100 disabled:opacity-30">‹</button>
+        <div className="mt-2 flex items-center justify-center gap-3 text-xs text-muted">
+          <button type="button" onClick={() => goTo(current - 1)} disabled={current === 0} aria-label={t('sign.viewer_prev')} className="rounded-md px-2 py-1 hover:bg-surface-3 disabled:opacity-30">‹</button>
           <span className="tabular-nums">{t('sign.viewer_page', { n: current + 1, total })}</span>
-          <button type="button" onClick={() => goTo(current + 1)} disabled={current >= total - 1} aria-label={t('sign.viewer_next')} className="rounded-md px-2 py-1 hover:bg-slate-100 disabled:opacity-30">›</button>
+          <button type="button" onClick={() => goTo(current + 1)} disabled={current >= total - 1} aria-label={t('sign.viewer_next')} className="rounded-md px-2 py-1 hover:bg-surface-3 disabled:opacity-30">›</button>
         </div>
       )}
     </div>

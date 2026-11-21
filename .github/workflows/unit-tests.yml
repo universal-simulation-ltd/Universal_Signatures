@@ -1,4 +1,5 @@
-# The Node unit tests (`npm run test:attest`, scripts/phoneAttest.test.mjs), on
+# The Node unit tests (`npm run test:attest`, scripts/phoneAttest.test.mjs, and
+# `npm run test:theme`, scripts/theme.test.mjs), on
 # every push and pull request. No server, no browser; the browser specs are
 # e2e.yml. Node 24 strips the TypeScript types the test imports.
 #
@@ -38,3 +39,5 @@ jobs:
       - run: npm ci
 
       - run: npm run test:attest
+
+      - run: npm run test:theme

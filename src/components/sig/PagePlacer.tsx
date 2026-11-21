@@ -87,10 +87,10 @@ export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onC
     onChange(clampPos({ xPct: shown.xPct + m[0], yPct: shown.yPct + m[1] }))
   }
 
-  if (error) return <p className="py-16 text-center text-sm text-rose-600">{error}</p>
+  if (error) return <p className="py-16 text-center text-sm text-bad">{error}</p>
   if (!page) {
     return (
-      <div className="mx-auto flex aspect-[1/1.414] w-full animate-pulse items-center justify-center rounded-lg bg-slate-100 text-sm text-slate-400" style={{ maxWidth: displayWidth }}>
+      <div className="mx-auto flex aspect-[1/1.414] w-full animate-pulse items-center justify-center rounded-lg bg-surface-3 text-sm text-faint" style={{ maxWidth: displayWidth }}>
         {t('sign.picker_rendering')}
       </div>
     )
@@ -124,7 +124,7 @@ export default function PagePlacer({ file, pageIndex, sigPng, widthPct, pos, onC
       aria-label={sigPng ? t('sign.picker_surface_label') : undefined}
       aria-describedby={sigPng ? liveId : undefined}
       onKeyDown={onKeyDown}
-      className={`relative mx-auto select-none rounded-lg shadow ring-1 ring-slate-200 outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${sigPng && !pos ? 'cursor-crosshair' : ''}`}
+      className={`paper relative mx-auto select-none rounded-lg bg-surface shadow ring-1 ring-line outline-none focus-visible:ring-2 focus-visible:ring-orange-600 ${sigPng && !pos ? 'cursor-crosshair' : ''}`}
       // Not `width: displayWidth` + `maxWidth: 100%`: in the studio's one-column
       // grid on a phone, a fixed 520px width sized the grid track itself, and the
       // whole page laid out 578px wide.

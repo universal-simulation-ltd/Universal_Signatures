@@ -40,7 +40,7 @@ export default function SignaturePad() {
           (BRANDING.md → Boxes, D) in place of a dashed outline. All four
           corners muted while it is empty; the leading one lit once there is
           ink in frame. */}
-      <div className={`u-box u-box--frame relative rounded-lg bg-white p-0 ${ink.hasInk ? '' : 'u-box--empty'}`}>
+      <div data-u-ground="light" className={`paper u-box u-box--frame relative rounded-lg bg-surface p-0 ${ink.hasInk ? '' : 'u-box--empty'}`}>
         <canvas
           ref={ink.canvasRef}
           role="img"
@@ -49,7 +49,7 @@ export default function SignaturePad() {
           {...ink.handlers}
         />
         {!ink.hasInk && (
-          <span className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 text-[11px] text-slate-400">
+          <span className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 text-[11px] text-faint">
             {t('create.pad_hint')}
           </span>
         )}
@@ -58,7 +58,7 @@ export default function SignaturePad() {
         <button
           type="button"
           onClick={() => setMode('type')}
-          className="rounded-md px-2 py-1.5 text-xs font-medium text-slate-500 hover:text-orange-700"
+          className="rounded-md px-2 py-1.5 text-xs font-medium text-muted hover:text-accent"
         >
           {t('create.pad_rather_type')}
         </button>
@@ -67,7 +67,7 @@ export default function SignaturePad() {
             type="button"
             onClick={ink.undo}
             disabled={!ink.canUndo}
-            className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent"
+            className="rounded-md px-3 py-1.5 text-xs font-medium text-soft hover:bg-surface-3 disabled:opacity-40 disabled:hover:bg-transparent"
           >
             {t('create.pad_undo')}
           </button>
@@ -75,7 +75,7 @@ export default function SignaturePad() {
             type="button"
             onClick={ink.clear}
             disabled={!ink.hasInk}
-            className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-rose-700 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-600"
+            className="rounded-md px-3 py-1.5 text-xs font-medium text-soft hover:bg-surface-3 hover:text-bad disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-soft"
           >
             {t('create.pad_clear')}
           </button>

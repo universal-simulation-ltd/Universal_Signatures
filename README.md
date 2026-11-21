@@ -37,6 +37,9 @@ Live at **`opensource.unisim.co.uk/signatures`**.
   product `signatures`, kind `saved-signatures`.
 - **Eight languages** — English, French, Spanish, Italian, German, Portuguese
   (Brazil and Portugal) and Turkish, following the suite's language setting.
+- **Light or dark** — Tune this app ▸ Colour scheme: Light (the default), Dark
+  or Match my device. Signatures and PDF pages stay on white paper in dark, so
+  what you see is what gets stamped.
 
 ### Embedding a badge
 

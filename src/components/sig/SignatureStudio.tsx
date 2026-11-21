@@ -10,6 +10,7 @@ import SignaturePad from './SignaturePad'
 import TypeSignature from './TypeSignature'
 import PhoneSignPanel from './PhoneSignPanel'
 import ApplyToPdf from './ApplyToPdf'
+import { useThemeStore } from '../../stores/themeStore'
 import SaveTabs from './SaveTabs'
 import MainSignatureBar from './MainSignatureBar'
 import { useMainSignature } from '../../lib/cloud'
@@ -30,6 +31,7 @@ const ALIGN_LABELS: Record<LabelAlign, MessageKey> = {
 
 export default function SignatureStudio() {
   const t = useT()
+  const theme = useThemeStore((s) => s.effective)
   const storedMode = useSigStore((s) => s.mode)
   const setMode = useSigStore((s) => s.setMode)
   // "Sign on phone" hands the drawing to a phone by QR code. On a phone you are
@@ -100,8 +102,8 @@ export default function SignatureStudio() {
           a stranger otherwise lands on "Create your signature" and "Sign a
           PDF" side by side with nothing saying which comes first. */}
       <div className="mb-5">
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">{t('create.page_headline')}</h1>
-        <p className="mt-1.5 max-w-3xl text-sm sm:text-base text-slate-600">{t('create.page_lead')}</p>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-ink">{t('create.page_headline')}</h1>
+        <p className="mt-1.5 max-w-3xl text-sm sm:text-base text-soft">{t('create.page_lead')}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -110,9 +112,9 @@ export default function SignatureStudio() {
             LAST, and the last is the SaveTabs wrapper, hidden while folded, so
             the folded card kept a 24px margin under it for nothing. */}
         <div className="flex flex-col gap-6">
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <section className="rounded-xl border border-line bg-surface p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-sm font-bold text-slate-900">
+            <h2 className="text-sm font-bold text-ink">
               {sending ? (
                 // `aria-expanded` + `aria-controls`: the SDK's reveal-on-expand
                 // brings the opened column into view by itself.
@@ -121,10 +123,10 @@ export default function SignatureStudio() {
                   onClick={() => setOpenInSend((o) => !o)}
                   aria-expanded={!folded}
                   aria-controls={bodyId}
-                  className="inline-flex items-center gap-1.5 text-left hover:text-orange-700"
+                  className="inline-flex items-center gap-1.5 text-left hover:text-accent"
                 >
                   {t('create.studio_title')}
-                  <svg viewBox="0 0 24 24" className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${folded ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" className={`h-4 w-4 shrink-0 text-muted transition-transform ${folded ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M6 9l6 6 6-6" />
                   </svg>
                 </button>
@@ -152,7 +154,7 @@ export default function SignatureStudio() {
               })}
             </div>
           </div>
-          {folded && <p className="mt-1 text-xs text-slate-500">{t('create.studio_folded_hint')}</p>}
+          {folded && <p className="mt-1 text-xs text-muted">{t('create.studio_folded_hint')}</p>}
           <div id={bodyId} className={folded ? 'hidden' : undefined}>
           <div className="mt-4">
             {main && <MainSignatureBar main={main} />}
@@ -160,9 +162,9 @@ export default function SignatureStudio() {
           </div>
 
           {/* Optional name / date / time stamped beneath the signature. */}
-          <div className="mt-4 space-y-2 border-t border-slate-100 pt-3">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('create.labels_heading')}</div>
-            <label className="flex items-center gap-2 text-sm text-slate-700">
+          <div className="mt-4 space-y-2 border-t border-line-soft pt-3">
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted">{t('create.labels_heading')}</div>
+            <label className="flex items-center gap-2 text-sm text-ink-2">
               <input type="checkbox" checked={includeName} onChange={(e) => setIncludeName(e.target.checked)} className="h-4 w-4 accent-orange-600" />
               {t('create.labels_add_name')}
             </label>
@@ -171,20 +173,20 @@ export default function SignatureStudio() {
                 value={signerName}
                 onChange={(e) => setSignerName(e.target.value)}
                 placeholder={t('create.labels_name_placeholder')}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+                className="w-full rounded-md border border-line-strong px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-accent-ring outline-none"
               />
             )}
-            <label className="flex items-center gap-2 text-sm text-slate-700">
+            <label className="flex items-center gap-2 text-sm text-ink-2">
               <input type="checkbox" checked={includeDate} onChange={(e) => setIncludeDate(e.target.checked)} className="h-4 w-4 accent-orange-600" />
-              <span>{t.rich('create.labels_add_date', { date: <span className="text-slate-400">({formatSigningDate()})</span> })}</span>
+              <span>{t.rich('create.labels_add_date', { date: <span className="text-faint">({formatSigningDate()})</span> })}</span>
             </label>
-            <label className="flex items-center gap-2 text-sm text-slate-700">
+            <label className="flex items-center gap-2 text-sm text-ink-2">
               <input type="checkbox" checked={includeTime} onChange={(e) => setIncludeTime(e.target.checked)} className="h-4 w-4 accent-orange-600" />
-              <span>{t.rich('create.labels_add_time', { time: <span className="text-slate-400">({formatSigningTime()})</span> })}</span>
+              <span>{t.rich('create.labels_add_time', { time: <span className="text-faint">({formatSigningTime()})</span> })}</span>
             </label>
             {hasLabels && (
               <div className="flex items-center gap-2 pt-0.5">
-                <span className="text-[11px] font-medium text-slate-500">{t('create.labels_align')}</span>
+                <span className="text-[11px] font-medium text-muted">{t('create.labels_align')}</span>
                 <div className="u-tabs inline-flex">
                   {(['left', 'center', 'right'] as LabelAlign[]).map((a) => (
                     <button
@@ -204,10 +206,10 @@ export default function SignatureStudio() {
                 image used for saving and signing. */}
             {hasLabels && (
               <div className="pt-1">
-                <div className="mb-1 text-[11px] font-medium text-slate-500">{t('create.labels_preview')}</div>
+                <div className="mb-1 text-[11px] font-medium text-muted">{t('create.labels_preview')}</div>
                 {/* What gets stamped, in frame (Boxes D · frame): muted
                     corners until there is a signature to show. */}
-                <div className={`u-box u-box--frame u-box--row flex min-h-[76px] items-center justify-center rounded-md bg-slate-50 p-3 ${composedDataUrl ? '' : 'u-box--empty'}`}>
+                <div data-u-ground="light" className={`paper u-box u-box--frame u-box--row flex min-h-[76px] items-center justify-center rounded-md bg-surface-2 p-3 ${composedDataUrl ? '' : 'u-box--empty'}`}>
                   {composedDataUrl ? (
                     <img
                       src={composedDataUrl}
@@ -215,7 +217,7 @@ export default function SignatureStudio() {
                       className="max-h-24 max-w-full object-contain"
                     />
                   ) : (
-                    <span className="text-center text-[11px] text-slate-400">
+                    <span className="text-center text-[11px] text-faint">
                       {base ? t('create.labels_preview_building') : t('create.labels_preview_empty')}
                     </span>
                   )}
@@ -223,7 +225,7 @@ export default function SignatureStudio() {
               </div>
             )}
             {hasLabels && (
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-faint">
                 {t('create.labels_note')}
               </p>
             )}
@@ -254,6 +256,7 @@ export default function SignatureStudio() {
             proof="https://github.com/universal-simulation-ltd/Universal_Signatures/blob/main/PRIVACY.md"
             subject={{ en: en.create.privacy_subject, [t.lang]: t('create.privacy_subject') } as LocalizedSubject}
             except={{ en: en.create.privacy_except, [t.lang]: t('create.privacy_except') } as LocalizedText}
+            theme={theme}
           />
         </div>
       </div>

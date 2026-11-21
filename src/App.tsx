@@ -15,6 +15,7 @@ import { parseExpiry } from './lib/mobileSign'
 import { KNOWLEDGE_BASE } from './knowledge'
 import { useT } from './i18n'
 import { useTouchPhone } from './lib/useCoarsePointer'
+import { useThemeStore } from './stores/themeStore'
 
 const REPO_URL = 'https://github.com/universal-simulation-ltd/Universal_Signatures'
 
@@ -48,6 +49,9 @@ export default function App() {
   // The studio has no "Sign on phone" on a phone (see SignatureStudio), so this
   // row does not offer it there either. A tablet keeps it.
   const phone = useTouchPhone()
+  // The RESOLVED theme ('system' already turned into light or dark), what the
+  // nav bar paints with. Importing the store is what applies `.dark` to <html>.
+  const theme = useThemeStore((s) => s.effective)
 
   // The phone signing page is a standalone full-screen view — no navbar/footer.
   if (r.name === 'signMobile') return <SignMobilePage token={r.token} expiresAt={r.expiresAt} />
@@ -55,7 +59,7 @@ export default function App() {
   // framing app has its own bar, and a second one inside it only confuses.
   if (EMBEDDED && r.name === 'studio') {
     return (
-      <div className="min-h-screen bg-slate-100">
+      <div className="min-h-screen bg-canvas">
         <main className={`${CONTAINER} py-4`}>
           <SignatureStudio />
         </main>
@@ -63,7 +67,7 @@ export default function App() {
     )
   }
   return (
-    <div className="flex flex-col min-h-screen bg-slate-100">
+    <div className="flex flex-col min-h-screen bg-canvas">
       <UniversalAppsNavBar
         // Signed in, the bar says whose it is: "Bradley’s Signatures" ("James’ Signatures",
         // "My Signatures" with no name), and Tune this app gets the account area (James, 2026-11-10 rollout).
@@ -91,6 +95,11 @@ export default function App() {
         // articles, bundled from ./knowledge so they read offline.
         knowledgeBase={KNOWLEDGE_BASE}
         productHomeHref={import.meta.env.BASE_URL}
+        // `themeStore` puts this app's colour scheme in Tune this app ▸ App
+        // preferences (Light / Dark / Match my device, or follow the account's
+        // Global choice). `theme` is the RESOLVED value the bar paints with.
+        theme={theme}
+        themeStore={useThemeStore}
         suiteSwitcherIconSrc={`${import.meta.env.BASE_URL}unisim-icon.png`}
         contentClassName={CONTAINER}
         // The mode Create your signature opens on — the twin of double-tapping
@@ -135,18 +144,18 @@ export default function App() {
             : <SignatureStudio />}
       </main>
 
-      <footer className="border-t border-slate-200 bg-white">
-        <div className={`${CONTAINER} py-4 flex flex-row items-center gap-3 text-xs text-slate-500`}>
+      <footer className="border-t border-line bg-surface">
+        <div className={`${CONTAINER} py-4 flex flex-row items-center gap-3 text-xs text-muted`}>
           <span>
             {t.rich('app.footer_with_love', {
               heart: (
                 <>
-                  <span aria-hidden="true" className="text-orange-600">&hearts;</span>
+                  <span aria-hidden="true" className="text-orange-600 dark:text-accent">&hearts;</span>
                   <span className="sr-only">{t('app.footer_love_sr')}</span>
                 </>
               ),
               link: (
-                <a href="https://www.unisim.co.uk" target="_blank" rel="noreferrer" className="text-slate-700 hover:text-orange-700 underline-offset-2 hover:underline">
+                <a href="https://www.unisim.co.uk" target="_blank" rel="noreferrer" className="text-ink-2 hover:text-accent underline-offset-2 hover:underline">
                   UNISIM.co.uk
                 </a>
               ),
@@ -157,7 +166,7 @@ export default function App() {
             target="_blank"
             rel="noreferrer"
             aria-label={t('app.github_aria')}
-            className="ml-auto shrink-0 inline-flex items-center gap-1.5 text-slate-600 hover:text-slate-900 transition-colors"
+            className="ml-auto shrink-0 inline-flex items-center gap-1.5 text-soft hover:text-ink transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5" aria-hidden="true">
               <path d="M12 .5C5.65.5.5 5.65.5 12.02c0 5.09 3.29 9.4 7.86 10.92.57.1.78-.25.78-.55 0-.27-.01-1-.02-1.96-3.2.69-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.7 1.25 3.36.95.1-.74.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18.92-.26 1.91-.39 2.89-.39.98 0 1.97.13 2.89.39 2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.18 1.82 1.18 3.08 0 4.42-2.69 5.39-5.26 5.68.41.35.77 1.05.77 2.12 0 1.53-.01 2.76-.01 3.14 0 .3.21.66.79.55 4.57-1.52 7.86-5.83 7.86-10.92C23.5 5.65 18.35.5 12 .5z" />

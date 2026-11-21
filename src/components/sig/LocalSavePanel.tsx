@@ -111,11 +111,11 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
     <>
       {!bare && (
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold text-slate-900">{t('save.local_title')}</h2>
+          <h2 className="text-sm font-bold text-ink">{t('save.local_title')}</h2>
           <Chip size="sm">{t('save.local_on_device')}</Chip>
         </div>
       )}
-      <p className={`text-xs text-slate-500 ${bare ? '' : 'mt-1'}`}>
+      <p className={`text-xs text-muted ${bare ? '' : 'mt-1'}`}>
         {t('save.local_intro')}
       </p>
 
@@ -124,7 +124,7 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
           value={saveName}
           onChange={(e) => setSaveName(e.target.value)}
           placeholder={t('save.local_name_placeholder')}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+          className="w-full rounded-md border border-line-strong px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-accent-ring outline-none"
         />
         <button
           onClick={onSave}
@@ -141,9 +141,9 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
           {saved.map((sig) => (
             <li
               key={sig.id}
-              className={`flex items-center gap-3 rounded-lg border p-2 ${sig.id === inUseId ? 'border-orange-300 bg-orange-50/60 ring-1 ring-orange-200' : 'border-slate-200 bg-slate-50'}`}
+              className={`flex items-center gap-3 rounded-lg border p-2 ${sig.id === inUseId ? 'border-orange-300 bg-accent-soft/60 ring-1 ring-orange-200 dark:border-orange-500/70 dark:ring-orange-500/30' : 'border-line bg-surface-2'}`}
             >
-              <span className="flex h-12 w-24 shrink-0 items-center justify-center overflow-hidden rounded bg-white ring-1 ring-slate-200">
+              <span className="paper flex h-12 w-24 shrink-0 items-center justify-center overflow-hidden rounded bg-surface ring-1 ring-line">
                 <img src={sig.imageDataUrl} alt={t('save.local_saved_alt')} className="max-h-11 max-w-[5.5rem] object-contain" />
               </span>
               <span className="min-w-0 flex-1">
@@ -158,21 +158,21 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
                     }}
                     onBlur={() => saveRename(sig.id)}
                     placeholder={t('save.local_rename_placeholder')}
-                    className="w-full rounded-md border border-slate-300 px-2 py-1 text-xs focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="w-full rounded-md border border-line-strong px-2 py-1 text-xs focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
                 ) : (
                   <button
                     onClick={() => startRename(sig)}
-                    className="block max-w-full truncate text-left text-xs font-medium text-slate-700 hover:text-orange-700"
+                    className="block max-w-full truncate text-left text-xs font-medium text-ink-2 hover:text-accent"
                     title={t('save.local_rename')}
                   >
                     {displayName(sig)}
                   </button>
                 )}
-                <span className="text-[10px] uppercase tracking-wide text-slate-400">{sig.style === 'type' ? t('save.style_type') : t('save.style_draw')}</span>
+                <span className="text-[10px] uppercase tracking-wide text-faint">{sig.style === 'type' ? t('save.style_type') : t('save.style_draw')}</span>
               </span>
               {sig.id === inUseId ? (
-                <span className="shrink-0 rounded-md bg-orange-100 px-3 py-1.5 text-xs font-semibold text-orange-700">
+                <span className="shrink-0 rounded-md bg-accent-soft px-3 py-1.5 text-xs font-semibold text-accent">
                   {t('save.local_in_use')}
                 </span>
               ) : (
@@ -186,7 +186,7 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
               <button
                 onClick={() => onRemove(sig.id)}
                 aria-label={t('save.local_remove_aria')}
-                className="shrink-0 rounded-md px-2 py-1.5 text-xs font-medium text-slate-400 hover:text-rose-600"
+                className="shrink-0 rounded-md px-2 py-1.5 text-xs font-medium text-faint hover:text-bad"
               >
                 {t('save.remove')}
               </button>
@@ -200,7 +200,7 @@ export default function LocalSavePanel({ bare = false }: { bare?: boolean }) {
   )
 
   if (bare) return content
-  return <div className="rounded-xl border border-slate-200 bg-white p-5">{content}</div>
+  return <div className="rounded-xl border border-line bg-surface p-5">{content}</div>
 }
 
 // Save to a file / Open a file, with an optional password. A signature is
@@ -283,20 +283,20 @@ function SignatureFile({ saved, onImported }: { saved: LocalSignature[]; onImpor
   }
 
   return (
-    <div className="mt-5 border-t border-slate-100 pt-4" data-testid="signature-file" {...drop.dropzoneProps}>
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('save.file_title')}</h3>
-      <p className="mt-1 text-xs text-slate-500">{t('save.file_intro')}</p>
+    <div className="mt-5 border-t border-line-soft pt-4" data-testid="signature-file" {...drop.dropzoneProps}>
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('save.file_title')}</h3>
+      <p className="mt-1 text-xs text-muted">{t('save.file_intro')}</p>
 
-      <label htmlFor={passwordId} className="mt-3 block text-[11px] font-medium text-slate-600">{t('save.file_password_label')}</label>
+      <label htmlFor={passwordId} className="mt-3 block text-[11px] font-medium text-soft">{t('save.file_password_label')}</label>
       <input
         id={passwordId}
         type="password"
         autoComplete="new-password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+        className="mt-1 w-full rounded-md border border-line-strong px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-accent-ring outline-none"
       />
-      <p className="mt-1 text-[11px] text-slate-400">{t('save.file_password_hint')}</p>
+      <p className="mt-1 text-[11px] text-faint">{t('save.file_password_hint')}</p>
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button
@@ -330,7 +330,7 @@ function SignatureFile({ saved, onImported }: { saved: LocalSignature[]; onImpor
         <input {...drop.inputProps} className="hidden" data-testid="signature-file-input" />
       </div>
       {note && (
-        <p key={note.seq} data-note={note.seq} role={note.tone === 'error' ? 'alert' : 'status'} className={`mt-2 text-sm ${note.tone === 'ok' ? 'text-emerald-700' : 'text-rose-700'}`}>
+        <p key={note.seq} data-note={note.seq} role={note.tone === 'error' ? 'alert' : 'status'} className={`mt-2 text-sm ${note.tone === 'ok' ? 'text-good' : 'text-bad'}`}>
           {note.text}
         </p>
       )}

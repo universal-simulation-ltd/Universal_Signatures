@@ -128,8 +128,8 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
 
   if (!signedIn) {
     return (
-      <div className="mt-4 rounded-lg bg-slate-50 p-4" data-testid="send-signed-out">
-        <p className="text-sm text-slate-700">
+      <div className="mt-4 rounded-lg bg-surface-2 p-4" data-testid="send-signed-out">
+        <p className="text-sm text-ink-2">
           {t.rich('send.signed_out_intro', { id: <strong>Universal ID</strong> })}
         </p>
         <button type="button" onClick={() => setSignInOpen(true)} className={`${btnPrimary} mt-3`}>
@@ -142,7 +142,7 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
 
   if (!emailVerified) {
     return (
-      <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <div className="mt-4 rounded-lg border border-warn-line bg-warn-soft p-4 text-sm text-warn-strong">
         {t.rich('send.unverified', { link: <a href={HUB_URL} className="font-semibold underline">{t('send.unverified_link')}</a> })}
       </div>
     )
@@ -215,12 +215,12 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
         <>
           {spots.length > 1 && (
             <div className="mb-3" data-testid="sign-spots">
-              <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('send.spots_label')}</div>
+              <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted">{t('send.spots_label')}</div>
               <div className="flex flex-wrap gap-1.5">
                 {spots.map((s, i) => (
                   <span
                     key={i}
-                    className={`inline-flex items-center rounded-full text-xs font-semibold ring-1 ${i === active ? 'bg-orange-600 text-white ring-orange-600' : 'bg-white text-slate-700 ring-slate-300'}`}
+                    className={`inline-flex items-center rounded-full text-xs font-semibold ring-1 ${i === active ? 'bg-orange-600 text-white ring-orange-600' : 'bg-surface text-ink-2 ring-line-strong'}`}
                   >
                     <button type="button" onClick={() => setActive(i)} aria-pressed={i === active} className="py-1 pl-3 pr-1.5">
                       {t('send.spot_n', { n: i + 1 })} · {s.page < 0 ? t('send.page_last') : t('send.page_n', { n: s.page + 1 })}
@@ -230,7 +230,7 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
                       onClick={() => removeSpot(i)}
                       aria-label={t('send.spot_remove_aria', { n: i + 1 })}
                       title={t('send.spot_remove_aria', { n: i + 1 })}
-                      className={`rounded-full py-1 pl-1 pr-2.5 ${i === active ? 'text-orange-100 hover:text-white' : 'text-slate-400 hover:text-rose-600'}`}
+                      className={`rounded-full py-1 pl-1 pr-2.5 ${i === active ? 'text-orange-100 hover:text-white' : 'text-faint hover:text-bad'}`}
                     >
                       ×
                     </button>
@@ -241,21 +241,21 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
           )}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="send-page" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('send.where_label')}</label>
+              <label htmlFor="send-page" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted">{t('send.where_label')}</label>
               <select
                 id="send-page"
                 value={page}
                 onChange={(e) => setPage(Number(e.target.value))}
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none"
+                className="w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-sm outline-none"
               >
                 <option value={-1}>{pages > 1 ? t('send.page_last_n', { n: pages }) : t('send.page_last')}</option>
                 {pages > 1 && Array.from({ length: pages - 1 }).map((_, i) => <option key={i} value={i}>{t('send.page_n', { n: i + 1 })}</option>)}
               </select>
-              <label htmlFor="send-size" className="mt-3 mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('send.size_label', { pct: widthPct })}</label>
+              <label htmlFor="send-size" className="mt-3 mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted">{t('send.size_label', { pct: widthPct })}</label>
               <input id="send-size" type="range" min={8} max={50} value={widthPct} onChange={(e) => setWidthPct(Number(e.target.value))} className="w-full accent-orange-600" />
             </div>
             <div>
-              <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">{t('send.position_label')}</div>
+              <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted">{t('send.position_label')}</div>
               <div role="group" aria-label={t('send.position_group_aria')} className={`grid grid-cols-3 gap-1.5 transition ${pos ? 'opacity-40' : ''}`}>
                 {ANCHORS.map((a) => (
                   <button
@@ -265,9 +265,9 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
                     aria-label={t(a.label)}
                     aria-pressed={!pos && anchor === a.id}
                     title={t(a.label)}
-                    className={`h-9 rounded-md ring-1 transition ${!pos && anchor === a.id ? 'bg-orange-600 ring-orange-600' : 'bg-white ring-slate-200 hover:bg-slate-50'}`}
+                    className={`h-9 rounded-md ring-1 transition ${!pos && anchor === a.id ? 'bg-orange-600 ring-orange-600' : 'bg-surface ring-line hover:bg-surface-2'}`}
                   >
-                    <span className={`mx-auto block h-2 w-2 rounded-full ${!pos && anchor === a.id ? 'bg-white' : 'bg-slate-300'}`} />
+                    <span className={`mx-auto block h-2 w-2 rounded-full ${!pos && anchor === a.id ? 'bg-surface' : 'bg-line-strong'}`} />
                   </button>
                 ))}
               </div>
@@ -279,9 +279,9 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
                 {pos ? t('send.custom_position') : t('send.choose_on_page')}
               </button>
               {pos && (
-                <div className="mt-1.5 flex items-center justify-between text-[11px] text-emerald-700">
+                <div className="mt-1.5 flex items-center justify-between text-[11px] text-good">
                   <span>{t('send.custom_set')}</span>
-                  <button type="button" onClick={() => setPos(null)} className="font-medium text-slate-500 hover:text-rose-600">{t('send.use_grid')}</button>
+                  <button type="button" onClick={() => setPos(null)} className="font-medium text-muted hover:text-bad">{t('send.use_grid')}</button>
                 </div>
               )}
             </div>
@@ -307,13 +307,13 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
               type="button"
               onClick={addSpot}
               data-testid="add-sign-spot"
-              className="mt-3 text-xs font-semibold text-orange-700 hover:underline"
+              className="mt-3 text-xs font-semibold text-accent hover:underline"
             >
               {t('send.add_spot')}
             </button>
           )}
 
-          <label htmlFor="send-email" className="mt-4 mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('send.email_label')}</label>
+          <label htmlFor="send-email" className="mt-4 mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted">{t('send.email_label')}</label>
           <input
             id="send-email"
             type="email"
@@ -322,21 +322,21 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t('send.email_placeholder')}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+            className="w-full rounded-md border border-line-strong px-3 py-2 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-accent-ring"
           />
 
-          <label className="mt-3 flex cursor-pointer items-start gap-2.5 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+          <label className="mt-3 flex cursor-pointer items-start gap-2.5 rounded-lg border border-line bg-surface-2/60 p-3">
             <input type="checkbox" checked={protect} onChange={(e) => setProtect(e.target.checked)} className="mt-0.5 h-4 w-4 accent-orange-600" />
-            <span className="text-xs text-slate-600">
-              {t.rich('send.protect_label', { title: <span className="font-semibold text-slate-800">{t('send.protect_title')}</span> })}
+            <span className="text-xs text-soft">
+              {t.rich('send.protect_label', { title: <span className="font-semibold text-ink">{t('send.protect_title')}</span> })}
             </span>
           </label>
 
-          <p className="mt-3 text-[11px] text-slate-500">
+          <p className="mt-3 text-[11px] text-muted">
             {t('send.storage_note')}
           </p>
 
-          {error && <p role="alert" className="mt-3 text-sm text-rose-700">{error}</p>}
+          {error && <p role="alert" className="mt-3 text-sm text-bad">{error}</p>}
 
           <button
             type="button"
@@ -349,13 +349,13 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
           </button>
         </>
       ) : (
-        <p className="text-center text-xs text-slate-500">{t('send.drop_hint')}</p>
+        <p className="text-center text-xs text-muted">{t('send.drop_hint')}</p>
       )}
 
       <div role="status">
         {sent && (
-          <div className={`mt-3 rounded-lg p-3 ${sent.emailed === 'failed' ? 'bg-amber-50' : 'bg-emerald-50'}`} data-testid="send-result">
-            <p className={`text-xs font-semibold ${sent.emailed === 'failed' ? 'text-amber-900' : 'text-emerald-800'}`}>
+          <div className={`mt-3 rounded-lg p-3 ${sent.emailed === 'failed' ? 'bg-warn-soft' : 'bg-good-soft'}`} data-testid="send-result">
+            <p className={`text-xs font-semibold ${sent.emailed === 'failed' ? 'text-warn-strong' : 'text-good-strong'}`}>
               {sent.emailed === 'sent'
                 ? t('send.result_sent', { email: sent.to })
                 : sent.emailed === 'draft'
@@ -363,19 +363,19 @@ export default function SendForSigning({ file, pages }: { file: File | null; pag
                   : t('send.result_failed', { email: sent.to, note: sent.note ?? '' })}
             </p>
             <div className="mt-2 flex items-center gap-2">
-              <input readOnly value={sent.link} aria-label={t('send.link_aria')} className="min-w-0 flex-1 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-[11px] text-slate-700" />
+              <input readOnly value={sent.link} aria-label={t('send.link_aria')} className="min-w-0 flex-1 rounded-md border border-line bg-surface px-2 py-1.5 text-[11px] text-ink-2" />
               <button type="button" onClick={() => copy(sent.link, 'new')} className={`${btnSecondarySm} shrink-0`}>
                 {copied === 'new' ? t('send.copied') : t('send.copy_link')}
               </button>
             </div>
-            <a href={certificateLink(sent.certId)} target="_blank" rel="noreferrer" className="mt-2 inline-block text-[11px] font-medium text-emerald-800 underline">
+            <a href={certificateLink(sent.certId)} target="_blank" rel="noreferrer" className="mt-2 inline-block text-[11px] font-medium text-good-strong underline">
               {t('send.cert_page_link')}
             </a>
           </div>
         )}
       </div>
 
-      <ErrorBoundary fallback={<p className="mt-5 text-xs text-slate-400">{t('send.list_load_error')}</p>}>
+      <ErrorBoundary fallback={<p className="mt-5 text-xs text-faint">{t('send.list_load_error')}</p>}>
         <SentList
           version={listVersion}
           copied={copied}
@@ -429,34 +429,34 @@ function SentList({
     if (res.code === 'completed' || res.code === 'expired') refresh()
   }
   return (
-    <div className="mt-5 border-t border-slate-100 pt-4" data-testid="sent-list">
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t('send.list_title')}</h3>
+    <div className="mt-5 border-t border-line-soft pt-4" data-testid="sent-list">
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('send.list_title')}</h3>
       {loading && requests.length === 0 ? (
-        <p className="mt-2 text-xs text-slate-400">{t('send.list_loading')}</p>
+        <p className="mt-2 text-xs text-faint">{t('send.list_loading')}</p>
       ) : requests.length === 0 ? (
         // An empty state: nothing in frame (Boxes D · frame, empty).
-        <p className="u-box u-box--frame u-box--empty mt-2 px-4 py-4 text-xs text-slate-500">{t('send.list_empty')}</p>
+        <p className="u-box u-box--frame u-box--empty mt-2 px-4 py-4 text-xs text-muted">{t('send.list_empty')}</p>
       ) : (
         <ul className="mt-2 space-y-2">
           {requests.map((r) => {
             const done = r.status === 'completed' || r.status === 'signed'
             const expired = !done && new Date(r.expires_at).getTime() < Date.now()
             return (
-              <li key={r.id} className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
+              <li key={r.id} className="rounded-lg border border-line bg-surface-2 p-2.5">
                 <div className="flex items-start justify-between gap-2">
                   <span className="min-w-0">
-                    <span className="block truncate text-xs font-medium text-slate-800" title={r.doc_name ?? ''}>{r.doc_name ?? 'document.pdf'}</span>
-                    <span className="block truncate text-[11px] text-slate-500">
+                    <span className="block truncate text-xs font-medium text-ink" title={r.doc_name ?? ''}>{r.doc_name ?? 'document.pdf'}</span>
+                    <span className="block truncate text-[11px] text-muted">
                       {r.recipient_email ?? '—'} · {new Date(r.created_at).toLocaleDateString(intlLocale(t.lang))}
                     </span>
                   </span>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${done ? 'bg-emerald-100 text-emerald-800' : expired ? 'bg-slate-200 text-slate-600' : 'bg-amber-100 text-amber-800'}`}>
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${done ? 'bg-good-chip text-good-strong' : expired ? 'bg-surface-4 text-soft' : 'bg-warn-chip text-warn-strong'}`}>
                     {done ? t('send.status_signed') : expired ? t('send.status_expired') : t('send.status_waiting')}
                   </span>
                 </div>
                 {confirming === r.id ? (
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
-                    <span className="text-slate-600">{t('send.withdraw_confirm')}</span>
+                    <span className="text-soft">{t('send.withdraw_confirm')}</span>
                     <button
                       type="button"
                       disabled={working === r.id}
@@ -472,10 +472,10 @@ function SentList({
                 ) : (
                   <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-medium">
                     {done && r.cert_id && (
-                      <a href={certificateLink(r.cert_id)} target="_blank" rel="noreferrer" className="text-orange-700 hover:underline">{t('send.certificate')}</a>
+                      <a href={certificateLink(r.cert_id)} target="_blank" rel="noreferrer" className="text-accent hover:underline">{t('send.certificate')}</a>
                     )}
                     {!done && !expired && (
-                      <button type="button" onClick={() => void onCopy(r)} className="text-orange-700 hover:underline">
+                      <button type="button" onClick={() => void onCopy(r)} className="text-accent hover:underline">
                         {copied === r.id ? t('send.copied') : t('send.copy_link')}
                       </button>
                     )}
@@ -486,7 +486,7 @@ function SentList({
                         disabled={reminders[r.id]?.busy}
                         title={t('send.remind_title')}
                         data-testid="remind-signer"
-                        className="text-orange-700 hover:underline disabled:opacity-50"
+                        className="text-accent hover:underline disabled:opacity-50"
                       >
                         {reminders[r.id]?.busy ? t('send.reminding') : t('send.remind')}
                       </button>
@@ -495,14 +495,14 @@ function SentList({
                         stays: deleting it would make the certificate page say
                         "no record found". Only one still waiting can go. */}
                     {!done && (
-                      <button type="button" onClick={() => setConfirming(r.id)} className="text-slate-500 hover:text-rose-700">
+                      <button type="button" onClick={() => setConfirming(r.id)} className="text-muted hover:text-bad">
                         {t('send.withdraw')}
                       </button>
                     )}
                   </div>
                 )}
                 {reminders[r.id]?.text && (
-                  <p role="status" className={`mt-1 text-[11px] ${reminders[r.id]?.ok ? 'text-emerald-700' : 'text-amber-800'}`}>
+                  <p role="status" className={`mt-1 text-[11px] ${reminders[r.id]?.ok ? 'text-good' : 'text-warn-strong'}`}>
                     {reminders[r.id]?.text}
                   </p>
                 )}

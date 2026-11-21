@@ -1,9 +1,156 @@
 @import "tailwindcss";
 
+/* Tailwind 4 defaults `dark:` to the OS media query. We drive it from a class
+   on <html> instead (stores/themeStore.ts, and index.html's pre-paint script),
+   so the app is light until somebody chooses otherwise. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Theme tokens ────────────────────────────────────────────────────────────
+   Every chrome colour in the app is one of these, used as a Tailwind colour
+   (`bg-surface`, `text-muted`, `border-line`, …), and `.dark` redefines them.
+   Light values are the slate/orange shades the app was drawn with, so light
+   is unchanged; dark is BRANDING.md → Theme tokens and Semantic, each text
+   colour measured at 4.5:1 or better on every surface it sits on.
+
+   ⚠️ PAPER. A signature is dark ink (#0f172a, lib/useInkCanvas.ts) on a
+   transparent PNG, and a PDF page is a white sheet: both are the product's
+   output and must look the same whatever the app's theme. Anything that shows
+   one — the drawing pad, the typed preview, a saved signature's thumbnail,
+   PDF pages — carries `.paper`, which puts the light tokens back for itself
+   and everything inside it (add `data-u-ground="light"` too on an SDK
+   `u-box`, so the box's own fill stays white). */
+:root {
+  --canvas: #f1f5f9;          /* the page behind the cards (slate-100) */
+  --surface: #ffffff;         /* cards, fields, dialogs */
+  --surface-2: #f8fafc;       /* a quiet inset (slate-50) */
+  --surface-3: #f1f5f9;       /* hover, a stronger inset (slate-100) */
+  --surface-4: #e2e8f0;       /* a neutral chip (slate-200) */
+  --text: #0f172a;            /* headings, values (slate-900) */
+  --text-2: #334155;          /* body (slate-700) */
+  --text-soft: #475569;       /* secondary (slate-600) */
+  --text-muted: #64748b;      /* hints, labels (slate-500) */
+  --text-faint: #94a3b8;      /* placeholders, icons (slate-400) */
+  --border: #e2e8f0;          /* slate-200 */
+  --border-strong: #cbd5e1;   /* fields, dashed drop areas (slate-300) */
+  --border-soft: #f1f5f9;     /* dividers inside a card (slate-100) */
+  --accent: #c2410c;          /* links, the accent text (orange-700) */
+  --accent-strong: #9a3412;   /* orange-800 */
+  --accent-soft: #ffedd5;     /* an orange tint (orange-100) */
+  --accent-ring: #ffedd5;     /* a focused field's halo (orange-100) */
+  --good: #047857;            /* emerald-700 */
+  --good-strong: #065f46;     /* emerald-800 */
+  --good-soft: #ecfdf5;       /* emerald-50 */
+  --good-chip: #d1fae5;       /* emerald-100 */
+  --good-line: #a7f3d0;       /* emerald-200 */
+  --warn: #b45309;            /* amber-700 */
+  --warn-strong: #92400e;     /* amber-800 */
+  --warn-soft: #fffbeb;       /* amber-50 */
+  --warn-chip: #fef3c7;       /* amber-100 */
+  --warn-line: #fde68a;       /* amber-200 */
+  --bad: #be123c;             /* rose-700 */
+  --bad-strong: #9f1239;      /* rose-800 */
+  --bad-soft: #fff1f2;        /* rose-50 */
+  --bad-line: #fecdd3;        /* rose-200 */
+}
+
+.dark {
+  --canvas: #0a0e16;
+  --surface: #0f172a;
+  --surface-2: #131c2e;
+  --surface-3: #182236;
+  --surface-4: #1e293b;
+  --text: #e6eaf2;
+  --text-2: #cbd5e1;
+  --text-soft: #9fb0c6;
+  --text-muted: #94a3b8;
+  --text-faint: #8796ab;
+  --border: #334155;
+  --border-strong: #64748b;
+  --border-soft: #1e293b;
+  --accent: #ff9a1f;
+  --accent-strong: #ffb45c;
+  --accent-soft: #3a2410;
+  --accent-ring: rgb(255 154 31 / 0.3);
+  --good: #4bbf78;
+  --good-strong: #7ad39c;
+  --good-soft: #0f2a1e;
+  --good-chip: #14382a;
+  --good-line: #1f5a3c;
+  --warn: #f2bb2e;
+  --warn-strong: #f5cc63;
+  --warn-soft: #2a2110;
+  --warn-chip: #3a2d10;
+  --warn-line: #5c4714;
+  --bad: #f0645a;
+  --bad-strong: #f58a82;
+  --bad-soft: #2e1519;
+  --bad-line: #5c2a30;
+  color-scheme: dark;
+}
+
+/* The light tokens again, for the product's own output (see PAPER above).
+   Listed out rather than shared with :root so that a later `.dark` rule can
+   never out-rank it: `.paper` sits deeper in the tree than `html.dark`. */
+.paper {
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #f1f5f9;
+  --text: #0f172a;
+  --text-2: #334155;
+  --text-soft: #475569;
+  --text-muted: #64748b;
+  --text-faint: #94a3b8;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --accent: #c2410c;
+  --accent-strong: #9a3412;
+  --accent-soft: #ffedd5;
+  --good-soft: #ecfdf5;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-4: var(--surface-4);
+  --color-ink: var(--text);
+  --color-ink-2: var(--text-2);
+  --color-soft: var(--text-soft);
+  --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-line-soft: var(--border-soft);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ring: var(--accent-ring);
+  --color-good: var(--good);
+  --color-good-strong: var(--good-strong);
+  --color-good-soft: var(--good-soft);
+  --color-good-chip: var(--good-chip);
+  --color-good-line: var(--good-line);
+  --color-warn: var(--warn);
+  --color-warn-strong: var(--warn-strong);
+  --color-warn-soft: var(--warn-soft);
+  --color-warn-chip: var(--warn-chip);
+  --color-warn-line: var(--warn-line);
+  --color-bad: var(--bad);
+  --color-bad-strong: var(--bad-strong);
+  --color-bad-soft: var(--bad-soft);
+  --color-bad-line: var(--bad-line);
+}
+
 html, body { height: 100%; margin: 0; }
+/* The ground behind #root, so an overscroll or a short page never shows a
+   white band in dark. */
+html { background: var(--canvas); }
 #root { min-height: 100%; }
 
 body {
+  color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
