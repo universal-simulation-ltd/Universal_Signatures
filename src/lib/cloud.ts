@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useUniversal } from '@unisim/sdk'
+import { useUniversal, useTwoStepVerifiedTick } from '@unisim/sdk'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getT } from '../i18n'
 import type { AnyVerifyResult, RequestCertResult, VerifyResult } from './types'
@@ -172,6 +172,9 @@ export function useMainSignature() {
   const { supabase, session } = useUniversal()
   const userId = session?.user && session.user.is_anonymous !== true ? session.user.id : null
   const [main, setMain] = useState<MainSignature | null>(null)
+  // Re-read once a two-step code is accepted: platform 0345 hides a person's
+  // own signatures from a session that owes one, and a refused read is empty.
+  const twoStepTick = useTwoStepVerifiedTick()
 
   useEffect(() => {
     if (!userId) {
@@ -191,7 +194,7 @@ export function useMainSignature() {
     return () => {
       cancelled = true
     }
-  }, [supabase, userId])
+  }, [supabase, userId, twoStepTick])
 
   return { main }
 }
